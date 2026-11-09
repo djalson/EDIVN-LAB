@@ -13,7 +13,7 @@ const DEVS = ['PC-01', 'PC-ADM', 'SRV-DC1', 'SRV-FIC', 'SRV-LNX', 'SW-T1', 'SW-T
     const fault = pick(FAULTS), dev = pick(DEVS), lvl = 1 + Math.floor(rng() * 4);
     const p = await b.newPage({ viewport: { width: W, height: H } }); const errs = []; const log = [];
     p.on('pageerror', e => errs.push('PAGEERR ' + e.message + ' @ ' + (e.stack || '').split('\n')[1])); p.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE ' + m.text()); });
-    await p.goto('file:///home/claude/game/dist/EDIVN-Lab.html'); await p.waitForFunction(() => window.SIM_APP);
+    await p.goto(require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy'); await p.waitForFunction(() => window.SIM_APP);
     await p.evaluate(o => SIM_APP.begin({ level: o.l, mode: 'free', seed: String(o.s), faultId: o.f }), { l: lvl, s: seed0 * 100 + s, f: fault });
     await p.evaluate(d => SIM_APP.openDev(d, ['PATCH-T'].includes(d) ? 'patch' : 'main'), dev); await p.waitForTimeout(500);
     for (let i = 0; i < K && !errs.length; i++) {

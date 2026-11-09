@@ -902,6 +902,96 @@ textarea.pgnotes { width: 100%; min-width: 360px; background: var(--ink); color:
 .term .tvault { position: absolute; top: 4px; right: 128px; z-index: 6; display: inline-flex; align-items: center; gap: 3px; font: 11px var(--mono); padding: 2px 8px; background: rgba(60, 48, 12, .9); color: #f1d98a; border: 1px solid #b58a1d; cursor: pointer; }
 .term .tvault:hover, .term .tvault:focus { color: #fff; border-color: #f1d98a; outline: none; }
 
+/* 40-campaign.css */
+/* Campagne : accueil à trois entrées, carte de chapitre, parcours, chantier, fiche d'intervention, blocs du débrief. */
+.cnav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.cnavb { text-align: left; color: var(--text); background: var(--panel2); border: 3px solid var(--ink); border-bottom: 5px solid var(--line); padding: 10px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; box-shadow: 4px 4px 0 var(--shadow); }
+.cnavb b { font: 700 14px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.cnavb small { color: var(--muted); font-size: 12px; }
+.cnavb:hover { border-bottom-color: var(--hv); }
+.cnavb.on { border-bottom-color: var(--hc); background: linear-gradient(180deg, color-mix(in srgb, var(--hv) 26%, var(--panel2)), var(--panel2)); }
+.cnavb.on b { color: var(--hc); }
+.cintro { margin: 0 0 14px; }
+.ccard { position: relative; background: var(--panel); border: 3px solid var(--hc); box-shadow: 6px 6px 0 var(--shadow); padding: 18px 20px; }
+.ccard.done { border-color: var(--ok); }
+.ckick { font: 700 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--hc); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ctitle { margin: 6px 0 6px !important; font-size: 26px !important; text-transform: none !important; letter-spacing: 0 !important; color: var(--text) !important; }
+.cstory { margin: 0 0 14px; max-width: 70ch; line-height: 1.5; }
+.cprog { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cbar { flex: 1 1 220px; height: 14px; background: color-mix(in srgb, var(--bg) 70%, #000); border: 2px solid var(--ink); min-width: 160px; }
+.cbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--hv), var(--hc)); transition: width .3s; }
+.cprogt { font-size: 13px; color: var(--muted); } .cprogt b { color: var(--text); }
+.cstate { margin: 10px 0 14px; font-size: 13.5px; }
+.cdue { margin-top: 6px; color: var(--warn); }
+.cmode { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.cmode > .muted { align-self: center; font-size: 12.5px; }
+.cmodeb { text-align: left; color: var(--text); background: var(--panel2); border: 2px solid var(--line); padding: 6px 12px; cursor: pointer; display: flex; flex-direction: column; }
+.cmodeb small { color: var(--muted); font-size: 11.5px; }
+.cmodeb.on { border-color: var(--hc); background: color-mix(in srgb, var(--hc) 14%, var(--panel2)); }
+.cact { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.cact .cgo { font: 700 15px var(--mono); letter-spacing: .06em; padding: 10px 18px; }
+.cpatht { margin-top: 22px !important; }
+.cpath { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.cnode { text-align: left; color: var(--text); background: var(--panel2); border: 2px solid var(--line); padding: 8px 10px; cursor: pointer; display: grid; grid-template-columns: 26px 1fr; column-gap: 8px; align-items: center; }
+.cnode .cnn { grid-row: span 2; width: 26px; height: 26px; display: grid; place-items: center; font: 700 12px var(--mono); background: var(--bg); border: 2px solid var(--line); }
+.cnode .cnt { font-weight: 600; font-size: 12.5px; line-height: 1.2; }
+.cnode small { color: var(--muted); font-size: 11px; }
+.cnode.done .cnn { background: var(--ok); border-color: var(--ok); color: var(--ink); }
+.cnode.cur { border-color: var(--hv); } .cnode.cur .cnn { border-color: var(--hv); color: var(--hc); }
+.cnode.sel { border-color: var(--hc); box-shadow: 3px 3px 0 var(--shadow); }
+.cnode.lock { opacity: .5; cursor: default; }
+.cfin { padding: 10px 14px; margin-bottom: 14px; border: 2px solid var(--ok); background: color-mix(in srgb, var(--ok) 14%, var(--panel)); }
+.cduty { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.cdutyb { text-align: left; color: var(--text); background: var(--panel2); border: 3px solid var(--ink); border-top: 6px solid var(--bad); padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; box-shadow: 4px 4px 0 var(--shadow); }
+.cdutyb:hover { transform: translate(-1px, -1px); }
+.cdutyb small { color: var(--muted); } .cdutyb .muted { font-size: 11.5px; }
+.cchk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.screen.home .pdaily { margin-bottom: 16px; }
+@media (max-width: 760px) { .cnav, .cduty { grid-template-columns: 1fr; } .ctitle { font-size: 21px !important; } }
+
+/* chantier */
+.modal.chmodal { max-width: 720px; }
+.chkick { font: 700 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--hc); }
+.chstory { line-height: 1.55; margin: 8px 0 4px; }
+.chantier h3 { margin: 16px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.chdevs { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.chdev { display: flex; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; }
+.chdev small { display: block; color: var(--muted); font-size: 11.5px; }
+.chdi { color: var(--hc); display: grid; place-items: center; }
+.chlearn { margin: 0; padding-left: 18px; } .chlearn li { margin: 3px 0; }
+
+/* carte : rappel du périmètre */
+.map { position: relative; }
+.mapscope { position: absolute; left: 12px; bottom: 10px; right: 12px; font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; pointer-events: none; }
+.pill.campill { border-color: var(--hc); }
+
+/* fiche d'intervention */
+.modal.fmodal { max-width: 760px; width: min(760px, 94vw); }
+.fhead { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+.fq { margin-top: 16px; }
+.fql { font-weight: 700; font-size: 15px; }
+.fqh { color: var(--muted); font-size: 12.5px; margin: 2px 0 8px; }
+.fopts { display: flex; flex-direction: column; gap: 6px; }
+.fopt { text-align: left; color: var(--text); background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; line-height: 1.4; font-size: 13.5px; }
+.fopt:hover { border-color: var(--accent); }
+.fopt .fob { width: 14px; height: 14px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--muted); }
+.fopt.on { border-color: var(--hc); background: color-mix(in srgb, var(--hc) 12%, var(--panel2)); }
+.fopt.on .fob { border-color: var(--hc); background: var(--hc); box-shadow: inset 0 0 0 2px var(--panel2); }
+.fopt.dk { color: var(--muted); font-style: italic; }
+.frule { margin-top: 16px; padding: 8px 12px; font-size: 12.5px; color: var(--muted); border-left: 3px solid var(--hv); background: color-mix(in srgb, var(--hv) 8%, transparent); }
+.fmodal .actions { align-items: center; }
+
+/* débrief */
+.dcamp { margin-top: 14px; border-color: var(--hc); }
+.dcamp.up { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 10%, var(--panel2)); }
+.dcamp .cprog { margin: 4px 0 8px; }
+.dcbig { font-weight: 700; font-size: 16px; color: var(--hc); }
+.dcamp.up .dcbig { color: var(--ok); }
+.dfiche.ok { border-color: var(--ok); }
+.dfrow { display: grid; grid-template-columns: 96px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.dfko { color: var(--bad); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--bad) 50%, transparent); }
+.dfsum { margin-top: 8px; }
+
 </style>
 </head>
 <body>
@@ -6285,7 +6375,10 @@ function Mission(o) {
   this.seed = String(o.seed); this.lv = Game.levelOf(o.level); this.opts = { skill: o.skill, parts: o.parts, chain: o.chain }; this.mode = Game.modeOf(o.mode || 'free');
   this.W = SIM.buildHealthyWorld({ seed: this.seed }); this.base = this.W.sem();
   const prof = o.profile || Game.profile();
-  if (o.faultId) this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, faultId: o.faultId }), this.seed);
+  /* campagne : chapitre, examen, révision (src/engine/83-campaign.js) ; o.bundle : assemblage imposé (examen de chapitre) */
+  this.camp = o.camp ? Object.assign({}, o.camp) : null;
+  if (o.bundle) this.fault = F.bundle(o.bundle.seed || this.seed, o.bundle);
+  else if (o.faultId) this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, faultId: o.faultId }), this.seed);
   else if (this.lv.faults > 1) {
     /* Admin = 2 pannes, Cyber = 3, Chaos = 4 (ou o.parts) : assemblage validé par simulation, natures différentes, rejet des paires incompatibles. */
     const spec = { count: o.parts || this.lv.faults, mode: o.chain === false ? 'indep' : 'auto' };
@@ -6458,10 +6551,12 @@ Game.record = function (m, profile) {
   const entry = { at: Date.now(), seed: m.seed, level: m.lv.level, mode: m.mode.id, id: m.fault.id, kind: r.kind, total: r.total, mttr: r.mttrSec, stars: r.stars, perfect: !!r.perfect, skills: m.fault.skills };
   p.history.push(entry); if (p.history.length > 200) p.history.shift();
   m.parts.forEach(pt => { const d = p.done[pt.id] || { count: 0, best: 0 }; d.count++; d.best = Math.max(d.best, r.total); p.done[pt.id] = d; });
-  (m.fault.skills || []).forEach(s => { const k = p.skills[s] || { ok: 0, ko: 0 }; if (r.passed && !m.hintLog.length && !m.dangers.length) k.ok++; else k.ko++; p.skills[s] = k; });
+  (m.fault.skills || []).forEach(s => { const k = p.skills[s] || { ok: 0, ko: 0 }; if (r.passed && !m.hintLog.length && !m.dangers.length && !(r.report && !r.report.causeOk)) k.ok++; else k.ko++; p.skills[s] = k; });
   if (r.ranked) { const key = 'l' + m.lv.level; p.best[key] = Math.max(p.best[key] || 0, r.total); }
+  /* campagne et révision espacée : avant le calcul de l'XP (l'examen réussi pour la première fois rapporte un bonus) */
+  const camp = SIM.camp ? SIM.camp.record(p, m, r) : null;
   const prog = P.apply(p, m, r, prev, pre, lvBefore, stBefore);
-  Game.saveProfile(p); return { profile: p, newBadges: prog.newBadges, prog };
+  Game.saveProfile(p); return { profile: p, newBadges: prog.newBadges, prog, camp };
 };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
@@ -6631,6 +6726,8 @@ P.xpFor = function (m, r, p, prev) {
   else if (ids.some(id => r.total > (prev.bests[id] || 0))) add('Record personnel battu', 20);
   if (clean(m)) add('Sans faute (aucun indice, aucune action risquée)', 20);
   if (r.mttrSec <= m.parSec * 0.5) add('Éclair (moins de la moitié du temps cible)', 20); else if (r.mttrSec <= m.parSec * 0.75) add('Rapide (moins de 75 % du temps cible)', 10);
+  if (r.report && r.report.allOk) add('Fiche d’intervention juste', 15);
+  if (m.camp && m.camp.examFirst) add('Examen de chapitre réussi', SIM.camp.EXAM_XP);
   const goals = P.goalResults(m, r); goals.filter(x => x.done).forEach(x => add('Objectif : ' + x.label, x.xp, 'goal'));
   let sub = parts.reduce((a, x) => a + x.xp, 0); const mult = [];
   const mul = (label, f) => { if (f !== 1) { mult.push({ label, f }); } };
@@ -6840,6 +6937,264 @@ SIM.plan = function (W) {
     }
   }
   return { rows, devices };
+};
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== engine/83-campaign.js ===== */
+/* ============================================================================
+   Campagne : progression par chapitres. Chaque chapitre élargit le périmètre d'intervention (équipements visibles),
+   propose les pannes de ce périmètre, puis un examen de chapitre (chronométré) qui ouvre le suivant.
+   Aucune dépendance au DOM : testable sous Node (tests/campaign.js).
+
+   - Le monde simulé n'est JAMAIS modifié par la campagne : seul change ce que la carte montre (périmètre) et
+     ce que le tirage propose (pannes du chapitre). Le bac à sable reste donc strictement le jeu d'origine.
+   - Rien n'est stocké qui puisse se déduire : le chapitre atteint se lit sur les examens réussis.
+   - Révision espacée : une panne ratée (ou réparée sans avoir compris la cause) revient deux tickets plus tard.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, U = SIM.U, F = SIM.fault, Game = SIM.game;
+const C = SIM.camp = {};
+
+C.REVIEW_GAP = 2;          /* une panne à revoir revient après ce nombre de tickets */
+C.EXAM_XP = 150;           /* XP d'un examen de chapitre réussi pour la première fois */
+C.chapters = () => SIM.CHAPTERS || [];
+C.chapter = n => C.chapters().find(c => c.n === n) || null;
+C.last = () => C.chapters().length;
+
+/* ------------------------------------------------------------------ périmètre */
+let devCh = null;
+C.devChapter = function (id) {
+  if (!devCh) { devCh = {}; C.chapters().forEach(c => c.devices.forEach(d => { if (devCh[d] === undefined) devCh[d] = c.n; })); }
+  return devCh[id] === undefined ? C.last() : devCh[id];
+};
+/* équipements visibles jusqu'au chapitre n inclus */
+C.scope = function (n) { const out = []; C.chapters().forEach(c => { if (c.n <= n) c.devices.forEach(d => { if (out.indexOf(d) < 0) out.push(d); }); }); return out; };
+C.sites = function (n) { const out = []; C.chapters().forEach(c => { if (c.n <= n) c.sites.forEach(s => { if (out.indexOf(s) < 0) out.push(s); }); }); return out; };
+
+/* équipements nommés par une panne instanciée (injection, corrections, sondes, ticket) */
+let devRe = null;
+C.devsOf = function (inst) {
+  if (!devRe) { const ids = Object.keys(SIM.buildHealthyWorld().dev); devRe = ids.map(id => [id, new RegExp('(^|[^A-Za-z0-9-])' + id.replace(/-/g, '\\-') + '([^A-Za-z0-9-]|$)')]); }
+  const js = JSON.stringify([inst.inject, inst.fix, inst.fixes, inst.probes, inst.roots, inst.ticket && inst.ticket.from, inst.verify]);
+  return devRe.filter(x => x[1].test(js)).map(x => x[0]);
+};
+const maxCh = devs => devs.reduce((a, d) => Math.max(a, C.devChapter(d)), 1);
+
+/* ------------------------------------------------------------------ rattachement panne → chapitre (calculé, mis en cache) */
+let faultCh = null;
+C.faultChapter = function (def) {
+  if (!faultCh) faultCh = {};
+  if (faultCh[def.id] !== undefined) return faultCh[def.id];
+  const R = SIM.CHAPTER_RULES || { skills: {}, prefix: {} };
+  let n = Infinity;
+  F.variantCombos(def, 24).forEach(c => { n = Math.min(n, maxCh(C.devsOf(F.instantiate(def, 'ch', c)))); });
+  if (!isFinite(n)) n = 1;
+  (def.skills || []).forEach(s => { if (R.skills[s]) n = Math.max(n, R.skills[s]); });
+  Object.keys(R.prefix).forEach(p => { if (def.id.indexOf(p) === 0) n = R.prefix[p]; });
+  return (faultCh[def.id] = Math.min(C.last(), n));
+};
+C.isBase = def => !SIM.BASE_FAULT_IDS || SIM.BASE_FAULT_IDS.indexOf(def.id) >= 0;
+C.pool = function (n) { return SIM.faults.filter(d => C.isBase(d) && C.faultChapter(d) === n); };
+C.resetCache = function () { faultCh = null; devCh = null; devRe = null; };
+
+/* Graine dérivée dont la variante tient dans le périmètre du chapitre (une panne à variantes peut viser un serveur
+   qui n'est pas encore au programme) ; à défaut, la graine d'origine : la carte ajoutera les équipements manquants. */
+C.seedInScope = function (def, seed, n) {
+  const scope = C.scope(n);
+  for (let k = 0; k < 24; k++) { const s = k ? seed + '~' + k : String(seed); if (C.devsOf(F.instantiate(def, s)).every(d => scope.indexOf(d) >= 0)) return s; }
+  return String(seed);
+};
+
+/* ------------------------------------------------------------------ état de la campagne (lu sur le profil) */
+C.blank = () => ({ ok: {}, exams: {}, seen: {}, review: [], n: 0 });
+C.clean = function (c) {
+  const out = C.blank(); if (!c || typeof c !== 'object' || Array.isArray(c)) return out;
+  const okKey = k => k !== '__proto__' && k !== 'constructor' && k !== 'prototype';
+  const note = v => (typeof v === 'number' && isFinite(v) ? Math.min(100, Math.max(0, Math.round(v))) : 0);
+  const obj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+  if (obj(c.ok)) Object.keys(c.ok).filter(okKey).slice(0, 600).forEach(k => { const v = note(c.ok[k]); if (v) out.ok[k.slice(0, 60)] = v; });
+  if (obj(c.exams)) Object.keys(c.exams).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10), v = note(c.exams[k]); if (i >= 1 && i <= 40 && v) out.exams[i] = v; });
+  if (obj(c.seen)) Object.keys(c.seen).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10); if (i >= 1 && i <= 40 && c.seen[k]) out.seen[i] = 1; });
+  if (Array.isArray(c.review)) out.review = c.review.filter(obj).slice(0, 60).filter(x => typeof x.id === 'string').map(x => ({ id: x.id.slice(0, 60), due: typeof x.due === 'number' && isFinite(x.due) ? Math.max(0, Math.floor(x.due)) : 0 }));
+  out.n = typeof c.n === 'number' && isFinite(c.n) ? Math.min(1e6, Math.max(0, Math.floor(c.n))) : 0;
+  return out;
+};
+const campOf = p => (p.camp = p.camp || C.blank());
+C.examPassed = (p, n) => (campOf(p).exams[n] || 0) >= Game.PASS;
+/* chapitre le plus avancé ouvert : 1 + nombre d'examens réussis à la suite */
+C.unlocked = function (p) { let n = 1; while (n < C.last() && C.examPassed(p, n)) n++; return n; };
+C.finished = p => C.examPassed(p, C.last());
+C.chapterState = function (p, n) {
+  const ch = C.chapter(n), pool = C.pool(n), c = campOf(p);
+  const validated = pool.filter(d => (c.ok[d.id] || 0) >= Game.PASS).length;
+  const need = Math.min(ch.need, pool.length);
+  const unlocked = n <= C.unlocked(p);
+  return { n, ch, pool: pool.length, validated, need, unlocked, examReady: unlocked && validated >= need, examBest: c.exams[n] || 0, done: C.examPassed(p, n), seen: !!c.seen[n] };
+};
+C.state = function (p) { const cur = C.unlocked(p); return { current: cur, finished: C.finished(p), chapters: C.chapters().map(c => C.chapterState(p, c.n)), review: C.dueReviews(p).length }; };
+C.markSeen = function (p, n) { campOf(p).seen[n] = 1; };
+
+/* ------------------------------------------------------------------ tirage du prochain ticket */
+C.dueReviews = function (p) { const c = campOf(p), cur = C.unlocked(p); return c.review.filter(r => r.due <= c.n).map(r => SIM.faults.find(d => d.id === r.id)).filter(d => d && C.faultChapter(d) <= cur); };
+/* Prochain ticket du chapitre n : d'abord une panne à revoir arrivée à échéance, sinon une panne pas encore validée
+   (les plus simples d'abord), sinon la moins bien réussie. Renvoie de quoi créer la mission. */
+C.next = function (p, n, seed, opts) {
+  opts = opts || {}; const c = campOf(p); const rng = U.rng('camp|' + n + '|' + seed);
+  let def = null, review = false;
+  if (!opts.noReview) { const due = C.dueReviews(p).filter(d => C.faultChapter(d) === n || opts.anyChapter); if (due.length) { def = due[0]; review = true; } }
+  if (!def) {
+    const pool = C.pool(n); if (!pool.length) return null;
+    const todo = pool.filter(d => (c.ok[d.id] || 0) < Game.PASS);
+    if (todo.length) { const lv = Math.min.apply(null, todo.map(d => d.level)); const played = d => ((p.done || {})[d.id] || {}).count || 0; const easy = todo.filter(d => d.level === lv); const min = Math.min.apply(null, easy.map(played)); def = rng.pick(easy.filter(d => played(d) === min)); }
+    else { const worst = Math.min.apply(null, pool.map(d => c.ok[d.id] || 0)); def = rng.pick(pool.filter(d => (c.ok[d.id] || 0) === worst)); }
+  }
+  const ch = C.faultChapter(def);
+  return { faultId: def.id, level: def.level, seed: C.seedInScope(def, seed, Math.max(n, ch)), camp: { ch: n, review }, def };
+};
+/* Examen du chapitre n : deux pannes de natures différentes prises dans le périmètre connu, dont une au moins du chapitre ;
+   chronométré, sans indice. Si le chapitre ne permet pas d'assembler deux pannes (chapitre 1 : pannes de niveau 1), une seule panne, la plus difficile. */
+C.exam = function (p, n, seed) {
+  const ch = C.chapter(n); const own = C.pool(n).map(d => d.id); const known = []; for (let i = 1; i <= n; i++) C.pool(i).forEach(d => known.push(d.id));
+  const unproven = (SIM.UNPROVEN_FAULTS || []).map(u => u.fault);
+  const count = ch.examParts || 2;
+  try {
+    const anchor = own.filter(id => unproven.indexOf(id) < 0);
+    if (count < 2) throw new Error('examen à une seule panne');
+    if (!anchor.length) throw new Error('aucune panne du chapitre assemblable');
+    /* quelques graines dérivées avant de renoncer : l'assemblage est validé par simulation et peut être refusé */
+    let bseed = null, lastErr = null;
+    for (let k = 0; k < 4 && !bseed; k++) { const s = 'exam|' + n + '|' + seed + (k ? '~' + k : ''); try { const b = F.bundle(s, { count, pool: known, anchor, exclude: unproven, mode: 'indep' }); if (b.parts.some(x => own.indexOf(x.id) >= 0)) bseed = s; } catch (e) { lastErr = e; } }
+    if (!bseed) throw lastErr || new Error('aucune panne du chapitre dans l’assemblage');
+    return { level: 3, mode: 'timed', seed: String(seed), parts: count, bundle: { count, pool: known, anchor, exclude: unproven, mode: 'indep', seed: bseed }, camp: { ch: n, exam: true } };
+  } catch (e) {
+    const pool = C.pool(n).filter(d => unproven.indexOf(d.id) < 0); const top = Math.max.apply(null, pool.map(d => d.level));
+    const def = U.rng('exam1|' + n + '|' + seed).pick(pool.filter(d => d.level === top));
+    return { level: def.level, mode: 'timed', seed: C.seedInScope(def, seed, n), parts: 1, faultId: def.id, camp: { ch: n, exam: true } };
+  }
+};
+/* périmètre affiché pendant une mission de campagne : celui du chapitre, complété des équipements que la panne nomme */
+C.missionScope = function (m) {
+  if (!m.camp) return null;
+  const n = Math.max(m.camp.ch, 1); const devs = C.scope(n).slice(); const sites = C.sites(n).slice();
+  m.parts.forEach(pt => C.devsOf(pt).forEach(d => { if (devs.indexOf(d) < 0) devs.push(d); }));
+  return { devs, sites, n };
+};
+
+/* ------------------------------------------------------------------ enregistrement d'une mission */
+/* Appelé par Game.record pour TOUTE mission (la révision espacée vaut aussi hors campagne). Renvoie ce que le débrief affiche. */
+C.record = function (p, m, r) {
+  const c = campOf(p); const before = C.unlocked(p); c.n++;
+  const understood = !(r.report && r.report.causeOk === false);
+  /* révision espacée : ratée ou cause non comprise → reviendra ; validée et comprise → retirée de la liste */
+  m.parts.forEach(pt => {
+    if (!C.isBase(pt)) return; const i = c.review.findIndex(x => x.id === pt.id);
+    if (r.passed && understood) { if (i >= 0) c.review.splice(i, 1); }
+    else if (i >= 0) c.review[i].due = c.n + C.REVIEW_GAP; else { c.review.push({ id: pt.id, due: c.n + C.REVIEW_GAP }); if (c.review.length > 60) c.review.shift(); }
+  });
+  if (!m.camp) return null;
+  const n = m.camp.ch; const out = { ch: n, exam: !!m.camp.exam, review: !!m.camp.review, passed: !!r.passed };
+  const readyBefore = C.chapterState(p, n).examReady;
+  if (m.camp.exam) { const first = !C.examPassed(p, n); if (r.passed) { c.exams[n] = Math.max(c.exams[n] || 0, r.total); if (first) { out.examFirst = true; m.camp.examFirst = true; } } }
+  else if (r.passed) m.parts.forEach(pt => { if (C.isBase(pt)) c.ok[pt.id] = Math.max(c.ok[pt.id] || 0, r.total); });
+  const st = C.chapterState(p, n); out.validated = st.validated; out.need = st.need; out.pool = st.pool; out.examReady = st.examReady; out.examNowReady = st.examReady && !readyBefore && !st.done;
+  const after = C.unlocked(p); if (after > before) out.unlocked = after;
+  if (m.camp.exam && r.passed && n === C.last() && out.examFirst) out.finished = true;
+  return out;
+};
+/* le profil porte la campagne : nettoyée comme le reste (un profil lu dans le stockage n'est jamais de confiance) */
+const cleanBase = Game.cleanProfile;
+Game.cleanProfile = function (p) { const out = cleanBase(p); out.camp = C.clean(p && typeof p === 'object' ? p.camp : null); return out; };
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== engine/84-report.js ===== */
+/* ============================================================================
+   Fiche d'intervention : ce que le technicien remplit avant de fermer un ticket résolu.
+   Le jeu sait déjà noter la MANIÈRE (indices, actions dangereuses, coupures inutiles, clôtures prématurées).
+   La fiche note la COMPRÉHENSION : quelle était la cause racine, et quelle correction la traite durablement.
+   Aucune dépendance au DOM : testable sous Node (tests/report.js).
+
+   - Les questions sont générées depuis le catalogue : la bonne réponse est la cause (ou la correction) de la panne
+     jouée ; les autres sont celles de pannes voisines (mêmes compétences, mêmes équipements), donc crédibles.
+   - Barème : cause mal identifiée −10 par panne (plafond −20), correction mal identifiée −5. Rien en mode guidé.
+     La fiche ne fait JAMAIS échouer un ticket réparé : elle ne peut pas faire passer une note validée sous le seuil.
+     Elle départage les étoiles, et un « Parfait » exige une fiche juste.
+   - Une cause mal identifiée renvoie la panne en révision (src/engine/83-campaign.js) et ne compte pas pour la maîtrise.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, U = SIM.U, F = SIM.fault, Game = SIM.game;
+const R = SIM.report = {};
+R.CAUSE_COST = 10; R.CAUSE_CAP = 20; R.FIX_COST = 5;
+R.CHOICES = 4;
+
+const norm = s => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+/* pannes voisines d'une panne instanciée, de la plus proche à la plus lointaine */
+R.neighbours = function (inst, excludeIds, seed) {
+  const C = SIM.camp; const mine = (inst.skills || []).filter(s => s !== 'diag'); const devs = C ? C.devsOf(inst) : [];
+  const myCh = C ? C.faultChapter(inst.def || inst) : 0;
+  const rows = [];
+  SIM.faults.forEach(d => {
+    if (excludeIds.indexOf(d.id) >= 0 || d.id === inst.id) return;
+    if (/^multi_/.test(d.id) && !/^multi_/.test(inst.id)) return;   /* une chaîne « trois causes cumulées » se repère au premier coup d'œil */
+    /* variante de la voisine qui parle des mêmes machines que la panne jouée : sinon la bonne réponse se repère au nom du poste du ticket */
+    let i = F.instantiate(d, seed + '|' + d.id), dv = C ? C.devsOf(i).filter(x => devs.indexOf(x) >= 0).length : 0;
+    if (C && d.vary) F.variantCombos(d, 12).forEach(c => { const j = F.instantiate(d, seed + '|' + d.id, c); const n = C.devsOf(j).filter(x => devs.indexOf(x) >= 0).length; if (n > dv) { i = j; dv = n; } });
+    const shared = (d.skills || []).filter(s => mine.indexOf(s) >= 0).length;
+    const ch = C ? C.faultChapter(d) : 0;
+    rows.push({ inst: i, score: shared * 3 + dv * 2 + (ch === myCh ? 2 : ch < myCh ? 1 : -4) - Math.abs((d.level || 1) - (inst.level || 1)) * 0.5 });
+  });
+  rows.sort((a, b) => b.score - a.score || (a.inst.id < b.inst.id ? -1 : 1));
+  return rows.map(r => r.inst);
+};
+/* Critère de clôture affiché dans le ticket (« Pour clôturer : … ») : celui que la panne déclare (verifyText), sinon le critère par défaut
+   du moteur dit en clair — un test réussi depuis le poste du demandeur APRÈS la correction. Ne nomme ni la cause ni la commande. */
+R.closeText = function (inst) {
+  if (inst.verifyText) return inst.verifyText;
+  const hosts = []; (inst.probes || []).forEach(p => { const h = p.from || p.host || p.client; if (h && hosts.indexOf(h) < 0) hosts.push(h); });
+  if (inst.verify && inst.verify.length) return 'Après ta correction, constate le retour à la normale sur l’équipement concerné : le ticket se ferme sur un constat, pas sur la modification.';
+  if (hosts.length) return 'Après ta correction, refais depuis ' + hosts.join(' ou ') + ' ce qui échouait (test réseau, ouverture du site, du dossier ou de la session). Le ticket se ferme quand ce poste constate que tout remarche.';
+  return 'Après ta correction, vérifie le fonctionnement sur l’équipement concerné : le ticket se ferme sur un test réussi, pas sur la modification.';
+};
+/* une question : la bonne réponse + (CHOICES − 1) réponses de pannes voisines, textes tous différents, ordre tiré par la graine */
+function question(id, label, help, inst, field, near, rng) {
+  const good = String(inst[field] || ''); const seen = [norm(good)]; const wrong = [];
+  /* on tire parmi les voisines les plus proches (pas toujours les trois mêmes d'un rejeu à l'autre) */
+  const cand = near.slice(0, 9); const order = rng.shuffle(cand).concat(near.slice(9));
+  for (const n of order) { const t = String(n[field] || ''); if (!t || seen.indexOf(norm(t)) >= 0) continue; seen.push(norm(t)); wrong.push({ text: t, from: n.id }); if (wrong.length >= R.CHOICES - 1) break; }
+  const opts = rng.shuffle([{ text: good, good: true }].concat(wrong)).map((o, i) => ({ id: 'o' + (i + 1), text: o.text, good: !!o.good }));
+  return { id, label, help, part: inst.id, kind: field === 'cause' ? 'cause' : 'fix', options: opts.map(o => ({ id: o.id, text: o.text })), answer: opts.find(o => o.good).id };
+}
+/* Les questions de la fiche d'une mission terminée et résolue ; null sinon (un ticket abandonné n'a pas de fiche : le débrief donne la cause). */
+Game.Mission.prototype.reportSpec = function () {
+  if (this._report !== undefined) return this._report;
+  if (!this.result || this.result.kind !== 'resolved') return (this._report = null);
+  const rng = U.rng('report|' + this.seed + '|' + this.fault.id); const ids = this.parts.map(p => p.id); const qs = [];
+  const multi = this.parts.length > 1;
+  this.parts.forEach((pt, i) => {
+    const near = R.neighbours(pt, ids, this.seed);
+    qs.push(question('cause' + i, multi ? 'Cause racine n° ' + (i + 1) : 'Quelle était la cause racine ?', multi ? 'Ce ticket cachait ' + this.parts.length + ' pannes. Laquelle de ces causes en faisait partie ?' : 'Ce qui était réellement cassé, pas le symptôme décrit par le demandeur.', pt, 'cause', near, rng));
+    if (!multi) qs.push(question('fix' + i, 'Quelle correction traite cette cause durablement ?', 'La correction qui évite que la panne revienne, pas un contournement.', pt, 'solution', near, rng));
+  });
+  return (this._report = { questions: qs });
+};
+/* Dépôt de la fiche : answers = { idQuestion: idOption }. Ajuste la note de la mission (une seule fois). Sans appel, la note reste celle de la réparation. */
+Game.Mission.prototype.fileReport = function (answers) {
+  const spec = this.reportSpec(); const r = this.result;
+  if (!spec || !r || r.report) return r && r.report || null;
+  answers = answers || {};
+  const rows = spec.questions.map(q => ({ id: q.id, kind: q.kind, part: q.part, label: q.label, chosen: answers[q.id] || null, answer: q.answer, ok: answers[q.id] === q.answer,
+    chosenText: (q.options.find(o => o.id === answers[q.id]) || {}).text || null, answerText: q.options.find(o => o.id === q.answer).text }));
+  const causeKo = rows.filter(x => x.kind === 'cause' && !x.ok).length, fixKo = rows.filter(x => x.kind === 'fix' && !x.ok).length;
+  let pen = this.mode.hintsFree ? 0 : Math.min(R.CAUSE_CAP, causeKo * R.CAUSE_COST) + fixKo * R.FIX_COST;
+  const before = r.note;
+  /* la fiche ne fait pas échouer un ticket réparé */
+  if (before >= Game.PASS) pen = Math.min(pen, before - Game.PASS); else pen = 0;
+  r.score.report = -pen; r.note = r.total = Math.max(0, before - pen);
+  r.passed = r.kind === 'resolved' && r.note >= Game.PASS; r.stars = r.passed ? Game.starsOf(r.note) : 0;
+  r.perfect = r.kind === 'resolved' && r.note === 100 && !causeKo && !fixKo; r.tier = Game.tierOf(r.note);
+  r.report = { rows, causeOk: causeKo === 0, fixOk: fixKo === 0, allOk: causeKo === 0 && fixKo === 0, penalty: pen, guided: !!this.mode.hintsFree };
+  return r.report;
 };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
@@ -11214,6 +11569,86 @@ add({ id: 'stp_loop_cable', level: 4, title: 'Spanning Tree désactivé et boucl
   fix: [{ do: 'set', path: 'SW-CC.stp.off', value: [] }],
   traps: ['Débrancher le câble de brassage rétablit le réseau mais laisse le Spanning Tree désactivé : la prochaine boucle recommencera.', 'Redémarrer les commutateurs ne change rien : la boucle revient dès que les ports remontent.'],
   optimal: ['Constater que seul le VLAN 10 est touché', 'show spanning-tree vlan 10 sur SW-CC : aucune instance', 'show running-config | include spanning-tree : STP désactivé pour le VLAN 10', 'spanning-tree vlan 10, puis débrancher le câble inutile', 'Retester le ping des bureaux'] });
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== content/31-chapters.js ===== */
+/* ============================================================================
+   Campagne : les chapitres. Chaque chapitre élargit le périmètre d'intervention du joueur (équipements visibles sur
+   la carte) et porte les pannes dont les équipements et les compétences relèvent de ce périmètre.
+   Le rattachement d'une panne à un chapitre est CALCULÉ (src/engine/83-campaign.js) : le plus petit chapitre dont le
+   périmètre contient tous les équipements d'une de ses variantes, relevé par le chapitre minimal de ses compétences
+   (table `skills` ci-dessous) et par les règles de préfixe (`prefix`). Ajouter une panne ne demande donc rien ici.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM;
+
+SIM.CHAPTERS = [
+  { n: 1, id: 'bureau', title: 'Le bureau', kicker: 'Premier jour',
+    story: 'Bienvenue chez FormaTech. Pour ta première semaine, on te confie l’étage : les postes des utilisateurs, l’imprimante et la baie de brassage. Quand « plus rien ne marche », c’est toi qu’on appelle.',
+    learn: ['Couche physique : câbles, alimentation, écran, prises murales', 'Adressage IPv4 d’un poste : adresse, masque, passerelle, DNS', 'La démarche : constater, isoler, corriger, vérifier depuis le poste'],
+    devices: ['PC-01', 'PC-02', 'PC-ADM', 'PATCH-T', 'IMP-T1', 'SW-T2', 'SW-T3'], sites: ['toulouse'], need: 5, examParts: 1 },
+  { n: 2, id: 'serveur', title: 'Le premier serveur', kicker: 'On te donne les clés',
+    story: 'Tu as fait tes preuves à l’étage. On t’ouvre la salle serveurs : le contrôleur de domaine distribue les adresses, résout les noms et ouvre les sessions de toute l’entreprise. Quand il tousse, tout le monde s’enrhume.',
+    learn: ['DHCP : service, étendues, options, réservations', 'DNS : enregistrements, redirecteurs, cache', 'Comptes Active Directory : verrouillage, expiration, horloge'],
+    devices: ['SRV-DC1', 'SW-T1'], sites: [], need: 6 },
+  { n: 3, id: 'fichiers', title: 'Fichiers, web et stratégies', kicker: 'Les services métier',
+    story: 'Le serveur de fichiers héberge les dossiers partagés et l’intranet. Les stratégies de groupe décident de ce que chaque poste a le droit de faire. Ici, un « accès refusé » a toujours une raison précise.',
+    learn: ['Partages et droits NTFS, méthode AGDLP', 'IIS : sites, liaisons, certificats', 'Stratégies de groupe : liaison, héritage, filtrage', 'Pare-feu Windows : la règle précise plutôt que tout ouvrir'],
+    devices: ['SRV-FIC'], sites: [], need: 6 },
+  { n: 4, id: 'commute', title: 'Le réseau commuté', kicker: 'Câble console en main',
+    story: 'Les commutateurs étaient jusqu’ici des boîtes à voyants. On te donne maintenant le câble console : VLAN, trunks, sécurité des ports et routage entre VLAN passent sous ta responsabilité.',
+    learn: ['VLAN et ports d’accès', 'Trunks : VLAN autorisés, VLAN natif', 'Routage inter-VLAN et relais DHCP', 'Sécurité des ports, accès SSH aux équipements'],
+    devices: [], sites: [], need: 5 },
+  { n: 5, id: 'linux', title: 'Linux entre en scène', kicker: 'Un autre monde',
+    story: 'Un serveur Debian rejoint la salle : DNS secondaire, intranet LAMP, tâches planifiées. Pas de console graphique : un terminal, des journaux, et des droits au caractère près.',
+    learn: ['Services systemd et journaux', 'SSH : configuration, clés, restrictions', 'Droits, ACL, stockage', 'BIND9, Apache, MariaDB'],
+    devices: ['SRV-LNX'], sites: [], need: 6 },
+  { n: 6, id: 'perimetre', title: 'Le périmètre', kicker: 'La porte d’entrée',
+    story: 'Tout ce qui entre et sort passe par le pare-feu pfSense. Derrière lui, une DMZ héberge le site vitrine ; devant lui, Internet et les nomades qui se connectent en VPN depuis chez eux.',
+    learn: ['Règles de filtrage à états, alias', 'NAT sortant et redirection de port', 'DMZ et segmentation', 'OpenVPN pour les postes nomades, nginx en DMZ'],
+    devices: ['ISP', 'pfsense-tls', 'SW-DMZ', 'SRV-WEB', 'PCEXT'], sites: ['exterieur'], need: 6 },
+  { n: 7, id: 'filtrage', title: 'Filtrer et surveiller', kicker: 'Voir ce qui passe',
+    story: 'La direction veut filtrer la navigation et détecter les intrusions. Le proxy Squid et la sonde Snort tournent sur le pare-feu : mal réglés, ils bloquent tout le monde ou ne voient plus rien.',
+    learn: ['Proxy Squid : explicite, transparent, cache', 'SquidGuard : listes, catégories, exceptions', 'Snort : règles, interfaces, hôtes bloqués'],
+    devices: [], sites: [], need: 6 },
+  { n: 8, id: 'bordeaux', title: 'Deuxième site : Bordeaux', kicker: 'L’entreprise grandit',
+    story: 'FormaTech ouvre une agence à Bordeaux : son propre domaine, son pare-feu, et un tunnel IPsec vers Toulouse. Une panne peut maintenant se trouver à 250 km du symptôme.',
+    learn: ['Tunnel IPsec site à site : phases 1 et 2, règles', 'Relation d’approbation entre domaines', 'Routeur sur un bâton (ROAS)'],
+    devices: ['pfsense-bdx', 'R-B1', 'SW-B1', 'SRV-DC2', 'PC-B1'], sites: ['bordeaux'], need: 4 },
+  { n: 9, id: 'ramonville', title: 'Le labo de Ramonville', kicker: 'Tout Cisco',
+    story: 'À Ramonville, pas de pfSense : un routeur Cisco fait tout. NAT, listes de contrôle d’accès et DHCP se règlent en ligne de commande, et une ligne dans le mauvais ordre suffit à tout couper.',
+    learn: ['NAT / PAT sur routeur Cisco', 'ACL étendues : ordre et sens', 'DHCP porté par le routeur'],
+    devices: ['R-RV1', 'SW-RVA', 'SW-RVB', 'SRV-RV', 'PC-RV1', 'PC-RV2'], sites: ['ramonville'], need: 3 },
+  { n: 10, id: 'ha', title: 'Haute disponibilité', kicker: 'Quand ça ne doit jamais tomber',
+    story: 'Labège et Colomiers sont conçus pour survivre à une coupure : anneau OSPF, liens agrégés, Spanning Tree. Le piège : le réseau continue de marcher alors que la redondance est déjà perdue.',
+    learn: ['OSPF : voisinages, zones, route par défaut', 'EtherChannel : négociation, membres, VLAN', 'Spanning Tree : racine et boucles'],
+    devices: ['R-LB1', 'R-LB2', 'R-LB3', 'R-LB4', 'R-LB5', 'R-LB6', 'PC-LB2', 'PC-LB4', 'PC-LB6', 'SW-CA', 'SW-CB', 'SW-CC', 'PC-C1', 'PC-C2', 'PC-C3', 'PC-C4'], sites: ['labege', 'colomiers'], need: 4 },
+  { n: 11, id: 'astreinte', title: 'Astreinte', kicker: 'Seul aux commandes',
+    story: 'Tu connais toute l’infrastructure. Ce soir, c’est toi qui es d’astreinte : les pannes s’enchaînent, se masquent entre elles, et personne ne te dira où regarder.',
+    learn: ['Incidents à causes multiples', 'Une panne peut en cacher une autre', 'Prioriser et vérifier chaque correction'],
+    devices: [], sites: [], need: 3, examParts: 3 }
+];
+
+/* Chapitre minimal d'une compétence : une panne n'apparaît jamais avant que sa notion soit au programme. */
+SIM.CHAPTER_RULES = {
+  skills: {
+    'ad-compte': 2, 'ad-install': 2, 'ad-ou': 2, 'dhcp-auth': 2,
+    'iis': 3, 'agdlp': 3, 'ntfs-partage': 3, 'gpo': 3, 'gpo-heritage': 3, 'gpo-filtrage': 3, 'gpo-compte': 3, 'diag-gpo': 3, 'pare-feu-win': 3,
+    'vlan': 4, 'trunk': 4, 'roas': 4, 'routage': 4, 'ssh-cisco': 4, 'switch-secu': 4, 'dhcp-relay': 4, 'acl': 4,
+    'lx-droits': 5, 'lx-acl': 5, 'lx-ssh': 5, 'lx-services': 5, 'lx-reseau': 5, 'bind9': 5, 'lamp': 5, 'lx-stockage': 5, 'bash': 5, 'lx-secu': 5,
+    'nginx': 6, 'pfsense': 6, 'pare-feu-etats': 6, 'portfwd': 6, 'segmentation': 6, 'nat-pat': 6, 'openvpn': 6,
+    'proxy': 7, 'snort': 7,
+    'ipsec': 8, 'ad-trust': 8,
+    'ospf': 10, 'ospf-multi': 10, 'etherchannel': 10
+  },
+  /* préfixe d'identifiant → chapitre imposé (chaînes multi-causes scriptées : fin de campagne) */
+  prefix: { 'multi_': 11 }
+};
+/* Comptes du coffre : chapitre à partir duquel ils servent (la fiche de l'infra ne montre en campagne que les comptes au programme). */
+(SIM.VAULT || []).forEach(c => { c.ch = /bordeaux/i.test(c.scope) ? 8 : /SRV-RV|Ramonville/i.test(c.scope) ? 9 : /Debian/i.test(c.scope) ? 5 : /Cisco/i.test(c.scope) ? 4 : /pfSense/i.test(c.scope) ? 6 : 1; });
+/* Pannes du catalogue livré (les scénarios importés par un formateur ne font pas partie de la campagne). */
+SIM.BASE_FAULT_IDS = SIM.faults.map(d => d.id);
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
 /* ===== emu/00-core.js ===== */
@@ -18002,7 +18437,9 @@ const SIM = g.SIM, U = SIM.U, UI = SIM.ui, E = SIM.emu, Game = SIM.game;
 const TICK_SEC = 5;
 function Run(opts) {
   this.opts = opts; this.listeners = {};
-  this.m = Game.create({ level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, clock: () => Date.now() });
+  this.m = Game.create({ level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, clock: () => Date.now() });
+  /* campagne : périmètre affiché (équipements et sites du chapitre) ; null = toute l'infrastructure (bac à sable) */
+  this.scope = SIM.camp ? SIM.camp.missionScope(this.m) : null;
   this.W = this.m.W; this.surfaces = {}; this.ended = false; this.ticks = 0;
   this.id = 'INC-' + U.hash8('ticket|' + this.m.seed).slice(0, 6).toUpperCase();
   const self = this;
@@ -18037,8 +18474,17 @@ P.tick = function () {
   this.ticks++; SIM.sched.advance(this.W, TICK_SEC);
   this.W.touch('tick'); this.check();
 };
+/* Fin de partie. Ticket résolu : la fiche d'intervention est demandée AVANT l'enregistrement (elle entre dans la note) ;
+   l'interface répond par finalize(réponses). Sans fiche (abandon, temps écoulé, opts.report === false) : enregistrement direct. */
 P.finish = function () {
   if (this.ended) return; this.ended = true; clearInterval(this.tickTimer); clearInterval(this.clockTimer);
+  const spec = this.opts.report === false ? null : this.m.reportSpec();
+  if (spec && (this.listeners.report || []).length) { this.emit('report', this.m, spec); return; }
+  this.finalize();
+};
+P.finalize = function (answers) {
+  if (this.record) return;
+  if (answers) this.m.fileReport(answers);
   const rec = Game.record(this.m); this.record = rec; this.emit('end', this.m, rec);
 };
 P.stop = function () { this.ended = true; clearInterval(this.tickTimer); clearInterval(this.clockTimer); Object.keys(this.surfaces).forEach(k => { try { this.surfaces[k].destroy && this.surfaces[k].destroy(); } catch (e) { /* surface déjà détruite */ } }); };
@@ -18124,26 +18570,39 @@ UI.MapView = MapView;
 MapView.prototype.siteView = function (id) {
   if (this.views[id]) return this.views[id];
   const S = SITES[id]; const run = this.run; const self = this;
-  const map = h('div.map'); const inner = h('div.mapin', { style: { width: S.w + 'px', height: S.h + 'px' } });
+  const map = h('div.map'); const inner = h('div.mapin');
   const pos = {};
-  S.zones.forEach(z => inner.append(h('div.zone', { style: { left: z.x + 'px', top: z.y + 'px', width: z.w + 'px', height: z.h + 'px' } }, z.t)));
-  const svgNS = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('class', 'links'); svg.setAttribute('width', S.w); svg.setAttribute('height', S.h);
+  /* campagne : seuls les équipements du périmètre sont dessinés ; une zone vide n'est pas tracée */
+  const scope = run.scope ? run.scope.devs : null; const vis = nid => !scope || scope.indexOf(nid) >= 0;
+  const inZone = z => S.nodes.some(([nid, x, y]) => vis(nid) && x + 56 >= z.x && x + 56 <= z.x + z.w && y + 26 >= z.y && y + 26 <= z.y + z.h);
+  /* cadrage : en campagne la carte se resserre sur ce qui est visible (ox, oy : décalage ; MW, MH : taille utile) */
+  let ox = 0, oy = 0, MW = S.w, MH = S.h;
+  if (scope) {
+    const zs = S.zones.filter(inZone), ns = S.nodes.filter(n => vis(n[0])); const pad = 30;
+    const x0 = Math.min.apply(null, zs.map(z => z.x).concat(ns.map(n => n[1]))), y0 = Math.min.apply(null, zs.map(z => z.y).concat(ns.map(n => n[2])));
+    const x1 = Math.max.apply(null, zs.map(z => z.x + z.w).concat(ns.map(n => n[1] + 130))), y1 = Math.max.apply(null, zs.map(z => z.y + z.h).concat(ns.map(n => n[2] + 90)));
+    if (isFinite(x0) && isFinite(y0)) { ox = x0 - pad; oy = y0 - pad; MW = Math.max(520, x1 - x0 + 2 * pad); MH = Math.max(300, y1 - y0 + 2 * pad); }
+  }
+  inner.style.width = MW + 'px'; inner.style.height = MH + 'px';
+  S.zones.filter(z => !scope || inZone(z)).forEach(z => inner.append(h('div.zone', { style: { left: (z.x - ox) + 'px', top: (z.y - oy) + 'px', width: z.w + 'px', height: z.h + 'px' } }, z.t)));
+  const svgNS = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('class', 'links'); svg.setAttribute('width', MW); svg.setAttribute('height', MH);
   inner.append(svg);
-  S.nodes.forEach(([nid, x, y, type, sub]) => {
-    pos[nid] = { x: x + 56, y: y + 26 };
+  S.nodes.filter(n => vis(n[0])).forEach(([nid, x, y, type, sub]) => {
+    x -= ox; y -= oy; pos[nid] = { x: x + 56, y: y + 26 };
     const dev = run.W.dev[nid];
     const label = type === 'patch' ? 'Baie de brassage' : nid;
     const ic = h('div.ic', UI.icon(TYPE_ICON[type], 36));
     const n = h('div.node', { style: { left: x + 'px', top: y + 'px' }, title: label, on: { click: ev => { ev.stopPropagation(); self.popup(nid, type, n, inner, sub); } } }, ic, h('div.nm', label), h('div.sub', sub));
     inner.append(n);
   });
-  S.links.forEach(([a, b]) => {
+  S.links.filter(([a, b]) => pos[a] && pos[b]).forEach(([a, b]) => {
     const l = document.createElementNS(svgNS, 'line'); l.setAttribute('x1', pos[a].x); l.setAttribute('y1', pos[a].y); l.setAttribute('x2', pos[b].x); l.setAttribute('y2', pos[b].y);
     l.setAttribute('stroke', '#4a6286'); l.setAttribute('stroke-width', '2'); svg.append(l);
   });
   map.append(inner); map.addEventListener('click', () => this.closePop());
+  if (scope) { const hidden = S.nodes.filter(n => !vis(n[0])).length; if (hidden) map.append(h('div.mapscope', UI.icon('network', 14), ' Chapitre ' + run.scope.n + ' : tu vois ton périmètre d’intervention. Le reste de l’infrastructure se dévoile au fil de la campagne.')); }
   /* mise à l'échelle : la carte tient toujours dans la zone visible (jamais de nœud rogné) */
-  const fit = () => { const w = map.clientWidth, hh = map.clientHeight; if (!w || !hh) return; const k = Math.min(1, w / S.w, hh / S.h); inner.style.transformOrigin = '0 0'; inner.style.transform = k < 1 ? 'scale(' + k + ')' : ''; };
+  const fit = () => { const w = map.clientWidth, hh = map.clientHeight; if (!w || !hh) return; const k = Math.min(1, w / MW, hh / MH); inner.style.transformOrigin = '0 0'; inner.style.transform = k < 1 ? 'scale(' + k + ')' : ''; if (scope) { inner.style.marginLeft = Math.max(0, Math.round((w - MW * k) / 2)) + 'px'; inner.style.marginTop = Math.max(0, Math.round(Math.min(60, (hh - MH * k) / 3))) + 'px'; } };
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(map); setTimeout(fit, 0);
   this.views[id] = map; return map;
 };
@@ -24662,7 +25121,8 @@ UI.sceneSvg = function (which, theme) {
 'use strict';
 const SIM = g.SIM, U = SIM.U, UI = SIM.ui, Game = SIM.game, h = UI.h;
 
-function App(root) { this.root = root; this.run = null; this.home(); }
+/* #legacy dans l'adresse : jeu d'origine (accueil ouvert sur le bac à sable, pas de fiche d'intervention). Sert aux tests d'interface antérieurs à la campagne. */
+function App(root) { this.root = root; this.run = null; this.legacy = /legacy/.test(String(g.location && g.location.hash)); this.home(); }
 UI.App = App;
 const P = App.prototype;
 
@@ -24747,7 +25207,9 @@ P.home = function () {
     h('section', h('h2', h('span.hn', '2'), 'Comment tu joues ?'), md),
     h('section', adv));
   const cta = h('div.hcta', sum, h('button.btn.primary.hgo', { on: { click: start } }, h('span', 'Prendre le ticket'), h('i.hgoa', '▶')));
-  const scr = h('div.screen.home', h('div.hwrap', hero, tuto, h('div.hcols', h('div.hleft', UI.prog.dailyCard(prof, self), main, cta), side), h('div.muted.hfoot', h('span', SIM.faults.length + ' pannes au catalogue · simulateur de pannes d’infrastructure, consoles et journaux fidèles aux systèmes réels · pixel-art et icônes originaux, aucune police ni capture d’éditeur tiers.'), catCount), floor));
+  /* trois entrées : Campagne (mise en avant), Astreinte, Bac à sable (le jeu d'origine, tout ouvert) */
+  const left = UI.camp.homeLeft(self, prof, { sandbox: [main, cta], daily: () => UI.prog.dailyCard(prof, self) });
+  const scr = h('div.screen.home', h('div.hwrap', hero, tuto, h('div.hcols', left, side), h('div.muted.hfoot', h('span', SIM.faults.length + ' pannes au catalogue · simulateur de pannes d’infrastructure, consoles et journaux fidèles aux systèmes réels · pixel-art et icônes originaux, aucune police ni capture d’éditeur tiers.'), catCount), floor));
   root.append(scr);
 };
 
@@ -24810,6 +25272,7 @@ P.scenarioModal = function () {
 /* ------------------------------------------------------------------ partie */
 P.begin = function (opts) {
   let run;
+  if (opts.report === undefined) opts = Object.assign({ report: !this.legacy }, opts);
   try { run = new UI.Run(opts); } catch (e) { UI.modal('Impossible de préparer l’incident', h('p', String(e.message)), [{ label: 'Retour', primary: true }]); if (typeof console !== 'undefined') console.error(e); return; }
   if (this.run && this.run !== run) { try { this.run.stop(); } catch (e) { /* l'ancienne partie est abandonnée */ } }   // pas de minuteurs ni de surfaces orphelins en cas de « Rejouer »
   this.run = run; const m = run.m; const self = this;
@@ -24818,9 +25281,9 @@ P.begin = function (opts) {
   const btnHint = h('button.btn.small', { on: { click: () => self.hint() } }, 'Indice');
   const btnClose = h('button.btn.small.primary', { on: { click: () => self.closeTicket() } }, 'Clôturer le ticket');
   const btnGive = h('button.btn.small.danger', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
-  const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
+  const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
   const t = m.fault.ticket;
-  const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', t.body), m.parts.filter(x => x.verifyText).map(x => h('div.verif', h('b', 'Pour clôturer : '), x.verifyText)), UI.prog.goalsBox(run));
+  const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', t.body), UI.camp.verifBox(m), UI.prog.goalsBox(run));
   const hintsBox = h('div'); const guide = h('div'); const log = h('div.actlog');
   const guideCard = m.mode.steps ? h('div.card', h('h3', 'Assistant pas à pas'), guide) : null;
   const side = h('div.side', ticket, guideCard, h('div.card', h('h3', 'Indices'), hintsBox), h('div.card', h('h3', 'Journal de vos actions'), log));
@@ -24828,7 +25291,7 @@ P.begin = function (opts) {
   const stage = h('div.stage', tabs, view);
   root.append(bar, h('div.main', side, stage));
   /* onglets */
-  const siteIds = ['toulouse', 'bordeaux', 'ramonville', 'labege', 'colomiers', 'exterieur'];
+  const siteIds = ['toulouse', 'bordeaux', 'ramonville', 'labege', 'colomiers', 'exterieur'].filter(s => !run.scope || run.scope.sites.indexOf(s) >= 0);
   const mv = new UI.MapView(run, (id, what) => openDev(id, what));
   const open = []; let current = null;
   const tabEls = {};
@@ -24887,11 +25350,12 @@ P.begin = function (opts) {
     if (!steps.length) guide.append(h('div.muted', 'Pas de pas-à-pas pour cette panne.'));
   };
   run.on('act', () => drawLog()); drawLog(); drawGuide();
+  run.on('report', (mm, spec) => UI.camp.reportModal(self, run, spec));
   run.on('end', (mm, rec) => self.debrief(mm, rec));
   this.drawHints = () => { UI.clear(hintsBox); if (m.mode.noHints) hintsBox.append(h('div.muted', 'Indices désactivés en évaluation chronométrée.')); else if (!m.hintLog.length) hintsBox.append(h('div.muted', m.mode.hintsFree ? 'Indices gratuits en mode guidé.' : 'Chaque indice coûte des points sur 100 (' + Game.HINT_COST.map(c => '−' + c).join(' / ') + ').')); m.hintLog.forEach(x => hintsBox.append(h('div.hintbox', h('b', 'Indice ' + x.n + ' — '), x.text))); btnHint.disabled = !!m.mode.noHints || m.hintsUsed >= 3; };
   this.drawHints();
   /* site de départ */
-  const ts = t.site; firstSite = Array.isArray(ts) ? ts[0] : ts; if (!UI.SITES[firstSite]) firstSite = 'toulouse';
+  const ts = t.site; firstSite = Array.isArray(ts) ? ts[0] : ts; if (!UI.SITES[firstSite] || siteIds.indexOf(firstSite) < 0) firstSite = siteIds[0];
   const siteOf = x => x;
   select('site:' + firstSite);
   /* bandeau d'accueil du ticket */
@@ -24928,7 +25392,9 @@ P.debrief = function (m, rec) {
       h('div.card.dnote' + (r.passed ? '.ok' : '.ko'), h('h3', 'Note'), h('div.stars', { style: { fontSize: '22px' }, 'aria-label': (r.stars || 0) + ' étoile(s) sur 3' }, UI.stars(r.stars || 0)), h('div', { style: { fontSize: '30px', fontWeight: 800 } }, r.total, h('small.muted', ' / 100'), ' ', h('span.tag' + (r.passed ? '.ok' : '.bad'), r.tier)), h('div.muted', r.passed ? 'Validé (seuil ' + Game.PASS + ')' : 'Seuil de validation : ' + Game.PASS + ' / 100'), h('div.muted', r.ranked ? 'Partie classée' : 'Mode guidé : non classé')),
       h('div.card', h('h3', 'Temps de résolution (MTTR)'), h('div', { style: { fontSize: '26px', fontWeight: 700 } }, UI.fmtDur(d.mttrSec)), h('div.muted', 'Temps cible ' + UI.fmtDur(d.parSec) + (d.firstFixedSec !== null ? ' — correction effective à ' + UI.fmtDur(d.firstFixedSec) : ''))),
       h('div.card', h('h3', 'Démarche'), h('div', d.path.actions + ' actions, ' + d.path.counters.change + ' modifications'), h('div.muted', d.path.counters.progress + ' progrès, ' + d.path.counters.detour + ' sans effet, ' + d.path.counters.regress + ' reculs'), h('div.muted', d.hints.length + ' indice(s), ' + d.wrongCloses + ' clôture(s) refusée(s)'))),
+    UI.camp.debriefCamp(self, rec && rec.camp),
     UI.prog.debriefPanel(rec && rec.prog),
+    UI.camp.debriefReport(r.report),
     h('h2', 'Cause racine et correction'),
     h('div.card', d.fault.parts.length > 1 ? d.fault.parts.map((p, i) => h('div', { style: { marginBottom: '8px' } }, h('b', (i + 1) + '. ' + p.title), h('div', p.cause), h('div.muted', 'Correction : ' + p.solution))) : [h('div', d.fault.cause), h('div.muted', { style: { marginTop: '4px' } }, 'Correction : ' + d.fault.solution)]),
     d.closeRefusals && d.closeRefusals.length ? [h('h2', 'Pourquoi la clôture a été refusée'), h('div.card', [...new Set(d.closeRefusals.map(x => x.note))].map(x => h('div', x)))] : null,
@@ -24943,12 +25409,13 @@ P.debrief = function (m, rec) {
     d.review.length ? [h('h2', 'Notions à revoir'), h('div.card', d.review.map(x => h('div', '• ', h('b', x.label), ' : ', x.why.join(' ; '))))] : null,
     r.passed ? null : self.courseLinks(d),
     h('h2', 'Barème'),
-    h('div.card', h('table.tbl', h('tbody', h('tr', h('td', 'Départ'), h('td', { style: { textAlign: 'right' } }, sc.start)), line('Panne non résolue (plafond)', sc.unsolved), line('Pénalité de durée (temps cible ' + UI.fmtDur(d.parSec) + ')', sc.time), line('Indices', sc.hints), line('Actions dangereuses', sc.danger), line('Actions à impact', sc.impact), line('Clôtures prématurées', sc.wrongClose), line('Contournement pris pour une résolution', sc.falseRes), h('tr', h('td', h('b', 'Note')), h('td', { style: { textAlign: 'right' } }, h('b', r.total + ' / 100'))))), h('small.muted', 'Validé à partir de ' + Game.PASS + '. La durée seule ne peut pas faire passer sous ' + Game.PASS + ' une résolution propre (sans indice, sans action dangereuse, sans clôture prématurée).')),
+    h('div.card', h('table.tbl', h('tbody', h('tr', h('td', 'Départ'), h('td', { style: { textAlign: 'right' } }, sc.start)), line('Panne non résolue (plafond)', sc.unsolved), line('Pénalité de durée (temps cible ' + UI.fmtDur(d.parSec) + ')', sc.time), line('Indices', sc.hints), line('Actions dangereuses', sc.danger), line('Actions à impact', sc.impact), line('Clôtures prématurées', sc.wrongClose), line('Contournement pris pour une résolution', sc.falseRes), line('Fiche d’intervention (cause ou correction mal identifiée)', sc.report), h('tr', h('td', h('b', 'Note')), h('td', { style: { textAlign: 'right' } }, h('b', r.total + ' / 100'))))), h('small.muted', 'Validé à partir de ' + Game.PASS + '. La durée seule ne peut pas faire passer sous ' + Game.PASS + ' une résolution propre (sans indice, sans action dangereuse, sans clôture prématurée).')),
     h('h2', 'Historique complet des actions'),
     h('div.card', { style: { maxHeight: '260px', overflow: 'auto' } }, tl.length ? h('table.tbl', h('tbody', tl.map(x => h('tr', h('td.muted', UI.fmtDur(x.t)), h('td', x.dev || ''), h('td', x.text || ''), h('td', cls(x.cls)))))) : h('div.muted', 'Aucune action enregistrée.')),
     h('div.row', { style: { margin: '20px 0 40px' } },
-      h('button.btn.primary', { on: { click: () => self.begin({ daily: m.daily, level: m.lv.level, mode: m.mode.id, seed: m.seed, faultId: m.fault.bundle ? undefined : m.fault.id, skill: m.opts.skill, parts: m.opts.parts, chain: m.opts.chain }) } }, 'Rejouer cet incident'),
-      h('button.btn', { on: { click: () => { self.lastSeed = ''; self.home(); } } }, 'Nouveau ticket'),
+      UI.camp.debriefNext(self, m, rec && rec.camp),
+      h('button.btn' + (m.camp ? '' : '.primary'), { on: { click: () => m.camp ? self.begin(Object.assign({}, self.run.opts)) : self.begin({ daily: m.daily, level: m.lv.level, mode: m.mode.id, seed: m.seed, faultId: m.fault.bundle ? undefined : m.fault.id, skill: m.opts.skill, parts: m.opts.parts, chain: m.opts.chain }) } }, 'Rejouer cet incident'),
+      h('button.btn', { on: { click: () => { self.lastSeed = ''; self.home(); } } }, m.camp ? 'Retour à l’accueil' : 'Nouveau ticket'),
       h('button.btn', { on: { click: () => self.exportTrace(m, d) } }, 'Exporter la trace (JSON)')));
   root.append(scr);
   if (r.perfect) UI.themes.celebrate(UI.themes.saved(), r.total);
@@ -25319,8 +25786,9 @@ const cp = (text, what, cls) => text ? h('span.cp' + (cls ? '.' + cls : ''), { t
 INF.cp = cp;
 
 /* ------------------------------------------------------------------ identifiants */
-INF.credsView = function () {
-  const rows = SIM.VAULT.map(c => h('tr', h('td', c.scope), h('td', cp(c.user, 'Identifiant')), h('td', cp(c.secret, 'Mot de passe', 'mono')),
+INF.credsView = function (scope) {
+  /* campagne : seuls les comptes des équipements déjà au programme */
+  const rows = SIM.VAULT.filter(c => !scope || !c.ch || c.ch <= scope.n).map(c => h('tr', h('td', c.scope), h('td', cp(c.user, 'Identifiant')), h('td', cp(c.secret, 'Mot de passe', 'mono')),
     h('td.nowrap', h('button.btn.small', { title: 'Copier l’identifiant', on: { click: () => UI.copyText(c.user, 'Identifiant') } }, 'Copier id'), ' ', h('button.btn.small', { title: 'Copier le mot de passe', on: { click: () => UI.copyText(c.secret, 'Mot de passe') } }, 'Copier mdp')), h('td.muted', c.note)));
   return h('div', h('p.muted', 'Oui, ils sont tous dans un tableau : c’est un simulateur, pas une production. Dans la vraie vie, ça s’appelle un gestionnaire de mots de passe, et pas un post-it. Utilise le compte le moins privilégié qui suffit. Clique sur un identifiant ou un mot de passe pour le copier.'),
     h('table.tbl.infotbl', h('thead', h('tr', ['Contexte', 'Identifiant', 'Mot de passe', '', 'Note'].map(x => h('th', x)))), h('tbody', rows)));
@@ -25333,8 +25801,8 @@ INF.plan = function (seed) {
   const plan = SIM.plan(SIM.buildHealthyWorld({ seed: seed || 1 })); cache = { key, plan }; return plan;
 };
 INF.siteOf = dev => { const ids = Object.keys(UI.SITES); for (const sid of ids) { const n = UI.SITES[sid].nodes.find(x => x[0] === dev); if (n) return { sid, role: n[4] || '' }; } return { sid: '', role: '' }; };
-INF.planView = function (seed) {
-  const plan = INF.plan(seed); const box = h('div'); const q = h('input.txt', { placeholder: 'Filtrer : machine, IP, VLAN…', 'aria-label': 'Filtrer le plan d’adressage', style: { width: '260px' } });
+INF.planView = function (seed, scope) {
+  const full = INF.plan(seed); const plan = scope ? { rows: full.rows.filter(r => scope.devs.indexOf(r.dev) >= 0), devices: full.devices.filter(d => scope.devs.indexOf(d) >= 0) } : full; const box = h('div'); const q = h('input.txt', { placeholder: 'Filtrer : machine, IP, VLAN…', 'aria-label': 'Filtrer le plan d’adressage', style: { width: '260px' } });
   const sites = Object.keys(UI.SITES); const bySite = {}; plan.rows.forEach(r => { const s = INF.siteOf(r.dev); r._role = s.role; (bySite[s.sid || '_'] = bySite[s.sid || '_'] || []).push(r); });
   const draw = () => {
     UI.clear(box); const f = q.value.trim().toLowerCase(); let shown = 0;
@@ -25356,10 +25824,10 @@ INF.planView = function (seed) {
 
 /* ------------------------------------------------------------------ fenêtre */
 INF.modal = function (app, tab) {
-  const seed = app && app.run && app.run.m ? app.run.m.seed : 1; let cur = tab || 'creds'; const body = h('div.infoscroll'); const tabs = h('div.pgtabs', { style: { padding: '0 0 8px' } }); let mm = null;
+  const seed = app && app.run && app.run.m ? app.run.m.seed : 1; const scope = app && app.run && !app.run.ended && app.run.scope ? app.run.scope : (app && app.infraScope ? app.infraScope() : null); let cur = tab || 'creds'; const body = h('div.infoscroll'); const tabs = h('div.pgtabs', { style: { padding: '0 0 8px' } }); let mm = null;
   const draw = () => {
     UI.clear(tabs); [['creds', 'Identifiants'], ['plan', 'Plan d’adressage']].forEach(t => tabs.append(h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
-    UI.clear(body); body.append(cur === 'creds' ? INF.credsView() : INF.planView(seed));
+    UI.clear(body); body.append(cur === 'creds' ? INF.credsView(scope) : INF.planView(seed, scope));
     if (cur === 'plan' && app && app.run && app.run.m && app.run.m.aid) app.run.m.aid('plan');   /* D-94 : ouverture tracée, sans malus */
     if (mm) { mm.el.style.maxWidth = cur === 'plan' ? 'min(1240px, 96vw)' : '860px'; mm.el.style.width = cur === 'plan' ? '96vw' : 'auto'; }
   };
@@ -25423,6 +25891,175 @@ CH.attach = function (term) {
 };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
+/* ===== ui/95-campaign.js ===== */
+/* ============================================================================
+   Campagne et fiche d'intervention : accueil à trois entrées (Campagne, Astreinte, Bac à sable), écran « chantier »
+   d'un chapitre, fiche d'intervention après un ticket résolu, blocs du débrief.
+   Moteur : src/engine/83-campaign.js et 84-report.js. Chapitres : src/content/31-chapters.js.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, UI = SIM.ui, Game = SIM.game, C = SIM.camp, h = UI.h;
+const UC = UI.camp = {};
+const P = UI.App.prototype;
+const randomSeed = () => String(Math.floor(Math.random() * 900000000) + 100000000);
+const plural = (n, w) => n + ' ' + w + (n > 1 ? 's' : '');
+const TYPE_ICON = { cloud: 'cloud', firewall: 'firewall', switch: 'switch', router: 'router', server: 'server', linux: 'linux', pc: 'pc', printer: 'printer', patch: 'patch' };
+const nodeOf = id => { for (const sid of Object.keys(UI.SITES)) { const n = UI.SITES[sid].nodes.find(x => x[0] === id); if (n) return { type: n[3], sub: n[4], site: UI.SITES[sid].label }; } return { type: 'pc', sub: '', site: '' }; };
+
+/* ------------------------------------------------------------------ lancement */
+P.campMode = function () { const v = this._campMode || Game.store.get('campmode'); return v === 'free' || v === 'guided' ? v : 'guided'; };
+P.setCampMode = function (v) { this._campMode = v; Game.store.set('campmode', v); };
+/* périmètre montré par la fiche de l'infra depuis l'accueil : celui de la campagne, sauf dans le bac à sable */
+P.infraScope = function () { if (this.legacy || this.homeTab !== 'camp') return null; const n = C.unlocked(Game.profile()); return { n, devs: C.scope(n), sites: C.sites(n) }; };
+P.campTicket = function (n) {
+  const self = this; const p = Game.profile();
+  if (!C.chapterState(p, n).seen) { UC.chantier(this, n, () => self.campTicket(n)); return; }
+  const sp = C.next(p, n, randomSeed()); if (!sp) { UI.toast('Aucune panne dans ce chapitre.', 'warn'); return; }
+  this.begin({ level: sp.level, mode: this.campMode(), seed: sp.seed, faultId: sp.faultId, camp: sp.camp });
+};
+P.campExam = function (n) {
+  const self = this; const ch = C.chapter(n);
+  let sp; try { sp = C.exam(Game.profile(), n, randomSeed()); } catch (e) { UI.toast('Examen indisponible : ' + e.message, 'warn'); return; }
+  const what = sp.parts > 1 ? 'un ticket qui cache ' + sp.parts + ' pannes prises dans tout ce que tu as vu jusqu’ici, dont au moins une de ce chapitre' : 'un ticket tiré parmi les pannes les plus difficiles de ce chapitre';
+  UI.modal('Examen du chapitre ' + n, h('div', UI.paras('« ' + ch.title + ' » : ' + what + '.\n\nChronométré, sans indice ni assistant. Il faut ' + Game.PASS + ' / 100 pour ouvrir ' + (n < C.last() ? 'le chapitre suivant' : 'la fin de la campagne') + '. Tu peux le repasser autant de fois que tu veux : chaque tentative tire un nouvel incident.')),
+    [{ label: 'Pas maintenant' }, { label: 'Commencer l’examen', primary: true, fn: () => self.begin(sp) }]);
+};
+
+/* ------------------------------------------------------------------ écran « chantier » : ce que le chapitre ajoute */
+UC.chantier = function (app, n, then) {
+  const ch = C.chapter(n); const p = Game.profile(); const st = C.chapterState(p, n);
+  C.markSeen(p, n); Game.saveProfile(p);
+  const devs = ch.devices.map(id => { const nd = nodeOf(id); return h('div.chdev', h('span.chdi', UI.icon(TYPE_ICON[nd.type] || 'pc', 26)), h('div', h('b', nd.type === 'patch' ? 'Baie de brassage' : id), h('small', nd.sub + (nd.site && n > 7 ? ' · ' + nd.site : '')))); });
+  const body = h('div.chantier',
+    h('div.chkick', 'Chapitre ' + n + ' / ' + C.last() + ' · ' + ch.kicker),
+    h('p.chstory', ch.story),
+    devs.length ? [h('h3', n === 1 ? 'Ton périmètre' : 'Nouveau dans ton périmètre'), h('div.chdevs', devs)] : [h('h3', 'Ton périmètre'), h('p.muted', 'Aucun nouvel équipement : tu approfondis ceux que tu connais déjà.')],
+    h('h3', 'Au programme'), h('ul.chlearn', ch.learn.map(x => h('li', x))),
+    h('h3', 'Objectif'), h('p', 'Valider ' + plural(st.need, 'ticket') + ' (' + Game.PASS + ' / 100 ou plus) parmi les ' + st.pool + ' pannes du chapitre, puis réussir l’examen' + (n < C.last() ? ' pour ouvrir le chapitre ' + (n + 1) + '.' : ' final.')));
+  const mm = UI.modal(ch.title, body, [{ label: then ? 'C’est parti' : 'Fermer', primary: true, fn: then || null }]);
+  mm.el.classList.add('chmodal'); return mm;
+};
+
+/* ------------------------------------------------------------------ accueil : colonne de gauche à trois entrées */
+UC.homeLeft = function (app, prof, parts) {
+  const TABS = [['camp', 'Campagne', 'Ton parcours, chapitre par chapitre'], ['duty', 'Astreinte', 'Ticket du jour et incidents majeurs'], ['sandbox', 'Bac à sable', 'Tout est ouvert, tu choisis']];
+  let tab = app.legacy ? 'sandbox' : (app.homeTab || Game.store.get('hometab') || 'camp'); if (!TABS.some(t => t[0] === tab)) tab = 'camp';
+  app.homeTab = tab;
+  const left = h('div.hleft'); if (app.legacy) left.append(parts.daily());
+  const nav = h('div.cnav', { role: 'tablist' }); const pane = h('div.cpane');
+  const draw = () => {
+    UI.clear(nav); TABS.forEach(t => nav.append(h('button.cnavb' + (tab === t[0] ? '.on' : ''), { role: 'tab', 'aria-selected': tab === t[0] ? 'true' : 'false', 'data-tab': t[0], on: { click: () => { tab = t[0]; app.homeTab = tab; Game.store.set('hometab', tab); draw(); } } }, h('b', t[1]), h('small', t[2]))));
+    UI.clear(pane);
+    if (tab === 'camp') pane.append(UC.campPane(app, draw));
+    else if (tab === 'duty') pane.append(UC.dutyPane(app, parts, prof));
+    else pane.append(h('p.muted.cintro', 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.'), ...parts.sandbox);
+  };
+  draw(); left.append(nav, pane); return left;
+};
+UC.campPane = function (app, redraw) {
+  const prof = Game.profile(); const S = C.state(prof);
+  let sel = app.campSel && C.chapterState(prof, app.campSel) && C.chapterState(prof, app.campSel).unlocked ? app.campSel : S.current;
+  const st = S.chapters.find(c => c.n === sel), ch = st.ch; const mode = app.campMode();
+  const left = Math.max(0, st.need - st.validated);
+  const due = C.dueReviews(prof).filter(d => C.faultChapter(d) === sel).length;
+  const modeBtn = (id, label, sub) => h('button.cmodeb' + (mode === id ? '.on' : ''), { 'data-mode': id, on: { click: () => { app.setCampMode(id); redraw(); } } }, h('b', label), h('small', sub));
+  const ticketBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo' : ''), { 'data-act': 'ticket', on: { click: () => app.campTicket(sel) } }, label);
+  const examBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo' : ''), { 'data-act': 'exam', disabled: !st.examReady, title: st.examReady ? '' : 'Valide encore ' + plural(left, 'ticket') + ' pour ouvrir l’examen', on: { click: () => app.campExam(sel) } }, label);
+  const acts = st.done ? [ticketBtn(true, 'S’entraîner sur ce chapitre ▶'), examBtn(false, 'Repasser l’examen (meilleure note : ' + st.examBest + ')')]
+    : st.examReady ? [examBtn(true, 'Passer l’examen du chapitre ▶'), ticketBtn(false, 'S’entraîner encore')]
+    : [ticketBtn(true, 'Prendre un ticket ▶'), examBtn(false, 'Examen du chapitre')];
+  const card = h('div.ccard' + (st.done ? '.done' : ''),
+    h('div.ckick', 'Chapitre ' + sel + ' / ' + C.last() + ' · ' + ch.kicker, st.done ? h('span.tag.ok', 'Examen réussi · ' + st.examBest + ' / 100') : null),
+    h('h2.ctitle', ch.title), h('p.cstory', ch.story),
+    h('div.cprog', h('div.cbar', { role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': st.need, 'aria-valuenow': Math.min(st.validated, st.need) }, h('i', { style: { width: Math.round(100 * Math.min(1, st.need ? st.validated / st.need : 1)) + '%' } })),
+      h('span.cprogt', h('b', Math.min(st.validated, st.need) + ' / ' + st.need), ' tickets validés', st.validated > st.need ? ' (' + st.validated + ' sur les ' + st.pool + ' du chapitre)' : ' · ' + st.pool + ' pannes dans ce chapitre')),
+    h('div.cstate', st.done ? 'Chapitre terminé. Tu peux continuer à t’entraîner : les pannes pas encore vues passent en premier.' : st.examReady ? 'L’examen est ouvert : chronométré, sans indice ni assistant.' : 'Encore ' + plural(left, 'ticket') + ' à valider (' + Game.PASS + ' / 100 ou plus) pour ouvrir l’examen.',
+      due ? h('div.cdue', '↻ ' + plural(due, 'panne') + ' à revoir : ' + (due > 1 ? 'elles reviennent' : 'elle revient') + ' en priorité au prochain ticket.') : null),
+    h('div.cmode', h('span.muted', 'Comment tu joues ce ticket :'), modeBtn('guided', 'Accompagné', 'Indices gratuits, assistant pas à pas'), modeBtn('free', 'Autonome', 'Indices payants, plus d’XP')),
+    h('div.cact', acts, h('button.btn', { 'data-act': 'chantier', on: { click: () => UC.chantier(app, sel, null) } }, 'Voir le chantier')));
+  const path = h('div.cpath', { 'aria-label': 'Chapitres de la campagne' }, S.chapters.map(c => {
+    const cls = (c.done ? '.done' : '') + (c.n === S.current && !c.done ? '.cur' : '') + (c.unlocked ? '' : '.lock') + (c.n === sel ? '.sel' : '');
+    return h('button.cnode' + cls, { disabled: !c.unlocked, 'data-ch': c.n, title: c.unlocked ? c.ch.title : 'Réussis l’examen du chapitre ' + (c.n - 1) + ' pour l’ouvrir', on: { click: () => { app.campSel = c.n; redraw(); } } },
+      h('span.cnn', c.done ? '✓' : c.unlocked ? String(c.n) : '🔒'), h('span.cnt', c.ch.title), h('small', c.done ? 'Terminé' : c.unlocked ? Math.min(c.validated, c.need) + ' / ' + c.need : 'Verrouillé'));
+  }));
+  return h('div', S.finished ? h('div.cfin', h('b', 'Campagne terminée.'), ' Toute l’infrastructure est sous ta responsabilité. Reste l’astreinte, le ticket du jour, et les pannes que tu n’as pas encore croisées.') : null, card, h('h2.cpatht', 'Le parcours'), path);
+};
+UC.dutyPane = function (app, parts, prof) {
+  let timed = app._dutyTimed === true;
+  const box = h('div');
+  const draw = () => {
+    UI.clear(box);
+    const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
+    box.append(parts.daily(),
+      h('p.muted.cintro', 'Incidents majeurs : plusieurs pannes de natures différentes dans le même ticket, tirées dans toute l’infrastructure. À garder pour quand la campagne est bien avancée.'),
+      h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => h('button.cdutyb', { 'data-level': x[0], on: { click: () => go(x[0]) } }, h('b', x[1]), h('small', x[2]), h('span.muted', 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min')))),
+      h('label.cchk', h('input', { type: 'checkbox', checked: timed, on: { change: e => { timed = e.target.checked; app._dutyTimed = timed; } } }), ' Chronométré, sans indice'));
+  };
+  draw(); return box;
+};
+
+/* ------------------------------------------------------------------ ticket : critère de clôture, toujours affiché */
+UC.verifBox = function (m) {
+  const texts = []; m.parts.forEach(p => { const t = SIM.report.closeText(p); if (texts.indexOf(t) < 0) texts.push(t); });
+  return texts.map(t => h('div.verif', h('b', 'Pour clôturer : '), t));
+};
+
+/* ------------------------------------------------------------------ fiche d'intervention (ticket résolu, avant le débrief) */
+UC.reportModal = function (app, run, spec) {
+  const m = run.m; const ans = {}; const DK = '?';
+  const submit = h('button.btn.primary', { disabled: true, on: { click: () => { ov.remove(); const a = {}; Object.keys(ans).forEach(k => { if (ans[k] !== DK) a[k] = ans[k]; }); run.finalize(a); } } }, 'Fermer le ticket');
+  const left = h('span.muted');
+  const refresh = () => { const n = spec.questions.length - Object.keys(ans).length; submit.disabled = n > 0; left.textContent = n > 0 ? plural(n, 'réponse') + ' manquante' + (n > 1 ? 's' : '') : 'Fiche complète.'; };
+  const qbox = q => {
+    const box = h('div.fq', { 'data-q': q.id }, h('div.fql', q.label), h('div.fqh', q.help));
+    const opts = q.options.concat([{ id: DK, text: 'Je ne sais pas', dk: true }]).map(o => {
+      const b = h('button.fopt' + (o.dk ? '.dk' : ''), { 'data-o': o.id, 'aria-pressed': 'false', on: { click: () => { ans[q.id] = o.id; box.querySelectorAll('.fopt').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }); b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); refresh(); } } }, h('span.fob'), h('span', o.text));
+      return b;
+    });
+    box.append(h('div.fopts', opts)); return box;
+  };
+  const rule = m.mode.hintsFree ? 'Mode accompagné : la fiche est corrigée au débrief, elle n’enlève aucun point.' : 'Cause mal identifiée : −' + SIM.report.CAUSE_COST + ' · correction mal identifiée : −' + SIM.report.FIX_COST + '. La fiche ne fait jamais échouer un ticket réparé : elle départage les étoiles.';
+  const ov = h('div.overlay.frep', h('div.modal.fmodal', { role: 'dialog', 'aria-label': 'Fiche d’intervention' },
+    h('div.fhead', h('span.tag.ok', 'Ticket résolu'), h('span.muted', 'Ticket ' + run.id + ' · chrono arrêté à ' + UI.fmtDur(m.result.mttrSec))),
+    h('h2', 'Fiche d’intervention'),
+    h('p.muted', 'Le demandeur est dépanné. Avant de fermer le ticket, consigne ce que tu as trouvé : c’est ce qui sépare une panne réparée d’une panne comprise.'),
+    spec.questions.map(qbox),
+    h('div.frule', rule),
+    h('div.actions', left, submit)));
+  document.body.appendChild(ov); refresh();
+};
+
+/* ------------------------------------------------------------------ débrief */
+UC.debriefReport = function (rp) {
+  if (!rp) return null;
+  return [h('h2', 'Ta fiche d’intervention'),
+    h('div.card.dfiche' + (rp.allOk ? '.ok' : ''), rp.rows.map(x => h('div.dfrow', h('span.tag' + (x.ok ? '.ok' : '.bad'), x.ok ? 'Juste' : x.chosen ? 'Faux' : 'Sans réponse'), h('div', h('b', x.label),
+        x.ok ? h('div.muted', x.answerText) : [x.chosenText ? h('div.dfko', 'Ta réponse : ' + x.chosenText) : null, h('div', 'Réponse attendue : ' + x.answerText)]))),
+      h('div.muted.dfsum', rp.allOk ? 'Panne réparée et comprise.' + (rp.guided ? '' : ' Bonus d’XP.') : rp.guided ? 'Mode accompagné : aucun point retiré. La panne reviendra dans quelques tickets pour que tu la retravailles.' : (rp.penalty ? '−' + rp.penalty + ' sur la note. ' : 'Aucun point retiré (note déjà au seuil). ') + (rp.causeOk ? '' : 'La panne reviendra dans quelques tickets pour que tu la retravailles.')))];
+};
+UC.debriefCamp = function (app, camp) {
+  if (!camp) return null;
+  const ch = C.chapter(camp.ch); const pct = Math.round(100 * Math.min(1, camp.need ? camp.validated / camp.need : 1));
+  const msg = camp.finished ? h('div.dcbig', '★ Campagne terminée. Toute l’infrastructure est sous ta responsabilité.')
+    : camp.unlocked ? h('div.dcbig', '★ Chapitre ' + camp.unlocked + ' débloqué : ' + C.chapter(camp.unlocked).title)
+    : camp.exam ? h('div', camp.passed ? 'Examen réussi une nouvelle fois.' : 'Examen à repasser : il faut ' + Game.PASS + ' / 100. Chaque tentative tire un nouvel incident.')
+    : camp.examNowReady ? h('div.dcbig', 'L’examen du chapitre est ouvert.')
+    : camp.examReady ? h('div', 'L’examen du chapitre t’attend.')
+    : h('div', camp.passed ? 'Encore ' + plural(Math.max(0, camp.need - camp.validated), 'ticket') + ' à valider avant l’examen.' : 'Ticket non validé : il ne compte pas pour le chapitre' + (camp.review ? '' : ', et la panne reviendra dans quelques tickets') + '.');
+  return h('div.card.dcamp' + (camp.unlocked || camp.finished ? '.up' : ''), h('h3', 'Campagne · chapitre ' + camp.ch + ' — ' + ch.title + (camp.exam ? ' · examen' : camp.review ? ' · révision' : '')),
+    h('div.cprog', h('div.cbar', h('i', { style: { width: pct + '%' } })), h('span.cprogt', h('b', Math.min(camp.validated, camp.need) + ' / ' + camp.need), ' tickets validés')), msg);
+};
+UC.debriefNext = function (app, m, camp) {
+  if (!m.camp || !camp) return null;
+  const n = camp.ch; const p = Game.profile();
+  if (camp.finished) return h('button.btn.primary', { on: { click: () => app.home() } }, 'Retour à la campagne');
+  if (camp.unlocked) return h('button.btn.primary', { 'data-act': 'next', on: { click: () => { app.campSel = camp.unlocked; app.campTicket(camp.unlocked); } } }, 'Découvrir le chapitre ' + camp.unlocked + ' ▶');
+  if (camp.examReady && !C.examPassed(p, n)) return [h('button.btn.primary', { 'data-act': 'exam', on: { click: () => app.campExam(n) } }, camp.exam ? 'Repasser l’examen ▶' : 'Passer l’examen du chapitre ▶'), h('button.btn', { 'data-act': 'next', on: { click: () => app.campTicket(n) } }, 'Ticket suivant')];
+  return h('button.btn.primary', { 'data-act': 'next', on: { click: () => app.campTicket(n) } }, 'Ticket suivant ▶');
+};
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
 /* ===== ui/99-main.js ===== */
 /* Point d'entrée du navigateur */
 (function (g) {
@@ -25430,6 +26067,8 @@ CH.attach = function (term) {
 if (typeof document === 'undefined') return;
 const boot = () => {
   const root = document.getElementById('app'); if (!root) return;
+  /* Passage à la V3 (campagne) : les profils antérieurs ne sont pas repris. Marqueur « gen » posé une fois. */
+  try { const st = g.SIM.game.store; if (!/legacy/.test(String(g.location && g.location.hash)) && st.get('gen') !== 3) { if (st.get('profile') !== null) st.set('profile', null); st.set('gen', 3); } } catch (e) { /* stockage indisponible */ }
   try { g.SIM_APP = new g.SIM.ui.App(root); } catch (e) { root.textContent = 'Erreur de démarrage : ' + e.message; if (typeof console !== 'undefined') console.error(e); }
 };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

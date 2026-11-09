@@ -1,0 +1,88 @@
+/* Campagne : accueil à trois entrées, carte de chapitre, parcours, chantier, fiche d'intervention, blocs du débrief. */
+.cnav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px; }
+.cnavb { text-align: left; color: var(--text); background: var(--panel2); border: 3px solid var(--ink); border-bottom: 5px solid var(--line); padding: 10px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; box-shadow: 4px 4px 0 var(--shadow); }
+.cnavb b { font: 700 14px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.cnavb small { color: var(--muted); font-size: 12px; }
+.cnavb:hover { border-bottom-color: var(--hv); }
+.cnavb.on { border-bottom-color: var(--hc); background: linear-gradient(180deg, color-mix(in srgb, var(--hv) 26%, var(--panel2)), var(--panel2)); }
+.cnavb.on b { color: var(--hc); }
+.cintro { margin: 0 0 14px; }
+.ccard { position: relative; background: var(--panel); border: 3px solid var(--hc); box-shadow: 6px 6px 0 var(--shadow); padding: 18px 20px; }
+.ccard.done { border-color: var(--ok); }
+.ckick { font: 700 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--hc); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ctitle { margin: 6px 0 6px !important; font-size: 26px !important; text-transform: none !important; letter-spacing: 0 !important; color: var(--text) !important; }
+.cstory { margin: 0 0 14px; max-width: 70ch; line-height: 1.5; }
+.cprog { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cbar { flex: 1 1 220px; height: 14px; background: color-mix(in srgb, var(--bg) 70%, #000); border: 2px solid var(--ink); min-width: 160px; }
+.cbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--hv), var(--hc)); transition: width .3s; }
+.cprogt { font-size: 13px; color: var(--muted); } .cprogt b { color: var(--text); }
+.cstate { margin: 10px 0 14px; font-size: 13.5px; }
+.cdue { margin-top: 6px; color: var(--warn); }
+.cmode { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.cmode > .muted { align-self: center; font-size: 12.5px; }
+.cmodeb { text-align: left; color: var(--text); background: var(--panel2); border: 2px solid var(--line); padding: 6px 12px; cursor: pointer; display: flex; flex-direction: column; }
+.cmodeb small { color: var(--muted); font-size: 11.5px; }
+.cmodeb.on { border-color: var(--hc); background: color-mix(in srgb, var(--hc) 14%, var(--panel2)); }
+.cact { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.cact .cgo { font: 700 15px var(--mono); letter-spacing: .06em; padding: 10px 18px; }
+.cpatht { margin-top: 22px !important; }
+.cpath { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.cnode { text-align: left; color: var(--text); background: var(--panel2); border: 2px solid var(--line); padding: 8px 10px; cursor: pointer; display: grid; grid-template-columns: 26px 1fr; column-gap: 8px; align-items: center; }
+.cnode .cnn { grid-row: span 2; width: 26px; height: 26px; display: grid; place-items: center; font: 700 12px var(--mono); background: var(--bg); border: 2px solid var(--line); }
+.cnode .cnt { font-weight: 600; font-size: 12.5px; line-height: 1.2; }
+.cnode small { color: var(--muted); font-size: 11px; }
+.cnode.done .cnn { background: var(--ok); border-color: var(--ok); color: var(--ink); }
+.cnode.cur { border-color: var(--hv); } .cnode.cur .cnn { border-color: var(--hv); color: var(--hc); }
+.cnode.sel { border-color: var(--hc); box-shadow: 3px 3px 0 var(--shadow); }
+.cnode.lock { opacity: .5; cursor: default; }
+.cfin { padding: 10px 14px; margin-bottom: 14px; border: 2px solid var(--ok); background: color-mix(in srgb, var(--ok) 14%, var(--panel)); }
+.cduty { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.cdutyb { text-align: left; color: var(--text); background: var(--panel2); border: 3px solid var(--ink); border-top: 6px solid var(--bad); padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 4px; box-shadow: 4px 4px 0 var(--shadow); }
+.cdutyb:hover { transform: translate(-1px, -1px); }
+.cdutyb small { color: var(--muted); } .cdutyb .muted { font-size: 11.5px; }
+.cchk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.screen.home .pdaily { margin-bottom: 16px; }
+@media (max-width: 760px) { .cnav, .cduty { grid-template-columns: 1fr; } .ctitle { font-size: 21px !important; } }
+
+/* chantier */
+.modal.chmodal { max-width: 720px; }
+.chkick { font: 700 11px var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--hc); }
+.chstory { line-height: 1.55; margin: 8px 0 4px; }
+.chantier h3 { margin: 16px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.chdevs { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.chdev { display: flex; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; }
+.chdev small { display: block; color: var(--muted); font-size: 11.5px; }
+.chdi { color: var(--hc); display: grid; place-items: center; }
+.chlearn { margin: 0; padding-left: 18px; } .chlearn li { margin: 3px 0; }
+
+/* carte : rappel du périmètre */
+.map { position: relative; }
+.mapscope { position: absolute; left: 12px; bottom: 10px; right: 12px; font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; pointer-events: none; }
+.pill.campill { border-color: var(--hc); }
+
+/* fiche d'intervention */
+.modal.fmodal { max-width: 760px; width: min(760px, 94vw); }
+.fhead { display: flex; gap: 10px; align-items: center; margin-bottom: 6px; }
+.fq { margin-top: 16px; }
+.fql { font-weight: 700; font-size: 15px; }
+.fqh { color: var(--muted); font-size: 12.5px; margin: 2px 0 8px; }
+.fopts { display: flex; flex-direction: column; gap: 6px; }
+.fopt { text-align: left; color: var(--text); background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; cursor: pointer; display: grid; grid-template-columns: 18px 1fr; gap: 10px; align-items: start; line-height: 1.4; font-size: 13.5px; }
+.fopt:hover { border-color: var(--accent); }
+.fopt .fob { width: 14px; height: 14px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--muted); }
+.fopt.on { border-color: var(--hc); background: color-mix(in srgb, var(--hc) 12%, var(--panel2)); }
+.fopt.on .fob { border-color: var(--hc); background: var(--hc); box-shadow: inset 0 0 0 2px var(--panel2); }
+.fopt.dk { color: var(--muted); font-style: italic; }
+.frule { margin-top: 16px; padding: 8px 12px; font-size: 12.5px; color: var(--muted); border-left: 3px solid var(--hv); background: color-mix(in srgb, var(--hv) 8%, transparent); }
+.fmodal .actions { align-items: center; }
+
+/* débrief */
+.dcamp { margin-top: 14px; border-color: var(--hc); }
+.dcamp.up { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 10%, var(--panel2)); }
+.dcamp .cprog { margin: 4px 0 8px; }
+.dcbig { font-weight: 700; font-size: 16px; color: var(--hc); }
+.dcamp.up .dcbig { color: var(--ok); }
+.dfiche.ok { border-color: var(--ok); }
+.dfrow { display: grid; grid-template-columns: 96px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.dfko { color: var(--bad); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--bad) 50%, transparent); }
+.dfsum { margin-top: 8px; }

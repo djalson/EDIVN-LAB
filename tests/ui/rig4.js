@@ -1,5 +1,5 @@
 /* Test : dhcp_conflict réparé en reconfigurant l'imprimante depuis son panneau (adresse manuelle hors plage), puis renouvellement du bail. */
-const T = require('/home/claude/game/tests/ui/lib.js');
+const T = require('./lib.js');
 (async () => {
   const t = await T.start({ fault: 'dhcp_conflict', dev: 'PC-01', seed: '7' }); const p = t.p;
   await p.evaluate(() => SIM_APP.openDev('IMP-T1', 'main')); await p.waitForTimeout(500);

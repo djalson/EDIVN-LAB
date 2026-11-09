@@ -6,7 +6,7 @@ const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } }); const errs = []; const fails = [];
   p.on('pageerror', e => errs.push('PAGEERR ' + e.message)); p.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE ' + m.text()); });
-  await p.goto('file:///home/claude/game/dist/EDIVN-Lab.html'); await p.waitForFunction(() => window.SIM_APP);
+  await p.goto(require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy'); await p.waitForFunction(() => window.SIM_APP);
   const only = process.argv.slice(2);
   const ids = (await p.evaluate(() => SIM.faults.map(f => f.id))).filter(i => !only.length || only.some(o => i.startsWith(o)));
   const modes = ['guided', 'free', 'timed']; let n = 0;

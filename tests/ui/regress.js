@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   for (const [w, h] of [[1440, 900], [1024, 768], [1920, 1080]]) {
     const p = await b.newPage({ viewport: { width: w, height: h } });
     p.on('pageerror', e => errs.push('PAGEERR ' + e.message)); p.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE ' + m.text()); });
-    await p.goto('file:///home/claude/game/dist/EDIVN-Lab.html'); await p.waitForFunction(() => window.SIM_APP);
+    await p.goto(require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy'); await p.waitForFunction(() => window.SIM_APP);
     await p.evaluate(() => SIM_APP.begin({ level: 1, mode: 'free', seed: '7', faultId: 'dhcp_svc', tour: false }));
     await p.evaluate(() => SIM_APP.openDev('SRV-DC1', 'main')); await p.waitForTimeout(500);
     await p.evaluate(() => SIM_APP.vaultModal());

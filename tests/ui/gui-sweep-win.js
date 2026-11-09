@@ -5,7 +5,7 @@
    par les balayages au terminal. Une étape sans recette graphique est signalée « sans recette » (jamais comptée comme réparée).
    Usage : node tests/ui/gui-sweep-win.js [préfixe-de-panne…]    (variable DIST pour changer le build) */
 const { chromium } = require('playwright');
-const DIST = process.env.DIST || 'file:///home/claude/game/dist/EDIVN-Lab.html';
+const DIST = process.env.DIST || require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy';
 const SEEDS = ['7', '11', '29', '101', '4242', '9', '15', '77'];
 const FAM = /^(ad|gpo|dhcp|dns|iis|sh|fw|nic|ipv4|web)_/;
 
@@ -109,7 +109,7 @@ const FAM = /^(ad|gpo|dhcp|dns|iis|sh|fw|nic|ipv4|web)_/;
         nRec++; if (BREAK && it.id === BREAK) continue;
         await rec.run(st); await closeAll();
       }
-    } catch (e) { await p.screenshot({ path: '/tmp/gs-' + it.id + '.png' }).catch(() => { }); err = e.message.split('\n').slice(0, 4).join(' ¦ ').slice(0, 420); }
+    } catch (e) { await p.screenshot({ path: require('os').tmpdir() + '/gs-' + it.id + '.png' }).catch(() => { }); err = e.message.split('\n').slice(0, 4).join(' ¦ ').slice(0, 420); }
     if (PEN && it.id === PEN) await p.evaluate(() => { SIM.win.setSvc(SIM_APP.run.W, 'PC-ADM', 'NlaSvc', 'stopped'); SIM_APP.run.m.act({ kind: 'ui', dev: 'PC-ADM', text: 'arrêt de service injecté par le crochet de neutralisation', mutates: true, impact: 'svc-stop' }); });   /* crochet (tests/ui/gui-sweep-neutral.js) : un impact passe par la vraie mission, le balayage doit le voir. Depuis la règle « par le résultat » (30/10/2026) le service est RÉELLEMENT arrêté et reste arrêté : un tag sans changement d'état ne coûte plus rien */
     if (missing.length) missing.forEach(m => { noRecipe[m.replace(/\d+/g, 'N').slice(0, 80)] = (noRecipe[m.replace(/\d+/g, 'N').slice(0, 80)] || 0) + 1; });
     if (gap) { gaps.push(tag); process.stdout.write('g'); continue; }
@@ -117,7 +117,7 @@ const FAM = /^(ad|gpo|dhcp|dns|iis|sh|fw|nic|ipv4|web)_/;
     /* D-109 : un chemin de résolution déclaré ne coûte aucun malus de danger ni d'impact */
     const good = !err && !missing.length && ['fixed', 'resolved', 'workaround'].indexOf(st.status) >= 0 && st.status !== 'workaround' && !st.pen;
     if (!good && process.env.GS_DEBUG) console.log('\n[debug ' + tag + '] ' + JSON.stringify(await p.evaluate(e => (0, eval)(e), process.env.GS_DEBUG)).slice(0, 700));
-    if (!good && !err) await p.screenshot({ path: '/tmp/gs-' + it.id + '.png' }).catch(() => { });
+    if (!good && !err) await p.screenshot({ path: require('os').tmpdir() + '/gs-' + it.id + '.png' }).catch(() => { });
     if (good) okN++; else fails.push(tag + ' : ' + (err ? 'erreur ' + err : '') + (missing.length ? ' sans recette ' + missing.length : '') + (!err && !missing.length ? ' statut ' + st.status + ' ' + st.why : '') + (st.pen ? ' malus sur un chemin déclaré : ' + st.pen : ''));
     if (errs.length > e0) fails.push(tag + ' : erreurs de page ' + errs.slice(e0).join(' | ').slice(0, 200));
     process.stdout.write(good ? '.' : 'x'); if (n % 40 === 0) process.stdout.write(' ' + n + '/' + plan.length + '\n');

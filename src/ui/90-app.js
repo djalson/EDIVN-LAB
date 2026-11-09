@@ -6,7 +6,8 @@
 'use strict';
 const SIM = g.SIM, U = SIM.U, UI = SIM.ui, Game = SIM.game, h = UI.h;
 
-function App(root) { this.root = root; this.run = null; this.home(); }
+/* #legacy dans l'adresse : jeu d'origine (accueil ouvert sur le bac à sable, pas de fiche d'intervention). Sert aux tests d'interface antérieurs à la campagne. */
+function App(root) { this.root = root; this.run = null; this.legacy = /legacy/.test(String(g.location && g.location.hash)); this.home(); }
 UI.App = App;
 const P = App.prototype;
 
@@ -91,7 +92,9 @@ P.home = function () {
     h('section', h('h2', h('span.hn', '2'), 'Comment tu joues ?'), md),
     h('section', adv));
   const cta = h('div.hcta', sum, h('button.btn.primary.hgo', { on: { click: start } }, h('span', 'Prendre le ticket'), h('i.hgoa', '▶')));
-  const scr = h('div.screen.home', h('div.hwrap', hero, tuto, h('div.hcols', h('div.hleft', UI.prog.dailyCard(prof, self), main, cta), side), h('div.muted.hfoot', h('span', SIM.faults.length + ' pannes au catalogue · simulateur de pannes d’infrastructure, consoles et journaux fidèles aux systèmes réels · pixel-art et icônes originaux, aucune police ni capture d’éditeur tiers.'), catCount), floor));
+  /* trois entrées : Campagne (mise en avant), Astreinte, Bac à sable (le jeu d'origine, tout ouvert) */
+  const left = UI.camp.homeLeft(self, prof, { sandbox: [main, cta], daily: () => UI.prog.dailyCard(prof, self) });
+  const scr = h('div.screen.home', h('div.hwrap', hero, tuto, h('div.hcols', left, side), h('div.muted.hfoot', h('span', SIM.faults.length + ' pannes au catalogue · simulateur de pannes d’infrastructure, consoles et journaux fidèles aux systèmes réels · pixel-art et icônes originaux, aucune police ni capture d’éditeur tiers.'), catCount), floor));
   root.append(scr);
 };
 
@@ -154,6 +157,7 @@ P.scenarioModal = function () {
 /* ------------------------------------------------------------------ partie */
 P.begin = function (opts) {
   let run;
+  if (opts.report === undefined) opts = Object.assign({ report: !this.legacy }, opts);
   try { run = new UI.Run(opts); } catch (e) { UI.modal('Impossible de préparer l’incident', h('p', String(e.message)), [{ label: 'Retour', primary: true }]); if (typeof console !== 'undefined') console.error(e); return; }
   if (this.run && this.run !== run) { try { this.run.stop(); } catch (e) { /* l'ancienne partie est abandonnée */ } }   // pas de minuteurs ni de surfaces orphelins en cas de « Rejouer »
   this.run = run; const m = run.m; const self = this;
@@ -162,9 +166,9 @@ P.begin = function (opts) {
   const btnHint = h('button.btn.small', { on: { click: () => self.hint() } }, 'Indice');
   const btnClose = h('button.btn.small.primary', { on: { click: () => self.closeTicket() } }, 'Clôturer le ticket');
   const btnGive = h('button.btn.small.danger', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
-  const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
+  const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
   const t = m.fault.ticket;
-  const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', t.body), m.parts.filter(x => x.verifyText).map(x => h('div.verif', h('b', 'Pour clôturer : '), x.verifyText)), UI.prog.goalsBox(run));
+  const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', t.body), UI.camp.verifBox(m), UI.prog.goalsBox(run));
   const hintsBox = h('div'); const guide = h('div'); const log = h('div.actlog');
   const guideCard = m.mode.steps ? h('div.card', h('h3', 'Assistant pas à pas'), guide) : null;
   const side = h('div.side', ticket, guideCard, h('div.card', h('h3', 'Indices'), hintsBox), h('div.card', h('h3', 'Journal de vos actions'), log));
@@ -172,7 +176,7 @@ P.begin = function (opts) {
   const stage = h('div.stage', tabs, view);
   root.append(bar, h('div.main', side, stage));
   /* onglets */
-  const siteIds = ['toulouse', 'bordeaux', 'ramonville', 'labege', 'colomiers', 'exterieur'];
+  const siteIds = ['toulouse', 'bordeaux', 'ramonville', 'labege', 'colomiers', 'exterieur'].filter(s => !run.scope || run.scope.sites.indexOf(s) >= 0);
   const mv = new UI.MapView(run, (id, what) => openDev(id, what));
   const open = []; let current = null;
   const tabEls = {};
@@ -231,11 +235,12 @@ P.begin = function (opts) {
     if (!steps.length) guide.append(h('div.muted', 'Pas de pas-à-pas pour cette panne.'));
   };
   run.on('act', () => drawLog()); drawLog(); drawGuide();
+  run.on('report', (mm, spec) => UI.camp.reportModal(self, run, spec));
   run.on('end', (mm, rec) => self.debrief(mm, rec));
   this.drawHints = () => { UI.clear(hintsBox); if (m.mode.noHints) hintsBox.append(h('div.muted', 'Indices désactivés en évaluation chronométrée.')); else if (!m.hintLog.length) hintsBox.append(h('div.muted', m.mode.hintsFree ? 'Indices gratuits en mode guidé.' : 'Chaque indice coûte des points sur 100 (' + Game.HINT_COST.map(c => '−' + c).join(' / ') + ').')); m.hintLog.forEach(x => hintsBox.append(h('div.hintbox', h('b', 'Indice ' + x.n + ' — '), x.text))); btnHint.disabled = !!m.mode.noHints || m.hintsUsed >= 3; };
   this.drawHints();
   /* site de départ */
-  const ts = t.site; firstSite = Array.isArray(ts) ? ts[0] : ts; if (!UI.SITES[firstSite]) firstSite = 'toulouse';
+  const ts = t.site; firstSite = Array.isArray(ts) ? ts[0] : ts; if (!UI.SITES[firstSite] || siteIds.indexOf(firstSite) < 0) firstSite = siteIds[0];
   const siteOf = x => x;
   select('site:' + firstSite);
   /* bandeau d'accueil du ticket */
@@ -272,7 +277,9 @@ P.debrief = function (m, rec) {
       h('div.card.dnote' + (r.passed ? '.ok' : '.ko'), h('h3', 'Note'), h('div.stars', { style: { fontSize: '22px' }, 'aria-label': (r.stars || 0) + ' étoile(s) sur 3' }, UI.stars(r.stars || 0)), h('div', { style: { fontSize: '30px', fontWeight: 800 } }, r.total, h('small.muted', ' / 100'), ' ', h('span.tag' + (r.passed ? '.ok' : '.bad'), r.tier)), h('div.muted', r.passed ? 'Validé (seuil ' + Game.PASS + ')' : 'Seuil de validation : ' + Game.PASS + ' / 100'), h('div.muted', r.ranked ? 'Partie classée' : 'Mode guidé : non classé')),
       h('div.card', h('h3', 'Temps de résolution (MTTR)'), h('div', { style: { fontSize: '26px', fontWeight: 700 } }, UI.fmtDur(d.mttrSec)), h('div.muted', 'Temps cible ' + UI.fmtDur(d.parSec) + (d.firstFixedSec !== null ? ' — correction effective à ' + UI.fmtDur(d.firstFixedSec) : ''))),
       h('div.card', h('h3', 'Démarche'), h('div', d.path.actions + ' actions, ' + d.path.counters.change + ' modifications'), h('div.muted', d.path.counters.progress + ' progrès, ' + d.path.counters.detour + ' sans effet, ' + d.path.counters.regress + ' reculs'), h('div.muted', d.hints.length + ' indice(s), ' + d.wrongCloses + ' clôture(s) refusée(s)'))),
+    UI.camp.debriefCamp(self, rec && rec.camp),
     UI.prog.debriefPanel(rec && rec.prog),
+    UI.camp.debriefReport(r.report),
     h('h2', 'Cause racine et correction'),
     h('div.card', d.fault.parts.length > 1 ? d.fault.parts.map((p, i) => h('div', { style: { marginBottom: '8px' } }, h('b', (i + 1) + '. ' + p.title), h('div', p.cause), h('div.muted', 'Correction : ' + p.solution))) : [h('div', d.fault.cause), h('div.muted', { style: { marginTop: '4px' } }, 'Correction : ' + d.fault.solution)]),
     d.closeRefusals && d.closeRefusals.length ? [h('h2', 'Pourquoi la clôture a été refusée'), h('div.card', [...new Set(d.closeRefusals.map(x => x.note))].map(x => h('div', x)))] : null,
@@ -287,12 +294,13 @@ P.debrief = function (m, rec) {
     d.review.length ? [h('h2', 'Notions à revoir'), h('div.card', d.review.map(x => h('div', '• ', h('b', x.label), ' : ', x.why.join(' ; '))))] : null,
     r.passed ? null : self.courseLinks(d),
     h('h2', 'Barème'),
-    h('div.card', h('table.tbl', h('tbody', h('tr', h('td', 'Départ'), h('td', { style: { textAlign: 'right' } }, sc.start)), line('Panne non résolue (plafond)', sc.unsolved), line('Pénalité de durée (temps cible ' + UI.fmtDur(d.parSec) + ')', sc.time), line('Indices', sc.hints), line('Actions dangereuses', sc.danger), line('Actions à impact', sc.impact), line('Clôtures prématurées', sc.wrongClose), line('Contournement pris pour une résolution', sc.falseRes), h('tr', h('td', h('b', 'Note')), h('td', { style: { textAlign: 'right' } }, h('b', r.total + ' / 100'))))), h('small.muted', 'Validé à partir de ' + Game.PASS + '. La durée seule ne peut pas faire passer sous ' + Game.PASS + ' une résolution propre (sans indice, sans action dangereuse, sans clôture prématurée).')),
+    h('div.card', h('table.tbl', h('tbody', h('tr', h('td', 'Départ'), h('td', { style: { textAlign: 'right' } }, sc.start)), line('Panne non résolue (plafond)', sc.unsolved), line('Pénalité de durée (temps cible ' + UI.fmtDur(d.parSec) + ')', sc.time), line('Indices', sc.hints), line('Actions dangereuses', sc.danger), line('Actions à impact', sc.impact), line('Clôtures prématurées', sc.wrongClose), line('Contournement pris pour une résolution', sc.falseRes), line('Fiche d’intervention (cause ou correction mal identifiée)', sc.report), h('tr', h('td', h('b', 'Note')), h('td', { style: { textAlign: 'right' } }, h('b', r.total + ' / 100'))))), h('small.muted', 'Validé à partir de ' + Game.PASS + '. La durée seule ne peut pas faire passer sous ' + Game.PASS + ' une résolution propre (sans indice, sans action dangereuse, sans clôture prématurée).')),
     h('h2', 'Historique complet des actions'),
     h('div.card', { style: { maxHeight: '260px', overflow: 'auto' } }, tl.length ? h('table.tbl', h('tbody', tl.map(x => h('tr', h('td.muted', UI.fmtDur(x.t)), h('td', x.dev || ''), h('td', x.text || ''), h('td', cls(x.cls)))))) : h('div.muted', 'Aucune action enregistrée.')),
     h('div.row', { style: { margin: '20px 0 40px' } },
-      h('button.btn.primary', { on: { click: () => self.begin({ daily: m.daily, level: m.lv.level, mode: m.mode.id, seed: m.seed, faultId: m.fault.bundle ? undefined : m.fault.id, skill: m.opts.skill, parts: m.opts.parts, chain: m.opts.chain }) } }, 'Rejouer cet incident'),
-      h('button.btn', { on: { click: () => { self.lastSeed = ''; self.home(); } } }, 'Nouveau ticket'),
+      UI.camp.debriefNext(self, m, rec && rec.camp),
+      h('button.btn' + (m.camp ? '' : '.primary'), { on: { click: () => m.camp ? self.begin(Object.assign({}, self.run.opts)) : self.begin({ daily: m.daily, level: m.lv.level, mode: m.mode.id, seed: m.seed, faultId: m.fault.bundle ? undefined : m.fault.id, skill: m.opts.skill, parts: m.opts.parts, chain: m.opts.chain }) } }, 'Rejouer cet incident'),
+      h('button.btn', { on: { click: () => { self.lastSeed = ''; self.home(); } } }, m.camp ? 'Retour à l’accueil' : 'Nouveau ticket'),
       h('button.btn', { on: { click: () => self.exportTrace(m, d) } }, 'Exporter la trace (JSON)')));
   root.append(scr);
   if (r.perfect) UI.themes.celebrate(UI.themes.saved(), r.total);

@@ -157,7 +157,10 @@ function Mission(o) {
   this.seed = String(o.seed); this.lv = Game.levelOf(o.level); this.opts = { skill: o.skill, parts: o.parts, chain: o.chain }; this.mode = Game.modeOf(o.mode || 'free');
   this.W = SIM.buildHealthyWorld({ seed: this.seed }); this.base = this.W.sem();
   const prof = o.profile || Game.profile();
-  if (o.faultId) this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, faultId: o.faultId }), this.seed);
+  /* campagne : chapitre, examen, révision (src/engine/83-campaign.js) ; o.bundle : assemblage imposé (examen de chapitre) */
+  this.camp = o.camp ? Object.assign({}, o.camp) : null;
+  if (o.bundle) this.fault = F.bundle(o.bundle.seed || this.seed, o.bundle);
+  else if (o.faultId) this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, faultId: o.faultId }), this.seed);
   else if (this.lv.faults > 1) {
     /* Admin = 2 pannes, Cyber = 3, Chaos = 4 (ou o.parts) : assemblage validé par simulation, natures différentes, rejet des paires incompatibles. */
     const spec = { count: o.parts || this.lv.faults, mode: o.chain === false ? 'indep' : 'auto' };
@@ -330,9 +333,11 @@ Game.record = function (m, profile) {
   const entry = { at: Date.now(), seed: m.seed, level: m.lv.level, mode: m.mode.id, id: m.fault.id, kind: r.kind, total: r.total, mttr: r.mttrSec, stars: r.stars, perfect: !!r.perfect, skills: m.fault.skills };
   p.history.push(entry); if (p.history.length > 200) p.history.shift();
   m.parts.forEach(pt => { const d = p.done[pt.id] || { count: 0, best: 0 }; d.count++; d.best = Math.max(d.best, r.total); p.done[pt.id] = d; });
-  (m.fault.skills || []).forEach(s => { const k = p.skills[s] || { ok: 0, ko: 0 }; if (r.passed && !m.hintLog.length && !m.dangers.length) k.ok++; else k.ko++; p.skills[s] = k; });
+  (m.fault.skills || []).forEach(s => { const k = p.skills[s] || { ok: 0, ko: 0 }; if (r.passed && !m.hintLog.length && !m.dangers.length && !(r.report && !r.report.causeOk)) k.ok++; else k.ko++; p.skills[s] = k; });
   if (r.ranked) { const key = 'l' + m.lv.level; p.best[key] = Math.max(p.best[key] || 0, r.total); }
+  /* campagne et révision espacée : avant le calcul de l'XP (l'examen réussi pour la première fois rapporte un bonus) */
+  const camp = SIM.camp ? SIM.camp.record(p, m, r) : null;
   const prog = P.apply(p, m, r, prev, pre, lvBefore, stBefore);
-  Game.saveProfile(p); return { profile: p, newBadges: prog.newBadges, prog };
+  Game.saveProfile(p); return { profile: p, newBadges: prog.newBadges, prog, camp };
 };
 })(typeof globalThis !== 'undefined' ? globalThis : window);

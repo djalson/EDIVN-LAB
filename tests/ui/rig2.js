@@ -1,5 +1,5 @@
 /* Test E2E : pannes de couche 1 réparées uniquement par la vue physique, puis vérifiées depuis le poste. */
-const T = require('/home/claude/game/tests/ui/lib.js');
+const T = require('./lib.js');
 const st = (t) => t.p.evaluate(() => JSON.stringify(SIM_APP.run.m.parts.map(x => x.rt && x.rt.status)));
 const menuClick = async (p, label) => { await p.click('.ctx .ctxi:has-text("' + label + '")'); await p.waitForTimeout(250); };
 const CASES = {

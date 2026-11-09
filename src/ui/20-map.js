@@ -66,26 +66,39 @@ UI.MapView = MapView;
 MapView.prototype.siteView = function (id) {
   if (this.views[id]) return this.views[id];
   const S = SITES[id]; const run = this.run; const self = this;
-  const map = h('div.map'); const inner = h('div.mapin', { style: { width: S.w + 'px', height: S.h + 'px' } });
+  const map = h('div.map'); const inner = h('div.mapin');
   const pos = {};
-  S.zones.forEach(z => inner.append(h('div.zone', { style: { left: z.x + 'px', top: z.y + 'px', width: z.w + 'px', height: z.h + 'px' } }, z.t)));
-  const svgNS = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('class', 'links'); svg.setAttribute('width', S.w); svg.setAttribute('height', S.h);
+  /* campagne : seuls les équipements du périmètre sont dessinés ; une zone vide n'est pas tracée */
+  const scope = run.scope ? run.scope.devs : null; const vis = nid => !scope || scope.indexOf(nid) >= 0;
+  const inZone = z => S.nodes.some(([nid, x, y]) => vis(nid) && x + 56 >= z.x && x + 56 <= z.x + z.w && y + 26 >= z.y && y + 26 <= z.y + z.h);
+  /* cadrage : en campagne la carte se resserre sur ce qui est visible (ox, oy : décalage ; MW, MH : taille utile) */
+  let ox = 0, oy = 0, MW = S.w, MH = S.h;
+  if (scope) {
+    const zs = S.zones.filter(inZone), ns = S.nodes.filter(n => vis(n[0])); const pad = 30;
+    const x0 = Math.min.apply(null, zs.map(z => z.x).concat(ns.map(n => n[1]))), y0 = Math.min.apply(null, zs.map(z => z.y).concat(ns.map(n => n[2])));
+    const x1 = Math.max.apply(null, zs.map(z => z.x + z.w).concat(ns.map(n => n[1] + 130))), y1 = Math.max.apply(null, zs.map(z => z.y + z.h).concat(ns.map(n => n[2] + 90)));
+    if (isFinite(x0) && isFinite(y0)) { ox = x0 - pad; oy = y0 - pad; MW = Math.max(520, x1 - x0 + 2 * pad); MH = Math.max(300, y1 - y0 + 2 * pad); }
+  }
+  inner.style.width = MW + 'px'; inner.style.height = MH + 'px';
+  S.zones.filter(z => !scope || inZone(z)).forEach(z => inner.append(h('div.zone', { style: { left: (z.x - ox) + 'px', top: (z.y - oy) + 'px', width: z.w + 'px', height: z.h + 'px' } }, z.t)));
+  const svgNS = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('class', 'links'); svg.setAttribute('width', MW); svg.setAttribute('height', MH);
   inner.append(svg);
-  S.nodes.forEach(([nid, x, y, type, sub]) => {
-    pos[nid] = { x: x + 56, y: y + 26 };
+  S.nodes.filter(n => vis(n[0])).forEach(([nid, x, y, type, sub]) => {
+    x -= ox; y -= oy; pos[nid] = { x: x + 56, y: y + 26 };
     const dev = run.W.dev[nid];
     const label = type === 'patch' ? 'Baie de brassage' : nid;
     const ic = h('div.ic', UI.icon(TYPE_ICON[type], 36));
     const n = h('div.node', { style: { left: x + 'px', top: y + 'px' }, title: label, on: { click: ev => { ev.stopPropagation(); self.popup(nid, type, n, inner, sub); } } }, ic, h('div.nm', label), h('div.sub', sub));
     inner.append(n);
   });
-  S.links.forEach(([a, b]) => {
+  S.links.filter(([a, b]) => pos[a] && pos[b]).forEach(([a, b]) => {
     const l = document.createElementNS(svgNS, 'line'); l.setAttribute('x1', pos[a].x); l.setAttribute('y1', pos[a].y); l.setAttribute('x2', pos[b].x); l.setAttribute('y2', pos[b].y);
     l.setAttribute('stroke', '#4a6286'); l.setAttribute('stroke-width', '2'); svg.append(l);
   });
   map.append(inner); map.addEventListener('click', () => this.closePop());
+  if (scope) { const hidden = S.nodes.filter(n => !vis(n[0])).length; if (hidden) map.append(h('div.mapscope', UI.icon('network', 14), ' Chapitre ' + run.scope.n + ' : tu vois ton périmètre d’intervention. Le reste de l’infrastructure se dévoile au fil de la campagne.')); }
   /* mise à l'échelle : la carte tient toujours dans la zone visible (jamais de nœud rogné) */
-  const fit = () => { const w = map.clientWidth, hh = map.clientHeight; if (!w || !hh) return; const k = Math.min(1, w / S.w, hh / S.h); inner.style.transformOrigin = '0 0'; inner.style.transform = k < 1 ? 'scale(' + k + ')' : ''; };
+  const fit = () => { const w = map.clientWidth, hh = map.clientHeight; if (!w || !hh) return; const k = Math.min(1, w / MW, hh / MH); inner.style.transformOrigin = '0 0'; inner.style.transform = k < 1 ? 'scale(' + k + ')' : ''; if (scope) { inner.style.marginLeft = Math.max(0, Math.round((w - MW * k) / 2)) + 'px'; inner.style.marginTop = Math.max(0, Math.round(Math.min(60, (hh - MH * k) / 3))) + 'px'; } };
   if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fit).observe(map); setTimeout(fit, 0);
   this.views[id] = map; return map;
 };

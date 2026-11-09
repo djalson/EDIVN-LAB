@@ -163,6 +163,8 @@ P.xpFor = function (m, r, p, prev) {
   else if (ids.some(id => r.total > (prev.bests[id] || 0))) add('Record personnel battu', 20);
   if (clean(m)) add('Sans faute (aucun indice, aucune action risquée)', 20);
   if (r.mttrSec <= m.parSec * 0.5) add('Éclair (moins de la moitié du temps cible)', 20); else if (r.mttrSec <= m.parSec * 0.75) add('Rapide (moins de 75 % du temps cible)', 10);
+  if (r.report && r.report.allOk) add('Fiche d’intervention juste', 15);
+  if (m.camp && m.camp.examFirst) add('Examen de chapitre réussi', SIM.camp.EXAM_XP);
   const goals = P.goalResults(m, r); goals.filter(x => x.done).forEach(x => add('Objectif : ' + x.label, x.xp, 'goal'));
   let sub = parts.reduce((a, x) => a + x.xp, 0); const mult = [];
   const mul = (label, f) => { if (f !== 1) { mult.push({ label, f }); } };

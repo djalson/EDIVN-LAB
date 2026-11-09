@@ -11,7 +11,9 @@ const SIM = g.SIM, U = SIM.U, UI = SIM.ui, E = SIM.emu, Game = SIM.game;
 const TICK_SEC = 5;
 function Run(opts) {
   this.opts = opts; this.listeners = {};
-  this.m = Game.create({ level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, clock: () => Date.now() });
+  this.m = Game.create({ level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, clock: () => Date.now() });
+  /* campagne : périmètre affiché (équipements et sites du chapitre) ; null = toute l'infrastructure (bac à sable) */
+  this.scope = SIM.camp ? SIM.camp.missionScope(this.m) : null;
   this.W = this.m.W; this.surfaces = {}; this.ended = false; this.ticks = 0;
   this.id = 'INC-' + U.hash8('ticket|' + this.m.seed).slice(0, 6).toUpperCase();
   const self = this;
@@ -46,8 +48,17 @@ P.tick = function () {
   this.ticks++; SIM.sched.advance(this.W, TICK_SEC);
   this.W.touch('tick'); this.check();
 };
+/* Fin de partie. Ticket résolu : la fiche d'intervention est demandée AVANT l'enregistrement (elle entre dans la note) ;
+   l'interface répond par finalize(réponses). Sans fiche (abandon, temps écoulé, opts.report === false) : enregistrement direct. */
 P.finish = function () {
   if (this.ended) return; this.ended = true; clearInterval(this.tickTimer); clearInterval(this.clockTimer);
+  const spec = this.opts.report === false ? null : this.m.reportSpec();
+  if (spec && (this.listeners.report || []).length) { this.emit('report', this.m, spec); return; }
+  this.finalize();
+};
+P.finalize = function (answers) {
+  if (this.record) return;
+  if (answers) this.m.fileReport(answers);
   const rec = Game.record(this.m); this.record = rec; this.emit('end', this.m, rec);
 };
 P.stop = function () { this.ended = true; clearInterval(this.tickTimer); clearInterval(this.clockTimer); Object.keys(this.surfaces).forEach(k => { try { this.surfaces[k].destroy && this.surfaces[k].destroy(); } catch (e) { /* surface déjà détruite */ } }); };

@@ -2,11 +2,11 @@
    Les images sont écrites dans le dossier passé en argument (défaut /tmp/edivn-gallery). Ce script ne juge rien :
    il produit les images à regarder, et échoue seulement sur une erreur JS de page ou un élément absent. */
 const { chromium } = require('playwright'); const fs = require('fs');
-const OUT = process.argv[2] || '/tmp/edivn-gallery'; fs.mkdirSync(OUT, { recursive: true });
+const OUT = process.argv[2] || require('os').tmpdir() + '/edivn-gallery'; fs.mkdirSync(OUT, { recursive: true });
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } }); const errs = []; const miss = [];
   p.on('pageerror', e => errs.push('PAGEERR ' + e.message)); p.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE ' + m.text()); });
-  await p.goto('file:///home/claude/game/dist/EDIVN-Lab.html'); await p.waitForFunction(() => window.SIM_APP); await p.waitForTimeout(500);
+  await p.goto(require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy'); await p.waitForFunction(() => window.SIM_APP); await p.waitForTimeout(500);
   const shot = async (n) => { await p.waitForTimeout(350); await p.screenshot({ path: OUT + '/' + n + '.png' }); console.log('→ ' + n); };
   await shot('01-accueil');
   const begin = (o) => p.evaluate(o => { SIM_APP.begin(o); }, o);

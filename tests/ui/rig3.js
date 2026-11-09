@@ -1,4 +1,4 @@
-const T = require('/home/claude/game/tests/ui/lib.js');
+const T = require('./lib.js');
 (async () => {
   const t = await T.start({ fault: 'dhcp_conflict', dev: 'PC-01', seed: '7' }); const p = t.p;
   await p.evaluate(() => SIM_APP.openDev('SW-T2', 'rig')); await p.waitForTimeout(700); await t.shot('rig3_sw');

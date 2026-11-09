@@ -5,8 +5,8 @@ const W = +(process.argv[2] || 1440), H = +(process.argv[3] || 900);
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: W, height: H } }); const errs = [];
   p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   let ok = true; const chk = (n, c) => { console.log((c ? '✓ ' : '✗ ') + n); if (!c) ok = false; };
-  await p.goto('file:///home/claude/game/dist/EDIVN-Lab.html'); await p.waitForFunction(() => window.SIM_APP); await p.waitForTimeout(300);
-  await p.screenshot({ path: '/tmp/home_new.png' });
+  await p.goto(require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy'); await p.waitForFunction(() => window.SIM_APP); await p.waitForTimeout(300);
+  await p.screenshot({ path: require('os').tmpdir() + '/home_new.png' });
   chk('bannière tutoriel à la première visite', !!(await p.$('.htuto')));
   chk('5 niveaux et 3 modes', (await p.$$('.hlv')).length === 5 && (await p.$$('.hmd')).length === 3);
   const b0 = await p.innerText('.hbubble'); await p.click('.hcat'); await p.click('.hcat');
@@ -17,7 +17,7 @@ const W = +(process.argv[2] || 1440), H = +(process.argv[3] || 900);
   await p.click('.hlv:nth-child(3)'); chk('sélection niveau met à jour le récap', (await p.innerText('.hsum')).includes('Admin'));
   await p.click('.hgo'); await p.waitForTimeout(200);
   chk('proposition du tutoriel au premier lancement', (await p.innerText('.modal')).includes('Première partie'));
-  await p.screenshot({ path: '/tmp/home_prop.png' });
+  await p.screenshot({ path: require('os').tmpdir() + '/home_prop.png' });
   await p.click('.modal button:has-text("Lancer le tutoriel")'); await p.waitForTimeout(1200);
   chk('partie de tutoriel démarrée', await p.evaluate(() => SIM_APP.run && SIM_APP.run.m.fault.id === 'phys_eth'));
   chk('carte du tutoriel visible', !!(await p.$('.tcard')));
@@ -25,7 +25,7 @@ const W = +(process.argv[2] || 1440), H = +(process.argv[3] || 900);
   for (let guard = 0; guard < 30; guard++) {
     const kick = await p.innerText('.tcard .tkick').catch(() => ''); if (!kick) break;
     const num = +kick.match(/(\d+) \//)[1];
-    if (shots < 14) await p.screenshot({ path: '/tmp/tour' + String(num).padStart(2, '0') + '.png' }); shots++;
+    if (shots < 14) await p.screenshot({ path: require('os').tmpdir() + '/tour' + String(num).padStart(2, '0') + '.png' }); shots++;
     const title = await p.innerText('.tcard h3');
     if (title === 'Choisis une machine') { const host = await p.evaluate(() => ((SIM_APP.run.m.parts[0].vars || {}).c || {}).host); await p.click('.node[title="' + host + '"]'); await p.waitForTimeout(700); n++; continue; }
     if (title === 'Écran ou poste physique') { await p.click('.pop .btn >> nth=0'); await p.waitForTimeout(1200); n++; continue; }
@@ -34,7 +34,7 @@ const W = +(process.argv[2] || 1440), H = +(process.argv[3] || 900);
   chk('parcours complet jusqu\'à la fin', !(await p.$('.tcard')) && n >= 12);
   chk('tutoriel marqué comme fait', await p.evaluate(() => !!SIM.game.profile().tourDone));
   chk('on reste dans la partie après le tutoriel', await p.evaluate(() => !!SIM_APP.run));
-  await p.screenshot({ path: '/tmp/tour_end.png' });
+  await p.screenshot({ path: require('os').tmpdir() + '/tour_end.png' });
   await p.click('button:has-text("Abandonner")'); await p.waitForTimeout(200); await p.click('.modal button:has-text("Abandonner")'); await p.waitForTimeout(1200);
   await p.evaluate(() => SIM_APP.home()); await p.waitForTimeout(300);
   chk('plus de bannière après le tutoriel', !(await p.$('.htuto')));

@@ -15,6 +15,9 @@ const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
 const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
+/* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
+const FAST = process.argv.includes('--fast');
+const FASTSET = /^(assert-world|regress |game$|progress |campaign|report |lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -36,6 +39,8 @@ t('Moteur', 'build-guard (livrable autonome : toute ressource externe arrête la
 t('Moteur', 'faults', ['tests/faults.js'], { expect: /179\/179 pannes valides, 0 erreur/ });
 t('Moteur', 'validate', ['tests/validate.js'], { expect: /double import refusé/ });
 t('Moteur', 'game', ['tests/game.js'], { expect: /OK/ });
+t('Moteur', 'campaign (chapitres, périmètre, tirage, examen, déblocage, révision espacée ; campagne jouée en entier)', ['tests/campaign.js'], { timeout: 600, expect: /, 0 échec/ });
+t('Moteur', 'report (fiche d’intervention : une fiche bien formée par panne, barème, plancher au seuil, mode guidé)', ['tests/report.js'], { timeout: 600, expect: /, 0 échec/ });
 t('Moteur', 'scoring (note /100, seuil 75, étoiles, temps cible par panne, niveaux 1/1/2/3/4 pannes)', ['tests/scoring.js'], { timeout: 600, expect: /^OK$/m });
 t('Moteur', 'combo (pannes composées + niveaux Admin 2 / Cyber 3 / Chaos 4)', ['tests/combo.js', '16'], { timeout: 900, expect: /0 échec/ });
 t('Moteur', 'course-links (liens de révision : table statique, hôte fixe)', ['tests/course-links.js'], { expect: /^OK$/m });
@@ -72,6 +77,7 @@ t('Réparation graphique', 'gui-sweep-neutral (neutralisation : recette non jou�
 t('Réparation graphique', 'gestion-app (D-103 : application de gestion de SRV-FIC, un parcours par cause + neutralisation)', ['tests/ui/gestion-app.js'], { timeout: 900, expect: /0 échec/ });
 t('Réparation graphique', 'gui-sweep-win (pannes Windows / AD / GPO / DHCP / DNS / IIS / partages × variantes réparées par clics dans les vraies consoles)', ['tests/ui/gui-sweep-win.js'], { timeout: 2400, expect: /, 0 à reprendre,/ });
 t('Interface', 'home-tour', ['tests/ui/home-tour.js']);
+t('Interface', 'campaign-ui (accueil à trois entrées, chantier, carte du périmètre, fiche d’intervention, examen, déblocage, #legacy)', ['tests/ui/campaign.js'], { timeout: 300, expect: /^OK campagne$/m });
 t('Interface', 'themes-debrief (accueil, 8 thèmes, animations du 100, débrief, liens de cours)', ['tests/ui/themes-debrief.js'], { timeout: 300, expect: /^OK$/m });
 t('Interface', 'scenario-import', ['tests/ui/scenario-import.js']);
 t('Interface', 'dhcp-auth', ['tests/ui/dhcp-auth.js']);
@@ -100,7 +106,7 @@ if (!QUICK) {
 }
 
 /* --- exécution --- */
-const sel = T.filter(x => !ONLY || (x.group + ' ' + x.name).toLowerCase().includes(ONLY.toLowerCase()));
+const sel = T.filter(x => (!ONLY || (x.group + ' ' + x.name).toLowerCase().includes(ONLY.toLowerCase())) && (!FAST || FASTSET.test(x.name)));
 console.log('Construction…');
 const b = spawnSync('node', ['build.js'], { cwd: ROOT, encoding: 'utf8' });
 if (b.status !== 0) { console.error(b.stdout + b.stderr); process.exit(2); }
@@ -134,6 +140,6 @@ Object.keys(groups).forEach(g => {
   groups[g].forEach(r => { md += '| `' + r.x.name + '` | ' + (r.ok ? 'OK' : '**ÉCHEC** — ' + r.why.join(' ; ').replace(/\|/g, '/')) + ' | ' + r.sec + ' s |\n'; });
 });
 md += '\n## Ce que la batterie ne couvre pas\n\n- Le test « singe » est aléatoire (graines fixes, donc rejouable) : il détecte les erreurs JS, pas les incohérences de contenu.\n- Les sorties de commandes et Event ID marqués « à vérifier » (`docs/A-VERIFIER.md`) ne peuvent pas être validés automatiquement : ils attendent des captures de référence.\n- Aucun test de rendu pixel : la fidélité visuelle se juge à l’œil face aux captures.\n';
-fs.writeFileSync(path.join(ROOT, 'docs', 'RAPPORT-TESTS.md'), md);
-console.log('\n' + nOK + '/' + res.length + ' OK' + (nKO ? ' — ' + nKO + ' ÉCHEC(S)' : '') + ' en ' + dur + ' s → docs/RAPPORT-TESTS.md');
+if (!FAST && !ONLY) fs.writeFileSync(path.join(ROOT, 'docs', 'RAPPORT-TESTS.md'), md);   /* un passage partiel n'écrase pas le rapport de référence */
+console.log('\n' + nOK + '/' + res.length + ' OK' + (nKO ? ' — ' + nKO + ' ÉCHEC(S)' : '') + ' en ' + dur + ' s' + (FAST || ONLY ? '' : ' → docs/RAPPORT-TESTS.md'));
 process.exit(nKO ? 1 : 0);

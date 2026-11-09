@@ -3,7 +3,7 @@ const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } }); const errs = [];
   p.on('pageerror', e => errs.push('PAGEERR ' + e.message)); p.on('console', m => { if (m.type() === 'error') errs.push('CONSOLE ' + m.text()); });
-  await p.goto('file:///home/claude/game/dist/EDIVN-Lab.html'); await p.waitForFunction(() => window.SIM_APP);
+  await p.goto(require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy'); await p.waitForFunction(() => window.SIM_APP);
   for (const fault of (process.argv.slice(2).length ? process.argv.slice(2) : ['phys_eth', 'ad_locked', 'c_vlan_port'])) {
     await p.evaluate(f => SIM_APP.begin({ level: 1, mode: 'free', seed: '7', faultId: f }), fault); await p.waitForTimeout(300);
     const ids = await p.evaluate(() => Object.keys(SIM_APP.run.W.dev));

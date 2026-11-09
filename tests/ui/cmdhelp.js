@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } }); const errs = [];
   p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   let ok = true; const chk = (n, c) => { console.log((c ? '✓ ' : '✗ ') + n); if (!c) ok = false; };
-  await p.goto('file://' + (process.env.DIST || '/home/claude/game/dist/EDIVN-Lab.html')); await p.waitForFunction(() => window.SIM_APP); await p.waitForTimeout(300);
+  await p.goto((process.env.DIST ? 'file://' + process.env.DIST : require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy')); await p.waitForFunction(() => window.SIM_APP); await p.waitForTimeout(300);
   await p.evaluate(() => { SIM_APP.begin({ level: 1, mode: 'free', seed: '7', faultId: 'dhcp_scope_off' }); SIM_APP.openDev('PC-ADM', 'main'); }); await p.waitForTimeout(800);
   const bad = async () => /\bnull\b|undefined|NaN/.test(await p.innerText('.modal'));
   const bufOf = sel => p.evaluate(s => { const els = [...document.querySelectorAll('.term')]; return els.map(e => e.innerText).join('\n'); }, sel);

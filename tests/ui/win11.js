@@ -1,4 +1,4 @@
-const T = require('/home/claude/game/tests/ui/lib.js');
+const T = require('./lib.js');
 (async () => {
   const t = await T.start({ fault: process.argv[2] || 'dhcp_svc', dev: 'SRV-DC1', user: 'TOULOUSE\\Administrateur', pwd: 'Adm!n2026' }); const p = t.p;
   await p.waitForTimeout(1500); await t.shot('win11a');

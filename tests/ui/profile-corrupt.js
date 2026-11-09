@@ -13,7 +13,7 @@ const BAD = [
     const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const p = await ctx.newPage();
     p.on('pageerror', e => errs.push('PAGEERR ' + e.message)); p.on('dialog', d => { fails.push('boîte de dialogue JS inattendue : ' + d.message()); d.dismiss(); });
     await p.addInitScript(r => { try { localStorage.setItem('edivn.profile', r); localStorage.setItem('edivn.scenarios', r); } catch (e) { /* ignoré */ } }, raw);
-    await p.goto('file:///home/claude/game/dist/EDIVN-Lab.html'); await p.waitForFunction(() => window.SIM_APP, null, { timeout: 5000 }).catch(() => fails.push('SIM_APP absent pour ' + raw.slice(0, 40)));
+    await p.goto(require('url').pathToFileURL(require('path').join(__dirname, '..', '..', 'dist', 'EDIVN-Lab.html')).href + '#legacy'); await p.waitForFunction(() => window.SIM_APP, null, { timeout: 5000 }).catch(() => fails.push('SIM_APP absent pour ' + raw.slice(0, 40)));
     await p.waitForTimeout(400);
     const home = await p.evaluate(() => /Niveau de difficulté/i.test(document.body.innerText) || /Prendre le ticket/i.test(document.body.innerText));
     if (!home) fails.push('accueil absent pour le profil ' + raw.slice(0, 50));
