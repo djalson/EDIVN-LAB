@@ -1,0 +1,6 @@
+# Configuration de simulateur, non validée sur un Snort ni un pfSense réels.
+# Produit par le simulateur EDIVN Lab, pfsense-tls, instance Snort sur l’interface WAN (WAN).
+# Contenu de custom.rules tel que le simulateur le détient ; aucune règle ajoutée.
+
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP depuis Internet vers le pare-feu"; itype:8; classtype:icmp-event; sid:1000001; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET 22 (msg:"Tentative de connexion SSH depuis Internet"; flags:S; classtype:attempted-admin; sid:1000002; rev:1;)

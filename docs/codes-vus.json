@@ -1,0 +1,135 @@
+{
+ "evt:Microsoft-Windows-GroupPolicy:1502": {
+  "n": 1416,
+  "ctx": [
+   "journal"
+  ],
+  "kind": "evt"
+ },
+ "ios:%EC-5-BUNDLE": {
+  "n": 82,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%EC-5-CANNOT_BUNDLE2": {
+  "n": 22,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%EC-5-UNBUNDLE": {
+  "n": 87,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%LINEPROTO-5-UPDOWN": {
+  "n": 96,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%LINK-3-UPDOWN": {
+  "n": 95,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%LINK-5-CHANGED": {
+  "n": 17,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%OSPF-4-DUP_RTRID_NBR": {
+  "n": 10,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%OSPF-5-ADJCHG": {
+  "n": 90,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%SPANTREE-5-ROOTCHANGE": {
+  "n": 135,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%SSH-5-ENABLED": {
+  "n": 5,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "ios:%SYS-5-CONFIG_I": {
+  "n": 373,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "ios"
+ },
+ "name:DNS_ERROR_RCODE_NAME_ERROR": {
+  "n": 1,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "name"
+ },
+ "name:ERR_CERT_AUTHORITY_INVALID": {
+  "n": 164,
+  "ctx": [
+   "trace"
+  ],
+  "kind": "name"
+ },
+ "name:ERR_CERT_DATE_INVALID": {
+  "n": 2,
+  "ctx": [
+   "trace"
+  ],
+  "kind": "name"
+ },
+ "name:NET::ERR_CERT_AUTHORITY_INVALID": {
+  "n": 164,
+  "ctx": [
+   "navigateur"
+  ],
+  "kind": "name"
+ },
+ "name:NET::ERR_CERT_DATE_INVALID": {
+  "n": 2,
+  "ctx": [
+   "navigateur"
+  ],
+  "kind": "name"
+ },
+ "sql:ERROR 1064 (42000)": {
+  "n": 1,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "sql"
+ },
+ "sql:ERROR 1396 (HY000)": {
+  "n": 4,
+  "ctx": [
+   "terminal"
+  ],
+  "kind": "sql"
+ }
+}

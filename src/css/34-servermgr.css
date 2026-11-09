@@ -1,0 +1,22 @@
+/* Gestionnaire de serveur (aspect original) */
+.smgr .wbody { background: #f2f2f2; color: #1b1b1b; }
+.smwrap { display: flex; height: 100%; }
+.smnav { width: 190px; background: #263340; color: #e8eef5; padding: 8px 0; flex: 0 0 auto; }
+.smni { padding: 8px 14px; display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.smni:hover { background: #34475a; } .smni.on { background: #0a64c8; } .smni.sub { padding-left: 38px; font-size: 12px; color: #c5d3e2; }
+.smmain { flex: 1; overflow: auto; padding: 0 0 20px; }
+.smhead { padding: 10px 18px; background: #fff; border-bottom: 1px solid #d0d0d0; font-size: 15px; }
+.smwelcome { margin: 14px 18px; background: #0a64c8; color: #fff; }
+.smwt { padding: 10px 16px; font-size: 16px; letter-spacing: .3px; }
+.smwb { background: #fff; color: #1b1b1b; margin: 0 0 0 0; padding: 14px 18px; border: 1px solid #0a64c8; }
+.smwq { margin-bottom: 8px; } .lnk { color: #0a64c8; cursor: pointer; padding: 3px 0; } .lnk:hover { text-decoration: underline; }
+.smsec { margin: 14px 18px 8px; } .smsh { font-weight: 700; letter-spacing: .4px; color: #333; } .smsub { color: #555; margin-top: 2px; }
+.smtiles { display: flex; gap: 12px; flex-wrap: wrap; margin: 0 18px; }
+.smtile { width: 230px; background: #fff; border: 1px solid #c9c9c9; border-top: 3px solid #0a64c8; padding: 8px 10px; }
+.smtile.bad { border-top-color: #c42b1c; }
+.smth { margin-bottom: 6px; } .smtr { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; border-top: 1px solid #eee; }
+.smtr.lk { cursor: pointer; } .smtr.lk:hover { background: #f0f6fd; }
+.smok { color: #107c10; font-style: normal; } .smok.no { color: #c42b1c; }
+.smn { min-width: 20px; text-align: center; padding: 0 6px; } .smn.bad { background: #c42b1c; color: #fff; } .smn.warn { background: #f7b500; color: #000; }
+.smprops { margin: 0 18px; background: #fff; border: 1px solid #d0d0d0; }
+.smpr { display: flex; padding: 6px 12px; border-bottom: 1px solid #eee; } .smk { width: 240px; color: #444; } .smv { flex: 1; } .smv.lnk { cursor: pointer; }

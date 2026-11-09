@@ -1,0 +1,32 @@
+/* ---- terminal ---- */
+.term { position: relative; height: 100%; width: 100%; overflow: hidden; outline: none; font: 14px/17px var(--mono); background: #0c0c0c; color: #cccccc; }
+.term .tscroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 4px 6px 8px; }
+.term .tl, .term .tline { white-space: pre-wrap; word-break: break-all; min-height: 17px; }
+.term .tin { position: absolute; left: -9999px; top: 0; width: 10px; height: 10px; opacity: 0; }
+.term .tcur { background: #cccccc; color: #0c0c0c; }
+.term:focus-within .tcur { animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { background: transparent; color: inherit; } }
+.term .tscroll::-webkit-scrollbar { width: 12px; } .term .tscroll::-webkit-scrollbar-thumb { background: #555; }
+.term .tfull { position: absolute; inset: 0; background: inherit; z-index: 3; overflow: hidden; }
+.term .tpre { margin: 0; padding: 0 4px; font: inherit; white-space: pre; overflow: hidden; height: 100%; }
+.term .tpre .vcur { background: #cccccc; color: #0c0c0c; }
+.t-cmd { background: #0c0c0c; color: #cccccc; }
+.t-ps { background: #012456; color: #eeedf0; } .t-ps .tcur { background: #eeedf0; color: #012456; }
+.t-ps .k-e { color: #ff5f56; } .t-ps .k-w { color: #f5e663; } .t-ps .k-d { color: #9bb0cf; }
+.t-bash { background: #121212; color: #d4d4d4; font-family: var(--mono); } .t-bash .tcur { background: #d4d4d4; color: #121212; }
+.t-bash .k-e { color: #d4d4d4; } .t-bash .k-d { color: #8a8a8a; } .t-bash .k-w { color: #e2c36b; }
+.t-ios { background: #0a0a0a; color: #d0d0d0; } .t-ios .tcur { background: #d0d0d0; color: #0a0a0a; }
+.t-pf { background: #000; color: #e8e8e8; } .t-pf .tcur { background: #e8e8e8; color: #000; }
+.term .k-b, .term .k-h { font-weight: 700; }
+.term .k-d { opacity: .75; }
+/* nano */
+.term .editor { display: flex; flex-direction: column; background: #121212; color: #d4d4d4; font: inherit; }
+.nhead { display: flex; justify-content: space-between; background: #d4d4d4; color: #121212; padding: 0 2px; white-space: pre; flex: 0 0 auto; }
+.nhead .nname { flex: 1; text-align: center; }
+.ntext { flex: 1 1 auto; resize: none; border: 0; outline: none; background: #121212; color: #d4d4d4; font: inherit; padding: 0 4px; white-space: pre; overflow: auto; tab-size: 8; }
+.nstatus { flex: 0 0 17px; padding: 0 2px; display: flex; align-items: center; white-space: pre; }
+.nmsg { background: #d4d4d4; color: #121212; padding: 0 6px; margin: 0 auto; }
+.nlabel { background: #d4d4d4; color: #121212; padding: 0 2px; white-space: pre; }
+.ninput { flex: 1; background: #121212; color: #d4d4d4; border: 0; outline: 0; font: inherit; padding: 0 4px; }
+.nfoot { flex: 0 0 auto; display: grid; grid-template-columns: repeat(6, 1fr); padding: 0 2px; font-size: 12.5px; }
+.nkey b { background: #d4d4d4; color: #121212; font-weight: 400; padding: 0 2px; margin-right: 2px; }

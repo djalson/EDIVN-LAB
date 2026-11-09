@@ -1,0 +1,17 @@
+const SIM = require('./load')(); const W = SIM.buildHealthyWorld({}); const AD = SIM.ad;
+const t = (l, v) => console.log(l.padEnd(52), JSON.stringify(v));
+t('locateDC PC-01', (r => ({ ok: r.ok, ip: r.ip, err: r.err }))(AD.locateDC(W, 'PC-01', 'toulouse.local')));
+t('logon a.martin ok', (r => ({ ok: r.ok, code: r.code }))(AD.logon(W, 'PC-01', 'a.martin', 'Compta#2026')));
+t('logon mauvais mdp', (r => ({ ok: r.ok, code: r.code, msg: r.msg }))(AD.logon(W, 'PC-01', 'a.martin', 'xx')));
+AD.logon(W, 'PC-01', 'a.martin', 'x'); AD.logon(W, 'PC-01', 'a.martin', 'x'); AD.logon(W, 'PC-01', 'a.martin', 'x');
+t('verrouillé après 5 essais', (r => ({ ok: r.ok, code: r.code }))(AD.logon(W, 'PC-01', 'a.martin', 'Compta#2026')));
+t('user locked', AD.userOf(W.dev['SRV-DC1'].win.ad, 'a.martin').locked);
+const W2 = SIM.buildHealthyWorld({}); const lg = AD.logon(W2, 'PC-01', 'a.martin', 'Compta#2026'); AD.sessionStart(W2, 'PC-01', 'a.martin', lg);
+t('GP user settings', Object.keys(W2.dev['PC-01']._rt.gp.user.settings));
+t('GP comp settings', Object.keys(W2.dev['PC-01']._rt.gp.computer.settings));
+t('accès Compta (a.martin)', AD.shareAccess(W2, 'PC-01', '\\\\srv-fic\\Compta', 'write'));
+t('accès RH (a.martin)', AD.shareAccess(W2, 'PC-01', '\\\\srv-fic\\RH', 'read'));
+t('accès Commun', AD.shareAccess(W2, 'PC-01', '\\\\srv-fic\\Commun\\fond.png', 'read'));
+const W3 = SIM.buildHealthyWorld({}); const lg3 = AD.logon(W3, 'PC-B1', 'e.garcia', 'Bordeaux#26'); t('logon e.garcia', lg3.ok); AD.sessionStart(W3, 'PC-B1', 'e.garcia', lg3);
+t('e.garcia -> Commun (trust)', AD.shareAccess(W3, 'PC-B1', '\\\\srv-fic.toulouse.local\\Commun', 'write'));
+t('e.garcia -> Compta', AD.shareAccess(W3, 'PC-B1', '\\\\srv-fic.toulouse.local\\Compta', 'read'));

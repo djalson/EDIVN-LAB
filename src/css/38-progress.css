@@ -1,0 +1,99 @@
+/* ============================================================================
+   Progression : carte de carrière, ticket du jour, arbre / maîtrises / succès, bilan d'XP, objectifs bonus, coffre.
+   Couleurs : uniquement les variables du thème (aucune teinte figée hors médailles).
+   ============================================================================ */
+.xpbar { position: relative; height: 16px; background: var(--ink); border: 2px solid var(--line); overflow: hidden; min-width: 80px; }
+.xpbar.big { height: 22px; }
+.xpbar.small { height: 12px; margin-top: 4px; max-width: 240px; }
+.xpbar > i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, var(--hv), var(--hc)); transition: width .9s cubic-bezier(.2, .8, .2, 1); }
+.xpbar > span { position: relative; z-index: 1; display: block; text-align: center; font: 700 10px/12px var(--mono); color: var(--text); text-shadow: 0 1px 2px var(--ink), 0 0 3px var(--ink); }
+.xpbar.big > span { line-height: 18px; font-size: 12px; }
+.xpbar.small > span { line-height: 8px; font-size: 9px; }
+.lvchip { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-width: 46px; height: 46px; padding: 0 6px; background: var(--ink); border: 3px solid var(--hc); box-shadow: 3px 3px 0 var(--shadow); flex: 0 0 auto; }
+.lvchip small { font: 700 9px var(--mono); letter-spacing: .12em; color: var(--hc); }
+.lvchip b { font: 800 20px/1 var(--mono); color: var(--text); }
+.prow { display: flex; align-items: center; gap: 10px; }
+.ptitle { font-weight: 700; margin-bottom: 4px; }
+.pchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pchip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 3px 8px; background: var(--panel2); border: 1px solid var(--line); }
+.pchip.glow { border-color: var(--hc); animation: pgglow 1.8s ease-in-out infinite; }
+@keyframes pgglow { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 10px 1px var(--hc); } }
+
+.pdaily { display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin: 0 0 12px; background: var(--panel); border: 3px solid var(--hv); box-shadow: 5px 5px 0 var(--shadow); }
+.pdaily.done { border-color: var(--line); opacity: .85; }
+.pdi { flex: 0 0 auto; display: flex; }
+
+/* écran arbre / maîtrises / succès */
+.pgov { align-items: stretch; justify-content: center; padding: 18px; }
+.pgscr { max-height: calc(100vh - 36px); width: min(1100px, 100%); background: var(--panel); border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--shadow); display: flex; flex-direction: column; min-height: 0; }
+.pghead { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 2px solid var(--line); }
+.pgpts { text-align: center; padding: 4px 12px; border: 2px solid var(--line); background: var(--panel2); }
+.pgpts b { display: block; font: 800 22px/1 var(--mono); }
+.pgpts span { font-size: 11px; color: var(--muted); }
+.pgpts.glow { border-color: var(--hc); animation: pgglow 1.8s ease-in-out infinite; }
+.pgtabs, .pgfilter { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 0; }
+.pgtab { background: var(--panel2); color: var(--text); border: 2px solid var(--line); padding: 5px 12px; cursor: pointer; }
+.pgtab.on { background: var(--accent2); border-color: var(--hc); color: var(--onaccent); }
+.pgbody { padding: 12px 16px 16px; overflow: auto; min-height: 0; flex: 1 1 auto; }
+.pgcols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .pgcols { grid-template-columns: 1fr; } }
+.pgcol h3 { margin: 0 0 8px; font: 700 12px var(--mono); text-transform: uppercase; letter-spacing: .14em; color: var(--hc); }
+.pgchain { display: flex; flex-direction: column; gap: 8px; }
+.pgnode { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; background: var(--panel2); border: 2px solid var(--line); }
+.pgnode.owned { border-color: var(--ok); }
+.pgnode.buy { border-color: var(--hc); }
+.pgnode.locked { opacity: .62; }
+.pgni { flex: 0 0 auto; padding-top: 2px; }
+.pgown { color: var(--ok); font-size: 12px; font-weight: 700; margin-top: 2px; }
+.pgcost { color: var(--warn); font-size: 12px; font-weight: 700; margin-top: 2px; }
+.pgwhy { color: var(--muted); font-size: 12px; font-style: italic; margin-top: 2px; }
+.pgmast { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-top: 10px; }
+.pgdom h3 { margin: 0 0 6px; font: 700 12px var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--hc); }
+.pgsk { display: flex; align-items: center; gap: 8px; padding: 3px 0; border-bottom: 1px dashed var(--line); font-size: 12px; }
+.pgmed { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--ink); align-items: center; justify-content: center; font: 800 10px var(--mono); color: #1b1b1b; flex: 0 0 auto; }
+.pgach { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px; margin-top: 10px; }
+.pgac { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; background: var(--panel2); border: 2px solid var(--line); opacity: .72; }
+.pgac.on { opacity: 1; border-color: var(--warn); }
+.pgxp { font: 700 12px var(--mono); color: var(--warn); white-space: nowrap; }
+
+/* bilan d'XP du débrief */
+.pgdeb { margin: 16px 0; }
+.pgdeb h2 { margin: 0 0 8px; }
+.pgxpcard { display: block; }
+.pgxpbig { text-align: center; }
+.pgxpbig b { display: block; font: 800 26px/1 var(--mono); color: var(--warn); }
+.pgxpbig span { font-size: 11px; color: var(--muted); }
+.pglevelup { margin: 10px 0; padding: 8px 10px; border: 2px solid var(--hc); background: color-mix(in srgb, var(--hc) 14%, var(--panel2)); font-weight: 700; animation: pgglow 1.8s ease-in-out 3; }
+.pgxpt { margin-top: 10px; max-width: 520px; }
+.pgxpt td.r { text-align: right; white-space: nowrap; font-family: var(--mono); }
+.pggoals { margin-top: 12px; }
+.pggoals h3 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.pgg { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 13px; }
+.pgg.ok .pgchk { color: var(--ok); }
+.pgg:not(.ok):not(.lost) .pgchk { color: var(--muted); }
+.pgg.lost { opacity: .6; text-decoration: line-through; }
+.pgg.lost .pgchk { color: var(--bad); }
+.pgnewb { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* objectifs bonus dans le ticket */
+.pgoalbox { margin: 10px 0; padding: 8px 10px; border: 1px dashed var(--hv); background: color-mix(in srgb, var(--hv) 8%, transparent); font-size: 12px; }
+.pgoalh { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+
+/* coffre-fort et carnet */
+.vkey { display: inline-flex; align-items: center; gap: 4px; }
+textarea.pgnotes { width: 100%; min-width: 360px; background: var(--ink); color: var(--text); border: 2px solid var(--line); padding: 8px; font: 13px/1.5 var(--mono); resize: vertical; }
+@media (prefers-reduced-motion: reduce) { .pchip.glow, .pgpts.glow, .pglevelup { animation: none; } .xpbar > i { transition: none; } }
+.vfloat { position: absolute; right: 12px; top: 12px; z-index: 5; }
+.vfloat .btn { background: #fff; color: #333; border: 1px solid #888; }
+.desk .pfw-login { position: relative; }
+
+/* fiche de l'infra : identifiants et plan d'adressage */
+.cp { cursor: pointer; border-bottom: 1px dotted var(--muted); }
+.cp:hover, .cp:focus { background: color-mix(in srgb, var(--hc) 25%, transparent); outline: none; }
+.cp.mono, td .mono { font-family: var(--mono); }
+.nowrap { white-space: nowrap; }
+.infotbl { width: 100%; font-size: 12px; }
+.infotbl th { text-align: left; position: sticky; top: 0; background: var(--panel); }
+.infotbl tr.infofirst td { border-top: 2px solid var(--line); }
+.infosite { margin: 14px 0 4px; font: 700 12px var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--hc); }
+.infoscroll { max-height: calc(100vh - 360px); min-height: 200px; overflow: auto; padding-right: 4px; }

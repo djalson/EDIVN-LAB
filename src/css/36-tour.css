@@ -1,0 +1,9 @@
+/* ---- tutoriel ---- */
+.tshade { position: fixed; z-index: 300000; border-radius: 10px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(4, 9, 16, .68), 0 0 0 2px var(--accent), 0 0 22px 4px #3b8cffaa; transition: left .25s, top .25s, width .25s, height .25s; }
+.tcard { position: fixed; z-index: 300001; width: 390px; max-width: calc(100vw - 20px); background: #14233a; color: var(--text); border: 1px solid var(--accent); border-radius: 14px; padding: 16px 18px 14px; box-shadow: 0 16px 50px #000b; }
+.tcard h3 { margin: 2px 0 8px; font-size: 17px; }
+.tcard p { font-size: 13px; line-height: 1.5; }
+.tkick { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: #8fc0ff; }
+.twait { font-size: 12px; color: #ffd98f; background: #3a2f12; border: 1px solid #6a5420; border-radius: 8px; padding: 6px 9px; margin: 6px 0; }
+.tdots { display: flex; gap: 5px; margin: 10px 0 12px; } .tdots i { width: 18px; height: 4px; border-radius: 2px; background: #2a3b55; } .tdots i.past { background: #2a6fd6; } .tdots i.on { background: #8fc0ff; }
+.tbtns { display: flex; gap: 8px; align-items: center; }

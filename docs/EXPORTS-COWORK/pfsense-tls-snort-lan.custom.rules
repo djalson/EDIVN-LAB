@@ -1,0 +1,5 @@
+# Configuration de simulateur, non validée sur un Snort ni un pfSense réels.
+# Produit par le simulateur EDIVN Lab, pfsense-tls, instance Snort sur l’interface LAN (LAN).
+# Contenu de custom.rules tel que le simulateur le détient ; aucune règle ajoutée.
+
+alert tcp $HOME_NET any -> $EXTERNAL_NET 23 (msg:"Telnet sortant depuis le LAN"; flags:S; classtype:policy-violation; sid:1000003; rev:1;)

@@ -1,0 +1,13 @@
+/* aide-mémoire des commandes */
+.term .thelp { position: absolute; top: 4px; right: 18px; z-index: 6; font: 11px var(--mono); padding: 2px 8px; background: rgba(40, 40, 40, .85); color: #cfcfcf; border: 1px solid #666; cursor: pointer; opacity: .75; }
+.term .thelp:hover, .term .thelp:focus { opacity: 1; color: #fff; border-color: #aaa; outline: none; }
+.cmdhelp .chlist { max-height: calc(100vh - 340px); min-height: 160px; overflow: auto; margin-top: 8px; padding-right: 4px; }
+.cmdhelp .chgroup { margin: 12px 0 4px; font: 700 12px var(--mono); text-transform: uppercase; letter-spacing: .1em; color: var(--hc); }
+.cmdhelp .chrow { display: grid; grid-template-columns: minmax(150px, 230px) 1fr; column-gap: 12px; row-gap: 1px; padding: 4px 6px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.cmdhelp .chrow:hover, .cmdhelp .chrow:focus { background: color-mix(in srgb, var(--hc) 18%, transparent); outline: none; }
+.cmdhelp .chname { font-weight: 700; word-break: break-word; }
+.cmdhelp .chdesc { font-size: 12px; }
+.cmdhelp .chex { grid-column: 2; font-size: 11px; color: var(--muted); word-break: break-all; }
+.cmdhelp .chnote { grid-column: 2; font-size: 11px; color: var(--warn); }
+.term .tvault { position: absolute; top: 4px; right: 128px; z-index: 6; display: inline-flex; align-items: center; gap: 3px; font: 11px var(--mono); padding: 2px 8px; background: rgba(60, 48, 12, .9); color: #f1d98a; border: 1px solid #b58a1d; cursor: pointer; }
+.term .tvault:hover, .term .tvault:focus { color: #fff; border-color: #f1d98a; outline: none; }

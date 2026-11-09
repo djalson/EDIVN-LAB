@@ -1,0 +1,127 @@
+! Configuration de simulateur, non validée sur un IOS réel.
+! Produite par le simulateur EDIVN Lab (src/ + node tests/gen-exports.js), appareil SW-CA, monde sain, graine 1.
+! Les lignes « Building configuration… » et « Current configuration : N bytes » de la commande show running-config sont retirées.
+! Les empreintes « secret 5 » sont celles que le simulateur fabrique : une plateforme réelle peut les rejeter (information à rapporter).
+!
+!
+version 15.0
+no service pad
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname SW-CA
+!
+boot-start-marker
+boot-end-marker
+!
+enable secret 5 $1$dad2$fc0827b3507ab65a0776da
+!
+username admin privilege 15 secret 5 $1$b974$d2435a5846a13cc7fad0b9
+no aaa new-model
+system mtu routing 1500
+no ip routing
+!
+ip domain-name colomiers.local
+ip ssh version 2
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+spanning-tree vlan 1,10,20 priority 4096
+!
+vlan 10
+ name BUREAUX
+!
+vlan 20
+ name ATELIER
+!
+vlan internal allocation policy ascending
+!
+interface Port-channel1
+ description Po1 vers SW-CB
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 10,20
+ switchport mode trunk
+!
+interface FastEthernet0/1
+!
+interface FastEthernet0/2
+!
+interface FastEthernet0/3
+!
+interface FastEthernet0/4
+!
+interface FastEthernet0/5
+!
+interface FastEthernet0/6
+!
+interface FastEthernet0/7
+!
+interface FastEthernet0/8
+!
+interface FastEthernet0/9
+!
+interface FastEthernet0/10
+!
+interface FastEthernet0/11
+!
+interface FastEthernet0/12
+!
+interface FastEthernet0/13
+!
+interface FastEthernet0/14
+!
+interface FastEthernet0/15
+!
+interface FastEthernet0/16
+!
+interface FastEthernet0/17
+!
+interface FastEthernet0/18
+!
+interface FastEthernet0/19
+!
+interface FastEthernet0/20
+!
+interface FastEthernet0/21
+!
+interface FastEthernet0/22
+!
+interface FastEthernet0/23
+ description trunk vers SW-CC
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 10,20
+ switchport mode trunk
+!
+interface FastEthernet0/24
+!
+interface GigabitEthernet0/1
+ description membre Po1 vers SW-CB
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 10,20
+ switchport mode trunk
+ channel-group 1 mode active
+!
+interface GigabitEthernet0/2
+ description membre Po1 vers SW-CB
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 10,20
+ switchport mode trunk
+ channel-group 1 mode active
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+!
+banner motd ^CAcces reserve au personnel autorise^C
+!
+line con 0
+line vty 0 4
+ login local
+ transport input ssh
+line vty 5 15
+ login local
+ transport input ssh
+!
+end

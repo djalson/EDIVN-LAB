@@ -1,0 +1,58 @@
+! Configuration de simulateur, non validée sur un IOS réel.
+! Produite par le simulateur EDIVN Lab (src/ + node tests/gen-exports.js), appareil R-LB6, monde sain, graine 1.
+! Les lignes « Building configuration… » et « Current configuration : N bytes » de la commande show running-config sont retirées.
+! Les empreintes « secret 5 » sont celles que le simulateur fabrique : une plateforme réelle peut les rejeter (information à rapporter).
+!
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R-LB6
+!
+boot-start-marker
+boot-end-marker
+!
+enable secret 5 $1$dad2$fc0827b3507ab65a0776da
+!
+username admin privilege 15 secret 5 $1$b974$d2435a5846a13cc7fad0b9
+no aaa new-model
+!
+ip domain-name labege.lan
+ip ssh version 2
+!
+interface GigabitEthernet0/0
+ description vers R-LB3 (ABR)
+ ip address 10.30.36.2 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1
+ description LAN annexe
+ ip address 10.30.106.1 255.255.255.0
+ duplex auto
+ speed auto
+!
+interface Loopback0
+ description router-id
+ ip address 10.30.255.6 255.255.255.255
+!
+router ospf 1
+ router-id 10.30.255.6
+ log-adjacency-changes
+ network 10.30.36.0 0.0.0.3 area 1
+ network 10.30.106.0 0.0.0.255 area 1
+ network 10.30.255.6 0.0.0.0 area 1
+ passive-interface GigabitEthernet0/1
+!
+!
+line con 0
+line vty 0 4
+ login local
+ transport input ssh
+line vty 5 15
+ login local
+ transport input ssh
+!
+end

@@ -1,0 +1,85 @@
+/* Interface web du pare-feu (style tableau de bord d'administration à barre de navigation sombre, panneaux, tableaux).
+   Création originale : aucune ressource graphique d'éditeur tiers, pile de polices système. */
+.desk .pfw{font:14px/1.42857 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#333;background:#fff;min-height:100%}
+.desk .pfw *{box-sizing:border-box}
+.desk .pfw a{color:#337ab7;text-decoration:none;cursor:pointer}.desk .pfw a:hover{text-decoration:underline}
+.desk .pfw-nav{background:#212121;color:#fff;display:flex;align-items:stretch;height:50px;position:sticky;top:0;z-index:20}
+.desk .pfw-brand{font-size:20px;font-weight:700;padding:0 18px;display:flex;align-items:center;letter-spacing:.3px;color:#fff}
+.desk .pfw-brand i{font-style:normal;color:#4a9ad4;margin-left:2px}
+.desk .pfw-mi{position:relative;display:flex;align-items:center;padding:0 12px;color:#ddd;cursor:pointer;user-select:none}
+.desk .pfw-mi:hover,.desk .pfw-mi.open{background:#080808;color:#fff}
+.desk .pfw-mi .car{display:inline-block;border:4px solid transparent;border-top-color:currentColor;margin:4px 0 0 5px}
+.desk .pfw-dd{position:absolute;top:50px;left:0;min-width:210px;background:#fff;color:#333;border:1px solid rgba(0,0,0,.15);box-shadow:0 6px 12px rgba(0,0,0,.175);padding:5px 0;display:none;z-index:30}
+.desk .pfw-mi.open .pfw-dd{display:block}
+.desk .pfw-dd a{display:block;padding:3px 20px;color:#333;white-space:nowrap;line-height:1.6}
+.desk .pfw-dd a:hover{background:#f5f5f5;text-decoration:none;color:#262626}
+.desk .pfw-dd hr{border:0;border-top:1px solid #e5e5e5;margin:5px 0}
+.desk .pfw-right{margin-left:auto;display:flex;align-items:center;padding-right:14px;color:#aaa;font-size:12px}
+.desk .pfw-main{padding:0 15px 30px;max-width:1170px;margin:0 auto}
+.desk .pfw-crumb{font-size:22px;color:#333;margin:18px 0 14px;padding-bottom:6px;border-bottom:1px solid #ddd;font-weight:500}
+.desk .pfw-crumb span+span::before{content:"/";color:#aaa;margin:0 8px}
+.desk .pfw-tabs{display:flex;border-bottom:1px solid #ddd;margin-bottom:14px;flex-wrap:wrap}
+.desk .pfw-tabs a{padding:8px 14px;border:1px solid transparent;border-radius:4px 4px 0 0;margin-bottom:-1px;color:#555}
+.desk .pfw-tabs a:hover{background:#eee;text-decoration:none}
+.desk .pfw-tabs a.on{background:#fff;border-color:#ddd #ddd #fff;color:#333;font-weight:600}
+.desk .pfw-panel{border:1px solid #ddd;border-radius:4px;margin-bottom:18px;box-shadow:0 1px 1px rgba(0,0,0,.05)}
+.desk .pfw-ph{background:#424242;color:#fff;padding:8px 15px;border-radius:3px 3px 0 0}
+.desk .pfw-ph h2{margin:0;font-size:16px;font-weight:500}
+.desk .pfw-pb{padding:15px}
+.desk .pfw-pb.flush{padding:0}
+.desk .pfw-table{width:100%;border-collapse:collapse}
+.desk .pfw-table th{text-align:left;font-weight:600;padding:7px 9px;border-bottom:2px solid #ddd;background:#fff;white-space:nowrap}
+.desk .pfw-table td{padding:6px 9px;border-top:1px solid #ddd;vertical-align:middle}
+.desk .pfw-table tbody tr:nth-child(odd){background:#f9f9f9}
+.desk .pfw-table tr.off td{color:#999;background:#eee}
+.desk .pfw-table tr.auto td{color:#555}
+.desk .pfw-table td.act{white-space:nowrap}
+.desk .pfw-table td.act a,.desk .pfw-ic{display:inline-block;margin-right:5px;color:#337ab7;vertical-align:middle}
+.desk .pfw-ic svg{width:15px;height:15px;fill:currentColor;vertical-align:middle}
+.desk .pfw-ic.pass{color:#3c9a3c}.desk .pfw-ic.block{color:#c9302c}
+.desk .pfw-fg{display:flex;margin-bottom:14px;align-items:flex-start}
+.desk .pfw-lbl{width:16.66%;min-width:150px;padding:7px 15px 0 0;text-align:right;font-weight:600}
+.desk .pfw-inp{flex:1;max-width:620px}
+.desk .pfw-help{display:block;color:#737373;margin-top:5px;font-size:13px}
+.desk .pfw-static{padding-top:7px}
+.desk .pfw .form-control{display:block;width:100%;height:34px;padding:6px 12px;font:inherit;color:#555;background:#fff;border:1px solid #ccc;border-radius:4px;box-shadow:inset 0 1px 1px rgba(0,0,0,.075)}
+.desk .pfw textarea.form-control{height:auto}
+.desk .pfw .form-control:focus{border-color:#66afe9;outline:0;box-shadow:inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6)}
+.desk .pfw .form-control.sm{width:auto;display:inline-block}
+.desk .pfw-chk{display:flex;align-items:center;gap:7px;padding-top:6px;font-weight:400}
+.desk .pfw-chk input{margin:0}
+.desk .pfw-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.desk .pfw .btn{display:inline-block;padding:6px 12px;font:inherit;line-height:1.43;border:1px solid transparent;border-radius:4px;cursor:pointer;margin-right:4px;background:#fff;color:#333;border-color:#ccc}
+.desk .pfw .btn:hover{filter:brightness(.93)}
+.desk .pfw .btn.btn-primary{background:#337ab7;border-color:#2e6da4;color:#fff}
+.desk .pfw .btn.btn-success{background:#5cb85c;border-color:#4cae4c;color:#fff}
+.desk .pfw .btn.btn-danger{background:#d9534f;border-color:#d43f3a;color:#fff}
+.desk .pfw .btn.btn-info{background:#5bc0de;border-color:#46b8da;color:#fff}
+.desk .pfw .btn.btn-warning{background:#f0ad4e;border-color:#eea236;color:#fff}
+.desk .pfw .btn.btn-sm{padding:3px 8px;font-size:12px}
+.desk .pfw .btn[disabled]{opacity:.55;cursor:not-allowed}
+.desk .pfw-alert{padding:12px 15px;border:1px solid transparent;border-radius:4px;margin-bottom:16px}
+.desk .pfw-alert.success{background:#dff0d8;border-color:#d6e9c6;color:#3c763d}
+.desk .pfw-alert.warning{background:#fcf8e3;border-color:#faebcc;color:#8a6d3b}
+.desk .pfw-alert.danger{background:#f2dede;border-color:#ebccd1;color:#a94442}
+.desk .pfw-alert.info{background:#d9edf7;border-color:#bce8f1;color:#31708f}
+.desk .pfw-alert ul{margin:6px 0 0 18px;padding:0}
+.desk .pfw-alert .btn{float:right;margin-top:-5px}
+.desk .pfw-pre{font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;background:#f5f5f5;border:1px solid #ccc;border-radius:4px;padding:9px;white-space:pre-wrap;word-break:break-all}
+.desk .pfw-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding-top:80px}
+.desk .pfw-modal{background:#fff;width:420px;border-radius:6px;box-shadow:0 5px 15px rgba(0,0,0,.5)}
+.desk .pfw-modal .mh{padding:14px 15px;border-bottom:1px solid #e5e5e5;font-size:18px;font-weight:500}
+.desk .pfw-modal .mb{padding:18px 15px}
+.desk .pfw-modal .mf{padding:12px 15px;border-top:1px solid #e5e5e5;text-align:right}
+.desk .pfw-login{min-height:100%;background:#3a3f44;display:flex;align-items:center;justify-content:center;padding:60px 15px}
+.desk .pfw-login .box{width:420px;background:#fff;border-radius:4px;box-shadow:0 5px 25px rgba(0,0,0,.45)}
+.desk .pfw-login .hd{background:#212121;color:#fff;padding:12px 18px;border-radius:4px 4px 0 0;font-size:16px}
+.desk .pfw-login .bd{padding:20px}
+.desk .pfw-login label{display:block;font-weight:600;margin:10px 0 4px}
+.desk .pfw-login .btn{margin-top:16px}
+.desk .pfw-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.desk .pfw-up{color:#3c9a3c;font-weight:700}.desk .pfw-down{color:#c9302c;font-weight:700}
+.desk .pfw-tag{display:inline-block;padding:2px 7px;border-radius:3px;font-size:12px;color:#fff}.desk .pfw-tag.ok{background:#5cb85c}.desk .pfw-tag.ko{background:#d9534f}.desk .pfw-tag.wa{background:#f0ad4e}
+.desk .pfw-btnrow{margin:6px 0 18px}
+.desk .pfw-mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px}
+.desk .pfw-log{margin:0;padding:10px 14px;background:#1e1e1e;color:#d4d4d4;font:12px/1.5 Consolas,"DejaVu Sans Mono",monospace;white-space:pre-wrap;word-break:break-all;max-height:320px;overflow:auto;border-radius:3px}

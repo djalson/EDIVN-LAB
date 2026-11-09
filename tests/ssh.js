@@ -1,0 +1,10 @@
+const SIM = require('./load')(); const W = SIM.buildHealthyWorld({}); const S = SIM.ssh;
+const t = (l, r) => console.log(l.padEnd(46), JSON.stringify({ ok: r.ok, stage: r.stage, err: r.err, method: r.method, reason: r.reason }));
+t('PC-ADM -> SRV-LNX clé tssr', S.attempt(W, 'PC-ADM', '10.10.10.30', 'tssr', { key: W.d('PC-ADM').sshPub }, { dry: true }));
+t('PC-ADM -> SRV-LNX mdp tech', S.attempt(W, 'PC-ADM', 'srv-lnx.toulouse.local', 'tech', { pwd: 'T3ch#2026' }, { dry: true }));
+t('PC-ADM -> SRV-LNX mauvais mdp', S.attempt(W, 'PC-ADM', '10.10.10.30', 'tech', { pwd: 'x' }, { dry: true }));
+t('PC-ADM -> SRV-LNX root mdp', S.attempt(W, 'PC-ADM', '10.10.10.30', 'root', { pwd: 'R00t#2026' }, { dry: true }));
+for (const ip of ['10.10.30.2', '10.10.30.3', '10.10.30.1']) t('PC-ADM -> ' + ip + ' admin', S.attempt(W, 'PC-ADM', ip, 'admin', { pwd: 'Cisco#2026' }, { dry: true }));
+t('PC-ADM -> pfsense-tls 10.10.0.1', S.attempt(W, 'PC-ADM', '10.10.0.1', 'admin', { pwd: 'pfSense#2026' }, { dry: true }));
+t('PC-ADM -> SRV-RV 172.16.3.10 (depuis Toulouse)', S.attempt(W, 'PC-ADM', '172.16.3.10', 'admin', { pwd: 'Ramonville#2026' }, { dry: true }));
+t('PC-RV1 -> R-RV1 172.16.1.1', S.attempt(W, 'PC-RV1', '172.16.1.1', 'admin', { pwd: 'Cisco#2026' }, { dry: true }));

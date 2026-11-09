@@ -1,0 +1,64 @@
+! Configuration de simulateur, non validée sur un IOS réel.
+! Produite par le simulateur EDIVN Lab (src/ + node tests/gen-exports.js), appareil R-LB3, monde sain, graine 1.
+! Les lignes « Building configuration… » et « Current configuration : N bytes » de la commande show running-config sont retirées.
+! Les empreintes « secret 5 » sont celles que le simulateur fabrique : une plateforme réelle peut les rejeter (information à rapporter).
+!
+!
+version 15.2
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname R-LB3
+!
+boot-start-marker
+boot-end-marker
+!
+enable secret 5 $1$dad2$fc0827b3507ab65a0776da
+!
+username admin privilege 15 secret 5 $1$b974$d2435a5846a13cc7fad0b9
+no aaa new-model
+!
+ip domain-name labege.lan
+ip ssh version 2
+!
+interface GigabitEthernet0/0
+ description vers R-LB2
+ ip address 10.30.23.2 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/1
+ description vers R-LB4
+ ip address 10.30.34.1 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/2
+ description vers R-LB6 (zone 1)
+ ip address 10.30.36.1 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface Loopback0
+ description router-id
+ ip address 10.30.255.3 255.255.255.255
+!
+router ospf 1
+ router-id 10.30.255.3
+ log-adjacency-changes
+ network 10.30.23.0 0.0.0.3 area 0
+ network 10.30.34.0 0.0.0.3 area 0
+ network 10.30.36.0 0.0.0.3 area 1
+ network 10.30.255.3 0.0.0.0 area 0
+!
+!
+line con 0
+line vty 0 4
+ login local
+ transport input ssh
+line vty 5 15
+ login local
+ transport input ssh
+!
+end

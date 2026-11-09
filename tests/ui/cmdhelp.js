@@ -1,0 +1,52 @@
+/* Aide-mémoire des commandes dans l'interface : bouton dans cmd, PowerShell, Linux (après connexion) et IOS ; recherche ; clic = insertion dans la ligne de saisie
+   (sans exécution) ; absent de la console pfSense et de l'écran de connexion ; aucune erreur JS. Usage : DIST=/chemin/EDIVN-Lab.html node tests/ui/cmdhelp.js */
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 } }); const errs = [];
+  p.on('pageerror', e => errs.push(e.message)); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
+  let ok = true; const chk = (n, c) => { console.log((c ? '✓ ' : '✗ ') + n); if (!c) ok = false; };
+  await p.goto('file://' + (process.env.DIST || '/home/claude/game/dist/EDIVN-Lab.html')); await p.waitForFunction(() => window.SIM_APP); await p.waitForTimeout(300);
+  await p.evaluate(() => { SIM_APP.begin({ level: 1, mode: 'free', seed: '7', faultId: 'dhcp_scope_off' }); SIM_APP.openDev('PC-ADM', 'main'); }); await p.waitForTimeout(800);
+  const bad = async () => /\bnull\b|undefined|NaN/.test(await p.innerText('.modal'));
+  const bufOf = sel => p.evaluate(s => { const els = [...document.querySelectorAll('.term')]; return els.map(e => e.innerText).join('\n'); }, sel);
+  console.log('== cmd');
+  await p.evaluate(() => SIM_APP.run.surfaces['PC-ADM'].desk.openTerminal('cmd', true)); await p.waitForTimeout(500);
+  chk('bouton « Aide-mémoire » visible dans la fenêtre cmd', await p.isVisible('.term .thelp'));
+  await p.click('.term .thelp'); await p.waitForSelector('.cmdhelp .chrow');
+  chk('titre et catégories', /Commandes cmd disponibles/.test(await p.innerText('.modal h2')) && (await p.$$('.cmdhelp .chgroup')).length >= 4);
+  chk('toutes les commandes émulées sont listées', (await p.$$('.cmdhelp .chrow')).length === await p.evaluate(() => SIM.emu.cmdIndex('cmd').groups.reduce((a, g) => a + g.items.length, 0)));
+  await p.fill('.cmdhelp input.txt', 'ipconfig'); await p.waitForTimeout(100);
+  chk('recherche : « ipconfig » trouvé, peu de lignes', (await p.$$('.cmdhelp .chrow')).length >= 1 && (await p.$$('.cmdhelp .chrow')).length < 6);
+  chk('pas de texte parasite', !(await bad()));
+  await p.click('.cmdhelp .chrow:has(.chname:text-is("ipconfig"))'); await p.waitForTimeout(150);
+  chk('clic : modale fermée, commande insérée dans la ligne (non exécutée)', !(await p.$('.cmdhelp')) && await p.evaluate(() => { const t = [...document.querySelectorAll('.term')].pop(); return /ipconfig \/all\s*$/.test(t.querySelector('.tline').innerText) && !/Configuration IP de Windows/.test(t.innerText); }));
+  console.log('== PowerShell');
+  await p.evaluate(() => SIM_APP.run.surfaces['PC-ADM'].desk.openTerminal('ps', true)); await p.waitForTimeout(500);
+  await p.click('.termwin:last-of-type .thelp, .term.t-ps .thelp'); await p.waitForSelector('.cmdhelp .chrow');
+  chk('PowerShell : applets de commande + alias', /PowerShell/.test(await p.innerText('.modal h2')) && /alias/i.test(await p.innerText('.cmdhelp')) && /Get-ADGroupMember/.test(await p.innerText('.cmdhelp')));
+  await p.fill('.cmdhelp input.txt', 'dhcp'); await p.waitForTimeout(100); chk('PowerShell : « dhcp » → plusieurs applets DHCP', (await p.$$('.cmdhelp .chrow')).length >= 8);
+  await p.click('.modal button:has-text("Fermer")');
+  console.log('== Linux (connexion puis aide-mémoire)');
+  await p.evaluate(() => SIM_APP.openDev('SRV-LNX', 'main')); await p.waitForTimeout(800);
+  const lnxTerm = await p.evaluate(() => { const ts = [...document.querySelectorAll('.term.t-bash')]; return ts.length; });
+  chk('terminal Linux ouvert', lnxTerm >= 1);
+  chk('écran de connexion : pas de bouton Aide-mémoire', await p.evaluate(() => { const t = [...document.querySelectorAll('.term.t-bash')].pop(); const b = t && t.querySelector('.thelp'); return !b || b.style.display === 'none'; }));
+  await p.evaluate(() => { const t = [...document.querySelectorAll('.term.t-bash')].pop(); t.querySelector('textarea.tin').focus(); }); await p.keyboard.type('tssr'); await p.keyboard.press('Enter'); await p.waitForTimeout(250); await p.keyboard.type('Tssr-2026!'); await p.keyboard.press('Enter'); await p.waitForTimeout(600);
+  chk('connecté : le bouton apparaît', await p.evaluate(() => { const t = [...document.querySelectorAll('.term.t-bash')].pop(); const b = t && t.querySelector('.thelp'); return !!b && b.style.display !== 'none'; }));
+  await p.evaluate(() => { const t = [...document.querySelectorAll('.term.t-bash')].pop(); t.querySelector('.thelp').click(); }); await p.waitForSelector('.cmdhelp .chrow');
+  chk('Linux : catégories, netstat signalé « apt install net-tools »', /Commandes Linux/.test(await p.innerText('.modal h2')) && /apt install net-tools/.test(await p.innerText('.cmdhelp')) && (await p.$$('.cmdhelp .chgroup')).length >= 7);
+  await p.fill('.cmdhelp input.txt', 'setfacl'); await p.waitForTimeout(100); await p.click('.cmdhelp .chrow'); await p.waitForTimeout(150);
+  chk('Linux : clic = « setfacl -m u:tech:rwx /srv/echanges » inséré', await p.evaluate(() => { const t = [...document.querySelectorAll('.term.t-bash')].pop(); return /setfacl -m u:tech:rwx \/srv\/echanges\s*$/.test(t.querySelector('.tline').innerText); }));
+  console.log('== IOS');
+  await p.evaluate(() => { SIM_APP.openDev('SW-T1', 'main'); }); await p.waitForTimeout(800);
+  const ios = await p.evaluate(() => { const ts = [...document.querySelectorAll('.term.t-ios')]; const t = ts.pop(); return !!t && !!t.querySelector('.thelp'); });
+  chk('IOS : bouton présent', ios);
+  if (ios) { await p.evaluate(() => { const t = [...document.querySelectorAll('.term.t-ios')].pop(); t.querySelector('.thelp').click(); }); await p.waitForSelector('.cmdhelp .chrow');
+    chk('IOS : modes (privilégié, configuration, interface…) et aide anglaise', /Commandes IOS/.test(await p.innerText('.modal h2')) && /configuration d’interface/i.test(await p.innerText('.cmdhelp')) && /Turn on privileged commands/.test(await p.innerText('.cmdhelp')));
+    await p.fill('.cmdhelp input.txt', 'switchport trunk'); await p.waitForTimeout(100); chk('IOS : recherche « switchport trunk »', (await p.$$('.cmdhelp .chrow')).length >= 2 && !(await bad())); await p.click('.modal button:has-text("Fermer")'); }
+  console.log('== pfSense');
+  await p.evaluate(() => { SIM_APP.openDev('pfsense-tls', 'main'); }); await p.waitForTimeout(800);
+  chk('console pfSense : pas de bouton Aide-mémoire visible', await p.evaluate(() => { const t = [...document.querySelectorAll('.term')].pop(); const b = t && t.querySelector('.thelp'); return !!t && (!b || getComputedStyle(b).display === 'none'); }));
+  chk('aucune erreur JS de page', errs.length === 0); if (errs.length) console.log(errs.slice(0, 5));
+  await b.close(); process.exit(ok ? 0 : 1);
+})();
