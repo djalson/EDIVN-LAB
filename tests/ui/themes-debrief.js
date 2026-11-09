@@ -12,7 +12,7 @@ const { chromium } = require('playwright');
   const txt = await p.innerText('.screen.home');
   chk('slogan : « Le ticket est flou, la panne est réelle. À toi de la trouver. »', /Le ticket est flou, la panne est réelle\. À toi de la trouver\./.test(txt));
   chk('ancien slogan et « Coffre d’identifiants » absents', !/Une panne\. Un ticket flou/.test(txt) && !/Coffre/.test(txt) && /Mots de passe de l’infra/.test(txt));
-  chk('graine : aucun champ visible dans le parcours de choix (rangée dans Options formateur)', (await p.$$('.hmain > section:not(:last-child) input')).length === 0 && (await p.$$('details.adv input')).length === 1);
+  chk('graine : aucun champ visible dans le parcours de choix (rangée dans Options formateur)', (await p.$$('.hmain > section:not(:last-child) input')).length === 0 && (await p.$$('details.adv input.txt')).length === 1);
   chk('graine : ni libellé « graine » ni dé sur la page hors options', !/Graine de l’incident/.test(await p.innerText('.hleft .hmain > section:nth-child(1)')) && !(await p.$('.hmain section:has(h2:has-text("Graine"))')));
   chk('niveaux Admin / Cyber / Chaos annoncent 2 / 3 / 4 pannes', (await p.$$eval('.hlv .hlvd', e => e.map(x => x.textContent)).then(a => /Deux pannes/.test(a[2]) && /Trois pannes/.test(a[3]) && /Quatre/.test(a[4]))));
   const cats = await p.$$eval('.hcatg', e => e.map(x => { const r = x.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 + document.querySelector('.screen.home').scrollTop }; }));
