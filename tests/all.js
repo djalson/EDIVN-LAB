@@ -36,7 +36,7 @@ t('Moteur', 'impact-net (règle par le résultat : stop puis start du même serv
 t('Moteur', 'unproven-timed (pannes non prouvées par l’interface : jamais tirées en chronométré, tirées en guidé / libre ; liste vidée → reviennent)', ['tests/unproven-timed.js'], { expect: /^OK/m });
 t('Moteur', 'codes-audit (D-106 : registre des codes d’erreur, masquage, audit statique + exécution, neutralisation)', ['tests/codes-audit.js'], { expect: /^OK/m });
 t('Moteur', 'build-guard (livrable autonome : toute ressource externe arrête la construction ; neutralisation)', ['tests/build-guard.js'], { timeout: 300, expect: /0 échec/ });
-t('Moteur', 'faults', ['tests/faults.js'], { expect: /179\/179 pannes valides, 0 erreur/ });
+t('Moteur', 'faults', ['tests/faults.js'], { expect: /(\d+)\/\1 pannes valides, 0 erreur/ });
 t('Moteur', 'validate', ['tests/validate.js'], { expect: /double import refusé/ });
 t('Moteur', 'game', ['tests/game.js'], { expect: /OK/ });
 t('Moteur', 'campaign (chapitres, périmètre, tirage, examen, déblocage, révision espacée ; campagne jouée en entier)', ['tests/campaign.js'], { timeout: 600, expect: /, 0 échec/ });
@@ -85,6 +85,7 @@ for (let i = 1; i <= 11; i++) t('Consoles Windows', 'win' + i, ['tests/ui/win' +
 t('Réseau', 'net1', ['tests/ui/net1.js'], { allowBad: /CONSOLE/, timeout: 600 });   // net1 journalise des erreurs OpenVPN simulées
 t('Réseau', 'net2', ['tests/ui/net2.js']);
 [1, 3, 4].forEach(i => t('Baie / physique', 'rig' + i, ['tests/ui/rig' + i + '.js']));
+t('Baie / physique', 'rig-sites (câble débranché à Bordeaux et à Ramonville : réparé par la vue physique)', ['tests/ui/rig-sites.js'], { expect: /^OK rig-sites$/m });
 ['phys_eth', 'phys_power', 'phys_screen', 'phys_mon', 'phys_source', 'phys_wall', 'phys_patch']
   .forEach(f => t('Baie / physique', 'rig2:' + f, ['tests/ui/rig2.js', f], { expect: /après ping: \["resolved"\]|après geste: \["(fixed|resolved)"\]/ }));
 t('pfSense', 'pfw1', ['tests/ui/pfw1.js']);

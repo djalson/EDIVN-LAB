@@ -18,7 +18,7 @@ Les tests d'interface lisent `dist/` : **toujours reconstruire avant**.
 ## Architecture
 
 - `src/engine` : moteur sans DOM (monde, réseau, pannes, jeu, progression, **campagne**, **fiche**). Testable sous Node.
-- `src/content` : le monde, les 179 pannes (des données), les compétences, **les chapitres**.
+- `src/content` : le monde, les 187 pannes (des données), les compétences, **les chapitres**.
 - `src/emu` : terminaux (cmd, PowerShell, bash, IOS, pfSense).
 - `src/ui`, `src/css` : interfaces.
 - `build.js` concatène tout, dans l'ordre alphabétique de chaque dossier.

@@ -30,12 +30,12 @@ Le bac à sable est donc strictement le jeu d'origine, et tous les tests antéri
 | 5 | Linux entre en scène | SRV-LNX | 22 | 6 |
 | 6 | Le périmètre | ISP, pfsense-tls, SW-DMZ, SRV-WEB, PCEXT | 14 | 6 |
 | 7 | Filtrer et surveiller | (aucun : Squid et Snort sur le pare-feu) | 29 | 6 |
-| 8 | Deuxième site : Bordeaux | pfsense-bdx, R-B1, SW-B1, SRV-DC2, PC-B1 | 7 | 4 |
-| 9 | Le labo de Ramonville | R-RV1, SW-RVA, SW-RVB, SRV-RV, PC-RV1, PC-RV2 | 6 | 3 |
+| 8 | Deuxième site : Bordeaux | pfsense-bdx, R-B1, SW-B1, SRV-DC2, PC-B1 | 12 | 4 |
+| 9 | Le labo de Ramonville | R-RV1, SW-RVA, SW-RVB, SRV-RV, PC-RV1, PC-RV2 | 9 | 4 |
 | 10 | Haute disponibilité | Labège (anneau OSPF) et Colomiers (EtherChannel, STP) | 12 | 4 |
 | 11 | Astreinte | (tout) | 5 | 3 |
 
-Total : 179 pannes, 54 tickets à valider et 11 examens pour terminer la campagne.
+Total : 187 pannes, 55 tickets à valider et 11 examens pour terminer la campagne.
 
 ### Rattachement d'une panne à un chapitre (calculé, jamais écrit à la main)
 

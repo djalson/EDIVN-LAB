@@ -27,7 +27,7 @@ les postes et serveurs ont aussi leur vue « poste physique ».
 Niveaux, XP, arbre de compétences, maîtrise par compétence, succès, série, **ticket du jour**, thèmes à débloquer, coffre-fort d'identifiants et carnet de bord : voir `docs/PROGRESSION.md`. Rien de ce qui se gagne ne change la note.
 
 ## Contenu
-179 pannes de base réparties sur 4 niveaux (22 / 66 / 69 / 22) ; Junior et Confirmé = 1 panne, **Admin = 2 pannes, Cyber = 3, Chaos = 4** assemblées par le moteur (pannes de natures différentes, validées par simulation : 120 à 137 pannes combinables), dont 21 pannes proxy Squid/SquidGuard (`docs/PANNES-PROXY.md`) et des chaînes multi-causes scriptées de niveau 4, rattachées aux 50 compétences de la fiche
+187 pannes de base réparties sur 4 niveaux (28 / 67 / 69 / 22) ; Junior et Confirmé = 1 panne, **Admin = 2 pannes, Cyber = 3, Chaos = 4** assemblées par le moteur (pannes de natures différentes, validées par simulation : 120 à 137 pannes combinables), dont 21 pannes proxy Squid/SquidGuard (`docs/PANNES-PROXY.md`) et des chaînes multi-causes scriptées de niveau 4, rattachées aux 50 compétences de la fiche
 v21 (voir `docs/COUVERTURE-UI.md`). Les mêmes graines rejouent les mêmes incidents.
 
 ## Créer / modifier un scénario sans coder
@@ -39,7 +39,7 @@ Format : `docs/FORMAT-SCENARIO.md`.
 npm run build ; npm run test:fast     # après chaque modification (quelques minutes)
 npm test                              # batterie complète avant de livrer
 node build.js                 # assemble src/ → dist/EDIVN-Lab.html et docs/A-VERIFIER.md
-node tests/faults.js          # 179 pannes : sain → cassé → réparé → contournement
+node tests/faults.js          # 187 pannes : sain → cassé → réparé → contournement
 node tests/validate.js        # validation de scénarios
 node tests/game.js; node tests/scoring.js; node tests/course-links.js; node tests/combo.js; node tests/boot.js; node tests/emu-*.js ...
 node tests/ui/smoke-all.js    # 26 appareils × 3 pannes, toutes applications (Playwright)

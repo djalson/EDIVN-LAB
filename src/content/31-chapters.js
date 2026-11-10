@@ -45,7 +45,7 @@ SIM.CHAPTERS = [
   { n: 9, id: 'ramonville', title: 'Le labo de Ramonville', kicker: 'Tout Cisco',
     story: 'À Ramonville, pas de pfSense : un routeur Cisco fait tout. NAT, listes de contrôle d’accès et DHCP se règlent en ligne de commande, et une ligne dans le mauvais ordre suffit à tout couper.',
     learn: ['NAT / PAT sur routeur Cisco', 'ACL étendues : ordre et sens', 'DHCP porté par le routeur'],
-    devices: ['R-RV1', 'SW-RVA', 'SW-RVB', 'SRV-RV', 'PC-RV1', 'PC-RV2'], sites: ['ramonville'], need: 3 },
+    devices: ['R-RV1', 'SW-RVA', 'SW-RVB', 'SRV-RV', 'PC-RV1', 'PC-RV2'], sites: ['ramonville'], need: 4 },
   { n: 10, id: 'ha', title: 'Haute disponibilité', kicker: 'Quand ça ne doit jamais tomber',
     story: 'Labège et Colomiers sont conçus pour survivre à une coupure : anneau OSPF, liens agrégés, Spanning Tree. Le piège : le réseau continue de marcher alors que la redondance est déjà perdue.',
     learn: ['OSPF : voisinages, zones, route par défaut', 'EtherChannel : négociation, membres, VLAN', 'Spanning Tree : racine et boucles'],
