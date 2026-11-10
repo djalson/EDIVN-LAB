@@ -68,7 +68,7 @@ const SHOTS = process.env.SHOTS || '';
   chk('mode autonome appliqué', await p.evaluate(() => SIM_APP.run.m.mode.id === 'free'));
   await solve(); await fiche(false); await p.click('.fmodal .actions .btn'); await p.waitForSelector('.dfiche');
   chk('fiche fausse : −15, ticket toujours validé', await p.evaluate(() => { const r = SIM_APP.run.m.result; return r.score.report === -15 && r.note === 85 && r.passed; }));
-  chk('débrief : réponses attendues affichées, ligne au barème', (await p.$$('.dfiche .tag.bad')).length === 2 && /Réponse attendue/.test(await p.innerText('.dfiche')) && /Fiche d’intervention \(cause/.test(await p.innerText('.screen')));
+  chk('débrief : réponses attendues affichées, ligne au barème', (await p.$$('.dfiche .tag.bad')).length === 2 && /Réponse attendue/.test(await p.innerText('.dfiche')) && /Fiche d’intervention \(cause/.test(await p.$eval('.screen', e => e.textContent)));
   chk('panne mise en révision', await p.evaluate(() => SIM.game.profile().camp.review.length === 1));
   await shot('08-debrief-fiche-fausse');
   /* jusqu'à l'examen */

@@ -17,10 +17,12 @@ const SHOTS = process.env.SHOTS || '';
   /* ---------- niveau 20, chapitres 1 à 3 terminés ---------- */
   let p = await open({ v: 2, xp: xp(20), camp: { exams: { 1: 90, 2: 90, 3: 90 }, seen: { 1: 1, 2: 1, 3: 1, 4: 1 } } });
   chk('accueil : bouton Récompenses et prochaine récompense', !!(await p.$('.pcard .rwbtn')) && /niveau 22/i.test(await p.innerText('.rwnext')));
+  chk('contrats repliés par défaut', !!(await p.$('.ccard details.cctr:not([open])')));
+  await p.click('.ccard .cctr > summary');
   chk('accompagné : contrats indisponibles', await p.$eval('.ccard .rwcb', e => e.disabled) && /accompagné/.test(await p.innerText('.ccard .rwch')));
-  await p.click('.cmodeb[data-mode=free]'); chk('autonome : 4 contrats acquis au niveau 20', (await p.$$('.ccard .rwcb:not([disabled])')).length === 4);
+  await p.click('.cmodeb[data-mode=free]'); await p.click('.ccard .cctr > summary'); chk('autonome : 4 contrats acquis au niveau 20', (await p.$$('.ccard .rwcb:not([disabled])')).length === 4);
   await p.click('.ccard .rwcb[data-contract=nohelp]'); await p.click('.ccard .rwcb[data-contract=vague]'); await p.click('.ccard .rwcb[data-contract=nomap]');
-  chk('contrats cochés : multiplicateur affiché', /1,52/.test(await p.innerText('.ccard .rwch')));
+  chk('contrats cochés : multiplicateur affiché sur le repli', /1,52/.test(await p.innerText('.ccard .cctrn')));
   await shot(p, '20-contrats');
   await p.click('.cnavb[data-tab=duty]'); chk('astreinte niveau 20 : nuit noire verrouillée, les deux autres ouvertes', (await p.$$('.cdutyb.lock')).length === 1 && /niveau 30/.test(await p.innerText('.cdutyb.lock')));
   await shot(p, '21-astreinte-paliers');
@@ -45,7 +47,7 @@ const SHOTS = process.env.SHOTS || '';
   chk('couleurs de terminal « Phosphore vert »', await p.$eval('.term', e => getComputedStyle(e).color === 'rgb(51, 255, 102)'));
   await shot(p, '24-terminal-vert');
   await solve(p); await fiche(p);
-  chk('débrief : les trois contrats au bilan d’XP', (await p.innerText('.pgxpcard')).match(/Contrat «/g).length === 3);
+  chk('débrief : les trois contrats au bilan d’XP', ((await p.$eval('.pgxpcard', e => e.textContent)).match(/Contrat «/g) || []).length === 3);
   /* partie sans contrat : outils */
   await p.evaluate(() => { SIM.game.store.set('contracts', []); SIM_APP.begin({ level: 1, mode: 'free', seed: '7', faultId: 'phys_eth' }); }); await p.waitForTimeout(400);
   const dev = await p.evaluate(() => SIM_APP.run.m.parts[0].inject[0].port.split(':')[0]);
@@ -91,7 +93,7 @@ const SHOTS = process.env.SHOTS || '';
 
   /* ---------- thèmes : 10 dont 2 de prestige verrouillés au niveau 1 ---------- */
   p = await open({ v: 2 });
-  chk('niveau 1 : aucun contrat, premier annoncé au niveau 4', (await p.$$('.rwcb')).length === 0 && /niveau 4/.test(await p.innerText('.rwch')));
+  chk('niveau 1 : aucun contrat affiché', (await p.$$('.rwc')).length === 0);
   await p.click('.cnavb[data-tab=duty]'); chk('niveau 1 : les trois incidents d’astreinte verrouillés, ticket du jour ouvert', (await p.$$('.cdutyb.lock')).length === 3 && !!(await p.$('.pdaily')));
   await p.close();
 

@@ -42,9 +42,9 @@ R.neighbours = function (inst, excludeIds, seed) {
 R.closeText = function (inst) {
   if (inst.verifyText) return inst.verifyText;
   const hosts = []; (inst.probes || []).forEach(p => { const h = p.from || p.host || p.client; if (h && hosts.indexOf(h) < 0) hosts.push(h); });
-  if (inst.verify && inst.verify.length) return 'Après ta correction, constate le retour à la normale sur l’équipement concerné : le ticket se ferme sur un constat, pas sur la modification.';
-  if (hosts.length) return 'Après ta correction, refais depuis ' + hosts.join(' ou ') + ' ce qui échouait (test réseau, ouverture du site, du dossier ou de la session). Le ticket se ferme quand ce poste constate que tout remarche.';
-  return 'Après ta correction, vérifie le fonctionnement sur l’équipement concerné : le ticket se ferme sur un test réussi, pas sur la modification.';
+  if (inst.verify && inst.verify.length) return 'Constate le retour à la normale sur l’équipement concerné.';
+  if (hosts.length) return 'Refais depuis ' + hosts.join(' ou ') + ' ce qui échouait.';
+  return 'Vérifie que ça remarche sur l’équipement concerné.';
 };
 /* une question : la bonne réponse + (CHOICES − 1) réponses de pannes voisines, textes tous différents, ordre tiré par la graine */
 function question(id, label, help, inst, field, near, rng) {

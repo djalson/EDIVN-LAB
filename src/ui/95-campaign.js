@@ -32,6 +32,14 @@ P.campExam = function (n) {
     [{ label: 'Pas maintenant' }, { label: 'Commencer l’examen', primary: true, fn: () => self.begin(sp) }]);
 };
 
+/* Contrats repliés : rien tant qu'aucun n'est débloqué ; ouverts quand au moins un est coché (le multiplicateur reste visible). */
+UC.contractsFold = function (app, prof, off) {
+  const RW = SIM.rewards; if (app.legacy || !RW.CONTRACTS.some(c => RW.contractOwned(prof, c.id))) return null;
+  const tag = h('span.cctrn'); const upd = ids => { tag.textContent = ids.length ? 'XP × ' + RW.contractFactor(ids).toFixed(2).replace('.', ',') : ''; };
+  const on = UI.rewards.contracts(); upd(on);
+  return h('details.cctr', on.length ? { open: true } : {}, h('summary', 'Contrats', tag, h('span.muted.cctrh', 'plus d’XP contre une contrainte')), UI.rewards.contractPicker(app, { off, onChange: upd }));
+};
+
 /* ------------------------------------------------------------------ écran « chantier » : ce que le chapitre ajoute */
 UC.chantier = function (app, n, then) {
   const ch = C.chapter(n); const p = Game.profile(); const st = C.chapterState(p, n);
@@ -42,7 +50,7 @@ UC.chantier = function (app, n, then) {
     h('p.chstory', ch.story),
     devs.length ? [h('h3', n === 1 ? 'Ton périmètre' : 'Nouveau dans ton périmètre'), h('div.chdevs', devs)] : [h('h3', 'Ton périmètre'), h('p.muted', 'Aucun nouvel équipement : tu approfondis ceux que tu connais déjà.')],
     h('h3', 'Au programme'), h('ul.chlearn', ch.learn.map(x => h('li', x))),
-    h('h3', 'Objectif'), h('p', 'Valider ' + plural(st.need, 'ticket') + ' (' + Game.PASS + ' / 100 ou plus) parmi les ' + st.pool + ' pannes du chapitre, puis réussir l’examen' + (n < C.last() ? ' pour ouvrir le chapitre ' + (n + 1) + '.' : ' final.')));
+    h('div.chgoal', h('b', plural(st.need, 'ticket') + ' validé' + (st.need > 1 ? 's' : '')), ' puis l’examen ', h('span.muted', '(' + Game.PASS + ' / 100 ou plus)')));
   const mm = UI.modal(ch.title, body, [{ label: then ? 'C’est parti' : 'Fermer', primary: true, fn: then || null }]);
   mm.el.classList.add('chmodal'); return mm;
 };
@@ -59,7 +67,7 @@ UC.homeLeft = function (app, prof, parts) {
     UI.clear(pane);
     if (tab === 'camp') pane.append(UC.campPane(app, draw));
     else if (tab === 'duty') pane.append(UC.dutyPane(app, parts, prof));
-    else pane.append(h('p.muted.cintro', 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.'), app.legacy ? null : UI.rewards.contractPicker(app), ...parts.sandbox);
+    else pane.append(h('p.muted.cintro', app.legacy ? 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.' : 'Tout est ouvert. Rien ici ne fait avancer la campagne.'), UC.contractsFold(app, prof, ''), ...parts.sandbox);
   };
   draw(); left.append(nav, pane); return left;
 };
@@ -69,28 +77,29 @@ UC.campPane = function (app, redraw) {
   const st = S.chapters.find(c => c.n === sel), ch = st.ch; const mode = app.campMode();
   const left = Math.max(0, st.need - st.validated);
   const due = C.dueReviews(prof).filter(d => C.faultChapter(d) === sel).length;
-  const modeBtn = (id, label, sub) => h('button.cmodeb' + (mode === id ? '.on' : ''), { 'data-mode': id, on: { click: () => { app.setCampMode(id); redraw(); } } }, h('b', label), h('small', sub));
-  const ticketBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo' : ''), { 'data-act': 'ticket', on: { click: () => app.campTicket(sel) } }, label);
-  const examBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo' : ''), { 'data-act': 'exam', disabled: !st.examReady, title: st.examReady ? '' : 'Valide encore ' + plural(left, 'ticket') + ' pour ouvrir l’examen', on: { click: () => app.campExam(sel) } }, label);
-  const acts = st.done ? [ticketBtn(true, 'S’entraîner sur ce chapitre ▶'), examBtn(false, 'Repasser l’examen (meilleure note : ' + st.examBest + ')')]
-    : st.examReady ? [examBtn(true, 'Passer l’examen du chapitre ▶'), ticketBtn(false, 'S’entraîner encore')]
-    : [ticketBtn(true, 'Prendre un ticket ▶'), examBtn(false, 'Examen du chapitre')];
+  const modeBtn = (id, label, sub) => h('button.cmodeb' + (mode === id ? '.on' : ''), { 'data-mode': id, title: sub, 'aria-pressed': mode === id ? 'true' : 'false', on: { click: () => { app.setCampMode(id); redraw(); } } }, h('b', label));
+  const ticketBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo' : '.csec'), { 'data-act': 'ticket', on: { click: () => app.campTicket(sel) } }, label);
+  const examBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo.cexam' : '.csec'), { 'data-act': 'exam', disabled: !st.examReady, title: st.examReady ? '' : 'Valide encore ' + plural(left, 'ticket') + ' pour ouvrir l’examen', on: { click: () => app.campExam(sel) } }, label);
+  /* une action principale, énorme ; la seconde, discrète */
+  const acts = st.done ? [ticketBtn(true, 'S’entraîner ▶'), examBtn(false, 'Repasser l’examen · ' + st.examBest)]
+    : st.examReady ? [examBtn(true, 'Passer l’examen ▶'), ticketBtn(false, 'S’entraîner encore')]
+    : [ticketBtn(true, 'Prendre un ticket ▶'), examBtn(false, '🔒 Examen dans ' + plural(left, 'ticket'))];
+  const pips = h('div.cpips', { role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': st.need, 'aria-valuenow': Math.min(st.validated, st.need), 'aria-label': 'Tickets validés' },
+    Array.from({ length: st.need }, (x, i) => h('i' + (i < st.validated ? '.on' : ''))), h('span.cpipx' + (st.done ? '.on' : st.examReady ? '.ready' : ''), { title: 'Examen' }, '★'));
+  const contracts = UC.contractsFold(app, prof, mode === 'guided' ? 'indisponibles en mode accompagné' : '');
   const card = h('div.ccard' + (st.done ? '.done' : ''),
-    h('div.ckick', 'Chapitre ' + sel + ' / ' + C.last() + ' · ' + ch.kicker, st.done ? h('span.tag.ok', 'Examen réussi · ' + st.examBest + ' / 100') : null),
-    h('h2.ctitle', ch.title), h('p.cstory', ch.story),
-    h('div.cprog', h('div.cbar', { role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': st.need, 'aria-valuenow': Math.min(st.validated, st.need) }, h('i', { style: { width: Math.round(100 * Math.min(1, st.need ? st.validated / st.need : 1)) + '%' } })),
-      h('span.cprogt', h('b', Math.min(st.validated, st.need) + ' / ' + st.need), ' tickets validés', st.validated > st.need ? ' (' + st.validated + ' sur les ' + st.pool + ' du chapitre)' : ' · ' + st.pool + ' pannes dans ce chapitre')),
-    h('div.cstate', st.done ? 'Chapitre terminé. Tu peux continuer à t’entraîner : les pannes pas encore vues passent en premier.' : st.examReady ? 'L’examen est ouvert : chronométré, sans indice ni assistant.' : 'Encore ' + plural(left, 'ticket') + ' à valider (' + Game.PASS + ' / 100 ou plus) pour ouvrir l’examen.',
-      due ? h('div.cdue', '↻ ' + plural(due, 'panne') + ' à revoir : ' + (due > 1 ? 'elles reviennent' : 'elle revient') + ' en priorité au prochain ticket.') : null),
-    h('div.cmode', h('span.muted', 'Comment tu joues ce ticket :'), modeBtn('guided', 'Accompagné', 'Indices gratuits, assistant pas à pas'), modeBtn('free', 'Autonome', 'Indices payants, plus d’XP')),
-    app.legacy ? null : UI.rewards.contractPicker(app, { off: mode === 'guided' ? 'indisponibles en mode accompagné' : '' }),
-    h('div.cact', acts, h('button.btn', { 'data-act': 'chantier', on: { click: () => UC.chantier(app, sel, null) } }, 'Voir le chantier')));
+    h('div.ckick', 'Chapitre ' + sel + ' / ' + C.last(), st.done ? h('span.tag.ok', '✓ Examen réussi · ' + st.examBest) : null, due ? h('span.cdue', '↻ ' + plural(due, 'panne') + ' à revoir') : null),
+    h('h2.ctitle', ch.title),
+    h('div.cprog', pips, h('span.cprogt', h('b', Math.min(st.validated, st.need) + ' / ' + st.need), ' tickets')),
+    h('div.cact', acts[0], h('div.cmode', modeBtn('guided', 'Accompagné', 'Indices gratuits, assistant pas à pas'), modeBtn('free', 'Autonome', 'Indices payants, plus d’XP'))),
+    h('div.cmore', acts[1], h('button.flink', { 'data-act': 'chantier', on: { click: () => UC.chantier(app, sel, null) } }, 'Voir le chantier')),
+    contracts);
   const path = h('div.cpath', { 'aria-label': 'Chapitres de la campagne' }, S.chapters.map(c => {
     const cls = (c.done ? '.done' : '') + (c.n === S.current && !c.done ? '.cur' : '') + (c.unlocked ? '' : '.lock') + (c.n === sel ? '.sel' : '');
     return h('button.cnode' + cls, { disabled: !c.unlocked, 'data-ch': c.n, title: c.unlocked ? c.ch.title : 'Réussis l’examen du chapitre ' + (c.n - 1) + ' pour l’ouvrir', on: { click: () => { app.campSel = c.n; redraw(); } } },
       h('span.cnn', c.done ? '✓' : c.unlocked ? String(c.n) : '🔒'), h('span.cnt', c.ch.title), h('small', c.done ? 'Terminé' : c.unlocked ? Math.min(c.validated, c.need) + ' / ' + c.need : 'Verrouillé'));
   }));
-  return h('div', S.finished ? h('div.cfin', h('b', 'Campagne terminée.'), ' Toute l’infrastructure est sous ta responsabilité. Reste l’astreinte, le ticket du jour, et les pannes que tu n’as pas encore croisées.') : null, card, h('h2.cpatht', 'Le parcours'), path);
+  return h('div', S.finished ? h('div.cfin', h('b', 'Campagne terminée.'), ' Toute l’infrastructure est sous ta responsabilité. Reste l’astreinte, le ticket du jour, et les pannes que tu n’as pas encore croisées.') : null, card, h('div.cpatht', 'Le parcours'), path);
 };
 UC.dutyPane = function (app, parts, prof) {
   let timed = app._dutyTimed === true;
@@ -99,9 +108,9 @@ UC.dutyPane = function (app, parts, prof) {
     UI.clear(box);
     const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
     box.append(parts.daily(),
-      h('p.muted.cintro', 'Incidents majeurs : plusieurs pannes de natures différentes dans le même ticket, tirées dans toute l’infrastructure. À garder pour quand la campagne est bien avancée.'),
+      h('p.muted.cintro', 'Plusieurs pannes dans le même ticket, dans toute l’infrastructure.'),
       h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => { const open = SIM.rewards.dutyOpen(prof, x[0]); const need = (SIM.rewards.DUTY.find(d => d.level === x[0]) || {}).lv; return h('button.cdutyb' + (open ? '' : '.lock'), { 'data-level': x[0], disabled: !open, title: open ? '' : 'S’ouvre au niveau ' + need, on: { click: () => go(x[0]) } }, h('b', (open ? '' : '🔒 ') + x[1]), h('small', x[2]), h('span.muted', open ? 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min' : 'S’ouvre au niveau ' + need)); })),
-      UI.rewards.contractPicker(app),
+      UC.contractsFold(app, prof, '') || '',
       h('label.cchk', h('input', { type: 'checkbox', checked: timed, on: { change: e => { timed = e.target.checked; app._dutyTimed = timed; } } }), ' Chronométré, sans indice'));
   };
   draw(); return box;
@@ -115,27 +124,39 @@ UC.verifBox = function (m) {
 
 /* ------------------------------------------------------------------ fiche d'intervention (ticket résolu, avant le débrief) */
 UC.reportModal = function (app, run, spec) {
-  const m = run.m; const ans = {}; const DK = '?';
-  const submit = h('button.btn.primary', { disabled: true, on: { click: () => { ov.remove(); const a = {}; Object.keys(ans).forEach(k => { if (ans[k] !== DK) a[k] = ans[k]; }); run.finalize(a); } } }, 'Fermer le ticket');
-  const left = h('span.muted');
-  const refresh = () => { const n = spec.questions.length - Object.keys(ans).length; submit.disabled = n > 0; left.textContent = n > 0 ? plural(n, 'réponse') + ' manquante' + (n > 1 ? 's' : '') : 'Fiche complète.'; };
-  const qbox = q => {
+  /* Une question à la fois, comme un quiz : un clic sur une réponse passe à la suivante ; « ◂ Précédente » permet de corriger.
+     Le bouton « Fermer le ticket » s'active quand tout est répondu. */
+  const m = run.m; const ans = {}; const DK = '?'; const Q = spec.questions; let cur = 0;
+  const submit = h('button.btn.primary.fgo', { disabled: true, on: { click: () => { ov.remove(); const a = {}; Object.keys(ans).forEach(k => { if (ans[k] !== DK) a[k] = ans[k]; }); run.finalize(a); } } }, 'Fermer le ticket ▸');
+  const back = h('button.flink', { type: 'button', on: { click: () => { if (cur > 0) { cur--; show(); } } } }, '◂ Précédente');
+  const dots = h('div.fdots', { 'aria-hidden': 'true' });
+  const step = h('span.fstep');
+  const boxes = Q.map((q, qi) => {
     const box = h('div.fq', { 'data-q': q.id }, h('div.fql', q.label), h('div.fqh', q.help));
     const opts = q.options.concat([{ id: DK, text: 'Je ne sais pas', dk: true }]).map(o => {
-      const b = h('button.fopt' + (o.dk ? '.dk' : ''), { 'data-o': o.id, 'aria-pressed': 'false', on: { click: () => { ans[q.id] = o.id; box.querySelectorAll('.fopt').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }); b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); refresh(); } } }, h('span.fob'), h('span', o.text));
+      const b = h('button.fopt' + (o.dk ? '.dk' : ''), { 'data-o': o.id, 'aria-pressed': 'false', on: { click: () => {
+        ans[q.id] = o.id; box.querySelectorAll('.fopt').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }); b.classList.add('on'); b.setAttribute('aria-pressed', 'true');
+        if (qi < Q.length - 1) cur = qi + 1; show(); if (Object.keys(ans).length === Q.length) submit.focus();
+      } } }, h('span.fob'), h('span', o.text));
       return b;
     });
     box.append(h('div.fopts', opts)); return box;
+  });
+  const show = () => {
+    boxes.forEach((b, i) => b.classList.toggle('cur', i === cur));
+    UI.clear(dots); Q.forEach((q, i) => dots.append(h('i' + (i === cur ? '.on' : '') + (ans[q.id] ? '.done' : ''))));
+    step.textContent = 'Question ' + (cur + 1) + ' / ' + Q.length;
+    back.style.visibility = cur > 0 ? 'visible' : 'hidden';
+    const n = Q.length - Object.keys(ans).length; submit.disabled = n > 0;
+    submit.textContent = n > 0 ? 'Encore ' + n + ' réponse' + (n > 1 ? 's' : '') : 'Fermer le ticket ▸';
   };
-  const rule = m.mode.hintsFree ? 'Mode accompagné : la fiche est corrigée au débrief, elle n’enlève aucun point.' : 'Cause mal identifiée : −' + SIM.report.CAUSE_COST + ' · correction mal identifiée : −' + SIM.report.FIX_COST + '. La fiche ne fait jamais échouer un ticket réparé : elle départage les étoiles.';
+  const rule = m.mode.hintsFree ? 'Mode accompagné : aucun point en jeu.' : 'Cause fausse −' + SIM.report.CAUSE_COST + ' · correction fausse −' + SIM.report.FIX_COST + ' · jamais sous ' + Game.PASS;
   const ov = h('div.overlay.frep', h('div.modal.fmodal', { role: 'dialog', 'aria-label': 'Fiche d’intervention' },
-    h('div.fhead', UI.rewards.stamp(), h('span.tag.ok', 'Ticket résolu'), h('span.muted', 'Ticket ' + run.id + ' · chrono arrêté à ' + UI.fmtDur(m.result.mttrSec))),
-    h('h2', 'Fiche d’intervention'),
-    h('p.muted', 'Le demandeur est dépanné. Avant de fermer le ticket, consigne ce que tu as trouvé : c’est ce qui sépare une panne réparée d’une panne comprise.'),
-    spec.questions.map(qbox),
-    h('div.frule', rule),
-    h('div.actions', left, submit)));
-  document.body.appendChild(ov); refresh();
+    h('div.fhead', UI.rewards.stamp(), h('span.tag.ok', '✓ Dépanné'), h('span.muted', UI.fmtDur(m.result.mttrSec)), h('span.grow'), step, dots),
+    h('h2', 'Qu’as-tu trouvé ?'),
+    boxes,
+    h('div.ffoot', back, h('span.frule', rule), h('div.actions', submit))));
+  document.body.appendChild(ov); show();
 };
 
 /* ------------------------------------------------------------------ débrief */

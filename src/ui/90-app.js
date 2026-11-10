@@ -7,7 +7,7 @@
 const SIM = g.SIM, U = SIM.U, UI = SIM.ui, Game = SIM.game, h = UI.h;
 
 /* #legacy dans l'adresse : jeu d'origine (accueil ouvert sur le bac à sable, pas de fiche d'intervention). Sert aux tests d'interface antérieurs à la campagne. */
-function App(root) { this.root = root; this.run = null; this.legacy = /legacy/.test(String(g.location && g.location.hash)); this.home(); }
+function App(root) { this.root = root; this.run = null; this.legacy = /legacy/.test(String(g.location && g.location.hash)); if (g.document) g.document.documentElement.classList.toggle('v3ui', !this.legacy); this.home(); }
 UI.App = App;
 const P = App.prototype;
 
@@ -65,7 +65,7 @@ P.home = function () {
   const skillsRows = Object.keys(prof.skills).map(id => ({ id, ok: prof.skills[id].ok, ko: prof.skills[id].ko })).filter(r => r.ok + r.ko > 0).sort((a, b) => (b.ko - b.ok) - (a.ko - a.ok)).slice(0, 6);
   const hist = prof.history.slice(-5).reverse();
   const tagOf = x => x.stars > 0 ? h('span.tag.ok', x.perfect ? 'Parfait' : 'Validé') : h('span.tag.bad', x.kind === 'resolved' ? 'À repasser' : x.kind === 'timeout' ? 'Temps écoulé' : 'Abandonné');
-  const side = h('aside.hside',
+  const side = !this.legacy ? UI.simple.side(self, prof, theme, { stat, passed, avgNote, avgMttr, hist, tagOf }) : h('aside.hside',
     UI.prog.profileCard(prof, self),
     h('div.hcard', h('h3', 'Progression'), h('div.hstats', stat(String(passed.length), 'validés'), stat(passed.length ? avgNote + ' / 100' : '—', 'note moyenne'), stat(avgMttr ? UI.fmtDur(avgMttr) : '—', 'MTTR moyen')),
       prof.badges.length ? h('div.hbadges', prof.badges.slice(-6).map(b => { const bd = Game.BADGES.find(x => x.id === b) || { label: b }; return h('span.tag.ok', { title: bd.desc || '' }, bd.label); })) : h('div.muted', 'Aucun badge pour l’instant.')),
@@ -165,8 +165,8 @@ P.begin = function (opts) {
   const root = UI.clear(this.root);
   const timer = h('span.timer', '00:00'); const pillSite = h('span.pill', '');
   const btnHint = h('button.btn.small', { on: { click: () => self.hint() } }, 'Indice');
-  const btnClose = h('button.btn.small.primary', { on: { click: () => self.closeTicket() } }, 'Clôturer le ticket');
-  const btnGive = h('button.btn.small.danger', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
+  const btnClose = h('button.btn.small.primary.gclose', { on: { click: () => self.closeTicket() } }, UI.icon('check', 16), ' Clôturer le ticket');
+  const btnGive = h('button.btn.small.danger.ggive', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
   const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), UI.rewards.contractPills(m), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
   const t = m.fault.ticket;
   const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', UI.rewards.ticketBody(m, t.body)), UI.camp.verifBox(m), UI.prog.goalsBox(run));
@@ -272,38 +272,35 @@ P.debrief = function (m, rec) {
   const line = (k, v) => v ? h('tr', h('td', k), h('td', { style: { textAlign: 'right' } }, (v > 0 ? '+' : '') + v)) : null;
   const tl = d.path.timeline;
   const cls = c => c === 'progress' ? h('span.tag.ok', 'progrès') : c === 'regress' ? h('span.tag.bad', 'recul') : c === 'detour' ? h('span.tag.warn', 'sans effet') : c === 'false-close' || c === 'wrong-close' ? h('span.tag.bad', 'clôture refusée') : h('span.tag', 'lecture');
-  const scr = h('div.screen',
-    h('div.row', UI.svg(UI.iconSvg(ok ? 'check' : 'warning'), 40), h('div', h('h1', head), h('div.muted', 'Ticket ' + this.run.id + ' — ' + d.fault.title), h('div.muted.dseed', 'Graine de l’incident : ', h('code', m.seed), ' ', h('button.btn.small', { title: 'Copier la graine', on: { click: () => { try { try { navigator.clipboard.writeText(m.seed).then(() => UI.toast('Graine copiée.', 'ok'), () => UI.toast('Copie impossible : sélectionne la graine et copie-la à la main.', 'warn')); } catch (e) { UI.toast('Copie impossible : sélectionne la graine et copie-la à la main.', 'warn'); } } catch (e) { UI.toast('Copie impossible : graine ' + m.seed, 'warn'); } } } }, 'Copier')))),
-    h('div.grid.c3', { style: { marginTop: '14px' } },
-      h('div.card.dnote' + (r.passed ? '.ok' : '.ko'), h('h3', 'Note'), h('div.stars', { style: { fontSize: '22px' }, 'aria-label': (r.stars || 0) + ' étoile(s) sur 3' }, UI.stars(r.stars || 0)), h('div', { style: { fontSize: '30px', fontWeight: 800 } }, r.total, h('small.muted', ' / 100'), ' ', h('span.tag' + (r.passed ? '.ok' : '.bad'), r.tier)), h('div.muted', r.passed ? 'Validé (seuil ' + Game.PASS + ')' : 'Seuil de validation : ' + Game.PASS + ' / 100'), h('div.muted', r.ranked ? 'Partie classée' : 'Mode guidé : non classé')),
-      h('div.card', h('h3', 'Temps de résolution (MTTR)'), h('div', { style: { fontSize: '26px', fontWeight: 700 } }, UI.fmtDur(d.mttrSec)), h('div.muted', 'Temps cible ' + UI.fmtDur(d.parSec) + (d.firstFixedSec !== null ? ' — correction effective à ' + UI.fmtDur(d.firstFixedSec) : ''))),
-      h('div.card', h('h3', 'Démarche'), h('div', d.path.actions + ' actions, ' + d.path.counters.change + ' modifications'), h('div.muted', d.path.counters.progress + ' progrès, ' + d.path.counters.detour + ' sans effet, ' + d.path.counters.regress + ' reculs'), h('div.muted', d.hints.length + ' indice(s), ' + d.wrongCloses + ' clôture(s) refusée(s)'))),
-    UI.camp.debriefCamp(self, rec && rec.camp),
-    UI.rewards.debriefUnlocks(rec && rec.prog),
-    UI.prog.debriefPanel(rec && rec.prog),
-    UI.camp.debriefReport(r.report),
-    h('h2', 'Cause racine et correction'),
-    h('div.card', d.fault.parts.length > 1 ? d.fault.parts.map((p, i) => h('div', { style: { marginBottom: '8px' } }, h('b', (i + 1) + '. ' + p.title), h('div', p.cause), h('div.muted', 'Correction : ' + p.solution))) : [h('div', d.fault.cause), h('div.muted', { style: { marginTop: '4px' } }, 'Correction : ' + d.fault.solution)]),
-    d.closeRefusals && d.closeRefusals.length ? [h('h2', 'Pourquoi la clôture a été refusée'), h('div.card', [...new Set(d.closeRefusals.map(x => x.note))].map(x => h('div', x)))] : null,
-    d.fault.traps.length ? [h('h2', 'Pièges de ce scénario'), h('div.card', d.fault.traps.map(x => h('div', '• ' + x)))] : null,
-    h('h2', 'Chemin suivi et chemin optimal'),
-    h('div.grid.c2', h('div.card', h('h3', 'Chemin optimal'), d.path.optimal.map((s, i) => h('div', (i + 1) + '. ' + s))), h('div.card', h('h3', 'Impasses (modifications sans effet ou régressions)'), d.path.deadEnds.length ? d.path.deadEnds.slice(0, 10).map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), (x.dev ? x.dev + ' — ' : '') + x.text)) : h('div.muted', 'Aucune.'))),
-    d.sideEffects && d.sideEffects.length ? [h('h2', 'Effets de bord de tes actions'), h('div.card', d.sideEffects.map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), h('span.tag.warn', 'Blocage'), ' Ton action « ', h('code', x.text), ' »' + (x.dev ? ' (' + x.dev + ')' : '') + ' a déclenché la règle Snort SID ' + x.sid + (x.msg ? ' (« ' + x.msg + ' »)' : '') + ' et fait inscrire ' + (x.host || 'l’hôte') + ' (' + x.ip + ') dans la table des hôtes bloqués de ' + x.on + '. Un hôte bloqué n’atteint plus rien : le test a bloqué celui qui le lance.')))] : null,
-    d.aids && d.aids.length ? [h('h2', 'Aides consultées'), h('div.card', h('div.muted', 'Tracées pour information : aucun point n’est retiré.'), d.aids.map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), x.kind === 'plan' ? 'Plan d’adressage' : 'Aide-mémoire des commandes')))] : null,
-    d.dangers.length || d.impacts.length ? [h('h2', 'Actions dangereuses ou à impact'), h('div.card', d.dangers.map(x => h('div', h('span.tag.bad', 'Danger'), ' ', h('b', x.label), ' — ', x.why)), d.impacts.map(x => h('div', h('span.tag.warn', 'Impact'), ' ', x.text, ' ', h('span.muted', '(' + x.kind + ')'))))] : null,
-    h('h2', 'Compétences travaillées'),
-    h('div.card', d.skills.map(s => h('div', h('span.tag' + (s.ok ? '.ok' : '.warn'), s.ok ? 'maîtrisée sur ce ticket' : 'à revoir'), ' ', h('b', s.label), s.why.length ? h('span.muted', ' — ' + s.why.join(' ; ')) : null))),
-    d.review.length ? [h('h2', 'Notions à revoir'), h('div.card', d.review.map(x => h('div', '• ', h('b', x.label), ' : ', x.why.join(' ; '))))] : null,
-    r.passed ? null : self.courseLinks(d),
-    h('h2', 'Barème'),
-    h('div.card', h('table.tbl', h('tbody', h('tr', h('td', 'Départ'), h('td', { style: { textAlign: 'right' } }, sc.start)), line('Panne non résolue (plafond)', sc.unsolved), line('Pénalité de durée (temps cible ' + UI.fmtDur(d.parSec) + ')', sc.time), line('Indices', sc.hints), line('Actions dangereuses', sc.danger), line('Actions à impact', sc.impact), line('Clôtures prématurées', sc.wrongClose), line('Contournement pris pour une résolution', sc.falseRes), line('Fiche d’intervention (cause ou correction mal identifiée)', sc.report), h('tr', h('td', h('b', 'Note')), h('td', { style: { textAlign: 'right' } }, h('b', r.total + ' / 100'))))), h('small.muted', 'Validé à partir de ' + Game.PASS + '. La durée seule ne peut pas faire passer sous ' + Game.PASS + ' une résolution propre (sans indice, sans action dangereuse, sans clôture prématurée).')),
-    h('h2', 'Historique complet des actions'),
-    h('div.card', { style: { maxHeight: '260px', overflow: 'auto' } }, tl.length ? h('table.tbl', h('tbody', tl.map(x => h('tr', h('td.muted', UI.fmtDur(x.t)), h('td', x.dev || ''), h('td', x.text || ''), h('td', cls(x.cls)))))) : h('div.muted', 'Aucune action enregistrée.')),
-    h('div.row', { style: { margin: '20px 0 40px' } },
-      UI.camp.debriefNext(self, m, rec && rec.camp),
-      h('button.btn' + (m.camp ? '' : '.primary'), { on: { click: () => m.camp ? self.begin(Object.assign({}, self.run.opts)) : self.begin({ daily: m.daily, level: m.lv.level, mode: m.mode.id, seed: m.seed, faultId: m.fault.bundle ? undefined : m.fault.id, skill: m.opts.skill, parts: m.opts.parts, chain: m.opts.chain }) } }, 'Rejouer cet incident'),
-      h('button.btn', { on: { click: () => { self.lastSeed = ''; self.home(); } } }, m.camp ? 'Retour à l’accueil' : 'Nouveau ticket'),
-      h('button.btn', { on: { click: () => self.exportTrace(m, d) } }, 'Exporter la trace (JSON)')));
+  /* blocs du débrief : assemblés tels quels en mode d'origine (#legacy), réorganisés sinon (UI.simple.debrief : l'essentiel en haut, le détail repliable) */
+  const B = {
+    title: head,
+    head: h('div.row', UI.svg(UI.iconSvg(ok ? 'check' : 'warning'), 40), h('div', h('h1', head), h('div.muted', 'Ticket ' + this.run.id + ' — ' + d.fault.title), h('div.muted.dseed', 'Graine de l’incident : ', h('code', m.seed), ' ', h('button.btn.small', { title: 'Copier la graine', on: { click: () => { try { try { navigator.clipboard.writeText(m.seed).then(() => UI.toast('Graine copiée.', 'ok'), () => UI.toast('Copie impossible : sélectionne la graine et copie-la à la main.', 'warn')); } catch (e) { UI.toast('Copie impossible : sélectionne la graine et copie-la à la main.', 'warn'); } } catch (e) { UI.toast('Copie impossible : graine ' + m.seed, 'warn'); } } } }, 'Copier')))),
+    stats: h('div.grid.c3', { style: { marginTop: '14px' } }, h('div.card.dnote' + (r.passed ? '.ok' : '.ko'), h('h3', 'Note'), h('div.stars', { style: { fontSize: '22px' }, 'aria-label': (r.stars || 0) + ' étoile(s) sur 3' }, UI.stars(r.stars || 0)), h('div', { style: { fontSize: '30px', fontWeight: 800 } }, r.total, h('small.muted', ' / 100'), ' ', h('span.tag' + (r.passed ? '.ok' : '.bad'), r.tier)), h('div.muted', r.passed ? 'Validé (seuil ' + Game.PASS + ')' : 'Seuil de validation : ' + Game.PASS + ' / 100'), h('div.muted', r.ranked ? 'Partie classée' : 'Mode guidé : non classé')), h('div.card', h('h3', 'Temps de résolution (MTTR)'), h('div', { style: { fontSize: '26px', fontWeight: 700 } }, UI.fmtDur(d.mttrSec)), h('div.muted', 'Temps cible ' + UI.fmtDur(d.parSec) + (d.firstFixedSec !== null ? ' — correction effective à ' + UI.fmtDur(d.firstFixedSec) : ''))), h('div.card', h('h3', 'Démarche'), h('div', d.path.actions + ' actions, ' + d.path.counters.change + ' modifications'), h('div.muted', d.path.counters.progress + ' progrès, ' + d.path.counters.detour + ' sans effet, ' + d.path.counters.regress + ' reculs'), h('div.muted', d.hints.length + ' indice(s), ' + d.wrongCloses + ' clôture(s) refusée(s)'))),
+    camp: UI.camp.debriefCamp(self, rec && rec.camp),
+    unlocks: UI.rewards.debriefUnlocks(rec && rec.prog),
+    prog: UI.prog.debriefPanel(rec && rec.prog),
+    report: UI.camp.debriefReport(r.report),
+    cause: [h('h2', 'Cause racine et correction'), h('div.card', d.fault.parts.length > 1 ? d.fault.parts.map((p, i) => h('div', { style: { marginBottom: '8px' } }, h('b', (i + 1) + '. ' + p.title), h('div', p.cause), h('div.muted', 'Correction : ' + p.solution))) : [h('div', d.fault.cause), h('div.muted', { style: { marginTop: '4px' } }, 'Correction : ' + d.fault.solution)])],
+    causeCard: h('div.card', d.fault.parts.length > 1 ? d.fault.parts.map((p, i) => h('div', { style: { marginBottom: '8px' } }, h('b', (i + 1) + '. ' + p.title), h('div', p.cause), h('div.muted', 'Correction : ' + p.solution))) : [h('div', d.fault.cause), h('div.muted', { style: { marginTop: '4px' } }, 'Correction : ' + d.fault.solution)]),
+    refusals: d.closeRefusals && d.closeRefusals.length ? [h('h2', 'Pourquoi la clôture a été refusée'), h('div.card', [...new Set(d.closeRefusals.map(x => x.note))].map(x => h('div', x)))] : null,
+    traps: d.fault.traps.length ? [h('h2', 'Pièges de ce scénario'), h('div.card', d.fault.traps.map(x => h('div', '• ' + x)))] : null,
+    path: [h('h2', 'Chemin suivi et chemin optimal'), h('div.grid.c2', h('div.card', h('h3', 'Chemin optimal'), d.path.optimal.map((s, i) => h('div', (i + 1) + '. ' + s))), h('div.card', h('h3', 'Impasses (modifications sans effet ou régressions)'), d.path.deadEnds.length ? d.path.deadEnds.slice(0, 10).map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), (x.dev ? x.dev + ' — ' : '') + x.text)) : h('div.muted', 'Aucune.')))],
+    sideFx: d.sideEffects && d.sideEffects.length ? [h('h2', 'Effets de bord de tes actions'), h('div.card', d.sideEffects.map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), h('span.tag.warn', 'Blocage'), ' Ton action « ', h('code', x.text), ' »' + (x.dev ? ' (' + x.dev + ')' : '') + ' a déclenché la règle Snort SID ' + x.sid + (x.msg ? ' (« ' + x.msg + ' »)' : '') + ' et fait inscrire ' + (x.host || 'l’hôte') + ' (' + x.ip + ') dans la table des hôtes bloqués de ' + x.on + '. Un hôte bloqué n’atteint plus rien : le test a bloqué celui qui le lance.')))] : null,
+    aids: d.aids && d.aids.length ? [h('h2', 'Aides consultées'), h('div.card', h('div.muted', 'Tracées pour information : aucun point n’est retiré.'), d.aids.map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), x.kind === 'plan' ? 'Plan d’adressage' : 'Aide-mémoire des commandes')))] : null,
+    dangers: d.dangers.length || d.impacts.length ? [h('h2', 'Actions dangereuses ou à impact'), h('div.card', d.dangers.map(x => h('div', h('span.tag.bad', 'Danger'), ' ', h('b', x.label), ' — ', x.why)), d.impacts.map(x => h('div', h('span.tag.warn', 'Impact'), ' ', x.text, ' ', h('span.muted', '(' + x.kind + ')'))))] : null,
+    skills: [h('h2', 'Compétences travaillées'), h('div.card', d.skills.map(s => h('div', h('span.tag' + (s.ok ? '.ok' : '.warn'), s.ok ? 'maîtrisée sur ce ticket' : 'à revoir'), ' ', h('b', s.label), s.why.length ? h('span.muted', ' — ' + s.why.join(' ; ')) : null)))],
+    review: d.review.length ? [h('h2', 'Notions à revoir'), h('div.card', d.review.map(x => h('div', '• ', h('b', x.label), ' : ', x.why.join(' ; '))))] : null,
+    courses: r.passed ? null : self.courseLinks(d),
+    bareme: [h('h2', 'Barème'), h('div.card', h('table.tbl', h('tbody', h('tr', h('td', 'Départ'), h('td', { style: { textAlign: 'right' } }, sc.start)), line('Panne non résolue (plafond)', sc.unsolved), line('Pénalité de durée (temps cible ' + UI.fmtDur(d.parSec) + ')', sc.time), line('Indices', sc.hints), line('Actions dangereuses', sc.danger), line('Actions à impact', sc.impact), line('Clôtures prématurées', sc.wrongClose), line('Contournement pris pour une résolution', sc.falseRes), line('Fiche d’intervention (cause ou correction mal identifiée)', sc.report), h('tr', h('td', h('b', 'Note')), h('td', { style: { textAlign: 'right' } }, h('b', r.total + ' / 100'))))), h('small.muted', 'Validé à partir de ' + Game.PASS + '. La durée seule ne peut pas faire passer sous ' + Game.PASS + ' une résolution propre (sans indice, sans action dangereuse, sans clôture prématurée).'))],
+    hist: [h('h2', 'Historique complet des actions'), h('div.card', { style: { maxHeight: '260px', overflow: 'auto' } }, tl.length ? h('table.tbl', h('tbody', tl.map(x => h('tr', h('td.muted', UI.fmtDur(x.t)), h('td', x.dev || ''), h('td', x.text || ''), h('td', cls(x.cls)))))) : h('div.muted', 'Aucune action enregistrée.'))],
+    next: UI.camp.debriefNext(self, m, rec && rec.camp),
+    replay: h('button.btn' + (m.camp ? '' : '.primary'), { on: { click: () => m.camp ? self.begin(Object.assign({}, self.run.opts)) : self.begin({ daily: m.daily, level: m.lv.level, mode: m.mode.id, seed: m.seed, faultId: m.fault.bundle ? undefined : m.fault.id, skill: m.opts.skill, parts: m.opts.parts, chain: m.opts.chain }) } }, 'Rejouer cet incident'),
+    home: h('button.btn', { on: { click: () => { self.lastSeed = ''; self.home(); } } }, m.camp ? 'Retour à l’accueil' : 'Nouveau ticket'),
+    exp: h('button.btn', { on: { click: () => self.exportTrace(m, d) } }, 'Exporter la trace (JSON)')
+  };
+  const scr = this.legacy ? h('div.screen', B.head, B.stats, B.camp, B.unlocks, B.prog, B.report, B.cause, B.refusals, B.traps, B.path, B.sideFx, B.aids, B.dangers, B.skills, B.review, B.courses, B.bareme, B.hist,
+    h('div.row', { style: { margin: '20px 0 40px' } }, B.next, B.replay, B.home, B.exp)) : UI.simple.debrief(self, m, rec, d, r, B);
   root.append(scr);
   if (r.perfect) UI.themes.celebrate(UI.themes.saved(), r.total);
 };

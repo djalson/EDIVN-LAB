@@ -30,7 +30,7 @@ UR.contractPicker = function (app, o) {
     const nextC = RW.CONTRACTS.filter(c => !c.prestige && !RW.contractOwned(prof, c.id))[0];
     const f = RW.contractFactor(on);
     box.append(h('div.rwch', h('b', 'Contrats'), h('span.muted', owned.length ? (o.off ? ' — ' + o.off : on.length ? ' — XP × ' + f.toFixed(2).replace('.', ',') + ' sur un ticket validé' : ' — des contraintes en échange d’XP. La note n’est jamais touchée.') : ' — premier contrat au niveau ' + (nextC ? nextC.lv : '?'))));
-    if (owned.length) box.append(h('div.rwcl', owned.map(c => h('button.rwcb' + (on.indexOf(c.id) >= 0 ? '.on' : ''), { 'data-contract': c.id, disabled: !!o.off, title: c.desc, 'aria-pressed': on.indexOf(c.id) >= 0 ? 'true' : 'false', on: { click: () => { const cur = UR.contracts(); const i = cur.indexOf(c.id); if (i >= 0) cur.splice(i, 1); else cur.push(c.id); UR.setContracts(cur); draw(); } } }, h('b', c.label), h('small', '× ' + String(c.f).replace('.', ','))))));
+    if (owned.length) box.append(h('div.rwcl', owned.map(c => h('button.rwcb' + (on.indexOf(c.id) >= 0 ? '.on' : ''), { 'data-contract': c.id, disabled: !!o.off, title: c.desc, 'aria-pressed': on.indexOf(c.id) >= 0 ? 'true' : 'false', on: { click: () => { const cur = UR.contracts(); const i = cur.indexOf(c.id); if (i >= 0) cur.splice(i, 1); else cur.push(c.id); UR.setContracts(cur); draw(); if (o.onChange) o.onChange(UR.contracts()); } } }, h('b', c.label), h('small', '× ' + String(c.f).replace('.', ','))))));
     if (owned.length && nextC) box.append(h('div.muted.rwcn', 'Prochain contrat : « ' + nextC.label + ' » au niveau ' + nextC.lv + '.'));
   };
   draw(); return box;

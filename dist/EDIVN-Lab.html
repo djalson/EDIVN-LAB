@@ -1070,6 +1070,144 @@ html[data-map=night] .node .nm, html[data-map=night] .node .sub { background: #0
 .rwstamp { font: 800 10.5px var(--mono); letter-spacing: .14em; padding: 3px 8px; border: 2px solid currentColor; border-radius: 4px; transform: rotate(-4deg); color: #cd7f32; }
 .rwstamp[data-frame=silver] { color: #c0c7d1; } .rwstamp[data-frame=gold] { color: #ffd166; } .rwstamp[data-frame=onyx] { color: #e879f9; }
 
+/* 42-simple.css */
+/* Interface V3 allégée (src/ui/97-simple.js) : une action principale bien visible par écran, le détail replié.
+   Tout est porté par .v3ui (posée sur <html> hors #legacy). */
+
+/* ---------- accueil : onglets ---------- */
+.v3ui .cnavb { align-items: center; justify-content: center; padding: 14px 10px; }
+.v3ui .cnavb small { display: none; }
+.v3ui .cnavb b { font-size: 16px; }
+.v3ui .cintro { font-size: 14px; }
+
+/* ---------- accueil : carte du chapitre ---------- */
+.v3ui .ccard { padding: 26px 30px 22px; }
+.v3ui .ckick { gap: 12px; }
+.v3ui .ctitle { font-size: 36px !important; margin: 8px 0 16px !important; }
+.cdue { font: 700 11px var(--mono); letter-spacing: .06em; text-transform: none; color: var(--ink); background: var(--warn); padding: 3px 8px; }
+.cpips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cpips i { width: 46px; height: 16px; box-sizing: border-box; border: 2px solid var(--line); background: color-mix(in srgb, var(--bg) 70%, #000); }
+.cpips i.on { background: var(--ok); border-color: var(--ok); }
+.cpipx { display: grid; place-items: center; width: 30px; height: 30px; margin-left: 6px; box-sizing: border-box; border: 2px dashed var(--line); color: var(--muted); font-size: 15px; }
+.cpipx.ready { border: 2px solid var(--hc); color: var(--hc); box-shadow: 0 0 12px color-mix(in srgb, var(--hc) 60%, transparent); }
+.cpipx.on { border: 2px solid var(--ok); background: var(--ok); color: var(--ink); }
+.v3ui .cprog { gap: 16px; }
+.v3ui .cprogt { font-size: 15px; }
+.v3ui .cact { margin: 24px 0 14px; gap: 18px; align-items: center; }
+.v3ui .cact .cgo { font: 700 22px var(--mono); letter-spacing: .04em; padding: 18px 34px; min-width: 320px; min-height: 64px; box-shadow: 6px 6px 0 var(--shadow), 0 0 0 0 color-mix(in srgb, var(--hv) 70%, transparent); animation: cgopulse 2.4s ease-in-out infinite; }
+.v3ui .cact .cgo:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--shadow), 0 0 22px color-mix(in srgb, var(--hv) 70%, transparent); animation: none; }
+@keyframes cgopulse { 50% { box-shadow: 6px 6px 0 var(--shadow), 0 0 26px color-mix(in srgb, var(--hv) 55%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .v3ui .cact .cgo { animation: none; } }
+.v3ui .cmode { display: inline-flex; gap: 0; margin: 0; border: 2px solid var(--line); }
+.v3ui .cmodeb { border: none; padding: 10px 16px; min-height: 44px; justify-content: center; }
+.v3ui .cmodeb b { font-size: 14px; }
+.v3ui .cmodeb.on { background: color-mix(in srgb, var(--hc) 22%, var(--panel2)); color: var(--text); box-shadow: inset 0 -3px 0 var(--hc); }
+.cmore { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.btn.csec { background: transparent; border: 2px solid var(--line); color: var(--text); }
+.btn.csec:disabled { border-style: dashed; color: var(--muted); opacity: 1; }
+.flink { background: none; border: none; color: var(--hc); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 10px 4px; min-height: 44px; }
+.flink:hover { color: var(--text); }
+.cctr { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.cctr > summary { cursor: pointer; font-weight: 700; font-size: 14px; padding: 6px 0; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+.cctr > summary::before { content: '▸'; color: var(--hc); transition: transform .15s; }
+.cctr[open] > summary::before { transform: rotate(90deg); }
+.cctrn { font: 700 12px var(--mono); color: var(--warn); }
+.cctr .rwc { border: none; padding: 4px 0 0; margin: 0; }
+.cctr .rwch { display: none; }
+.v3ui .cpatht { margin: 26px 0 10px; font: 700 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+/* ---------- accueil : colonne de droite ---------- */
+.v3ui .hside .pcard .hbtns .btn { width: 100%; justify-content: center; padding: 11px 14px; font-weight: 700; }
+.hmini .hstats { margin-bottom: 8px; }
+.hmini .hhist .grow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.htools > summary { cursor: pointer; list-style: none; font: 700 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--hc); display: flex; gap: 8px; }
+.htools > summary::before { content: '▸'; transition: transform .15s; }
+.htools[open] > summary::before { transform: rotate(90deg); }
+.htools .hbtns { margin-top: 12px; }
+
+/* ---------- chantier ---------- */
+.chgoal { margin-top: 18px; padding: 12px 14px; border: 2px solid var(--hc); font-size: 15px; }
+.v3ui .modal .actions .btn.primary { font-size: 16px; font-weight: 700; padding: 12px 26px; min-height: 48px; }
+
+/* ---------- partie : barre du haut ---------- */
+.v3ui .gbar .gclose { font-size: 15px; font-weight: 700; padding: 8px 18px; min-height: 38px; box-shadow: 0 0 0 2px color-mix(in srgb, var(--hc) 60%, transparent), 0 0 16px color-mix(in srgb, var(--hv) 45%, transparent); }
+.v3ui .gbar .ggive { background: transparent; border-color: var(--line); color: var(--muted); }
+.v3ui .gbar .ggive:hover { border-color: var(--bad); color: var(--bad); }
+
+/* ---------- fiche d'intervention : une question à la fois ---------- */
+.v3ui .fmodal { max-width: 820px; width: min(820px, 94vw); padding: 24px 28px; }
+.v3ui .fmodal .fq { display: none; margin-top: 6px; }
+.v3ui .fmodal .fq.cur { display: block; animation: fqin .18s ease-out; }
+@keyframes fqin { from { opacity: 0; transform: translateX(14px); } }
+.v3ui .fmodal h2 { margin: 10px 0 14px; font-size: 26px; }
+.fhead .fstep { font: 700 12px var(--mono); color: var(--muted); letter-spacing: .06em; }
+.fdots { display: flex; gap: 6px; }
+.fdots i { width: 12px; height: 12px; border: 2px solid var(--line); box-sizing: border-box; }
+.fdots i.done { background: var(--ok); border-color: var(--ok); }
+.fdots i.on { border-color: var(--hc); box-shadow: 0 0 8px var(--hc); }
+.v3ui .fql { font-size: 20px; }
+.v3ui .fqh { margin-bottom: 14px; }
+.v3ui .fopts { gap: 8px; }
+.v3ui .fopt { padding: 13px 16px; font-size: 15px; min-height: 50px; align-items: center; transition: transform .1s, border-color .1s; }
+.v3ui .fopt:hover { transform: translateX(3px); border-color: var(--hc); }
+.v3ui .fopt .fob { margin-top: 0; }
+.ffoot { display: flex; align-items: center; gap: 14px; margin-top: 18px; }
+.ffoot .frule { flex: 1; margin: 0; padding: 0; border: none; background: none; font-size: 12px; color: var(--muted); }
+.ffoot .actions { margin: 0; }
+.btn.fgo { font: 700 17px var(--mono); padding: 14px 26px; min-height: 52px; }
+.btn.fgo:not(:disabled) { box-shadow: 5px 5px 0 var(--shadow), 0 0 18px color-mix(in srgb, var(--hv) 55%, transparent); }
+
+/* ---------- débrief ---------- */
+.dsimple { max-width: 1200px; margin: 0 auto; box-sizing: border-box; padding-bottom: 50px; }
+.dhero { display: grid; grid-template-columns: 210px minmax(0, 1fr) 230px auto; gap: 28px; align-items: center; margin-top: 18px; padding: 26px 30px; background: var(--panel); border: 3px solid var(--ok); box-shadow: 6px 6px 0 var(--shadow); }
+.dhero.ko { border-color: var(--bad); }
+.dhero.perfect { border-color: var(--hc); box-shadow: 6px 6px 0 var(--shadow), 0 0 30px color-mix(in srgb, var(--hc) 45%, transparent); }
+.dhres { text-align: center; }
+.dhstars { font-size: 30px !important; letter-spacing: 4px; line-height: 1; }
+.dhnote { font: 800 60px/1 var(--mono); margin-top: 6px; white-space: nowrap; }
+.dhnote small { font-size: 20px; color: var(--muted); font-weight: 600; }
+.dhsub { margin-top: 8px; display: inline-block; font: 700 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 4px 10px; background: var(--ok); color: var(--ink); }
+.dhero.ko .dhsub { background: var(--bad); color: #fff; }
+.dhero.perfect .dhsub { background: var(--hc); color: var(--ink); }
+.dhmid h1 { margin: 0; font-size: 32px; line-height: 1.1; }
+.dhfault { color: var(--muted); font-size: 15px; margin: 6px 0 14px; }
+.dhchips { display: flex; gap: 8px; flex-wrap: wrap; }
+.dchip { display: inline-flex; align-items: center; gap: 4px; font: 600 13px var(--mono); padding: 5px 10px; border: 1px solid var(--line); background: var(--panel2); }
+.dchip small { color: var(--muted); font-weight: 400; }
+.dchip.warn { border-color: var(--warn); color: var(--warn); } .dchip.bad { border-color: var(--bad); color: var(--bad); }
+.dhxp { display: flex; flex-direction: column; gap: 6px; }
+.dhxpn { font: 800 40px/1 var(--mono); color: var(--warn); }
+.dhxpn small { font-size: 16px; }
+.dhxpl { font-size: 13px; color: var(--muted); }
+.dhxp .xpbar { height: 10px; }
+.dhup { font: 700 13px var(--mono); color: var(--hc); }
+.dhact { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.btn.dgo { font: 700 19px var(--mono); padding: 16px 26px; min-height: 58px; white-space: nowrap; justify-content: center; box-shadow: 5px 5px 0 var(--shadow), 0 0 22px color-mix(in srgb, var(--hv) 55%, transparent); }
+.dhact2 { display: flex; gap: 8px; justify-content: stretch; }
+.dhact2 .btn { flex: 1; justify-content: center; font-size: 13px; }
+@media (max-width: 1150px) { .dhero { grid-template-columns: 150px minmax(0, 1fr); } .dhxp, .dhact { grid-column: span 1; } }
+@media (max-width: 700px) { .dhero { grid-template-columns: 1fr; text-align: left; } .dhres { text-align: left; } }
+.dsimple .dcamp { margin-top: 16px; }
+.dfound { margin-top: 22px; }
+.dfound.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 900px) { .dfound.two { grid-template-columns: 1fr; } }
+.dfound h2, .dfold .dfb h2 { margin: 0 0 8px; font: 700 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.dfound .card { margin: 0; font-size: 15px; line-height: 1.5; }
+.dfold { margin-top: 12px; background: var(--panel); border: 1px solid var(--line); }
+.dfold > summary { cursor: pointer; list-style: none; display: flex; align-items: baseline; gap: 12px; padding: 15px 20px; min-height: 22px; }
+.dfold > summary::before { content: '▸'; color: var(--hc); transition: transform .15s; }
+.dfold[open] > summary::before { transform: rotate(90deg); }
+.dfold > summary:hover { background: var(--panel2); }
+.dft { font-weight: 700; font-size: 15px; }
+.dfs { color: var(--muted); font-size: 13px; }
+.dfb { padding: 4px 20px 18px; }
+.dfb > h2, .dfb > * + h2 { margin-top: 16px !important; }
+.dfb > h2:first-child { margin-top: 4px !important; }
+.dfb .pgdeb > h2 { display: none; }
+.dfb > .card, .dfb .grid { margin-top: 8px; }
+/* correctif : les pastilles « Juste / Faux » de la fiche ne s'étirent plus sur toute la hauteur de la ligne */
+.dfrow > .tag { align-self: start; justify-self: start; }
+
 </style>
 </head>
 <body>
@@ -7236,9 +7374,9 @@ R.neighbours = function (inst, excludeIds, seed) {
 R.closeText = function (inst) {
   if (inst.verifyText) return inst.verifyText;
   const hosts = []; (inst.probes || []).forEach(p => { const h = p.from || p.host || p.client; if (h && hosts.indexOf(h) < 0) hosts.push(h); });
-  if (inst.verify && inst.verify.length) return 'Après ta correction, constate le retour à la normale sur l’équipement concerné : le ticket se ferme sur un constat, pas sur la modification.';
-  if (hosts.length) return 'Après ta correction, refais depuis ' + hosts.join(' ou ') + ' ce qui échouait (test réseau, ouverture du site, du dossier ou de la session). Le ticket se ferme quand ce poste constate que tout remarche.';
-  return 'Après ta correction, vérifie le fonctionnement sur l’équipement concerné : le ticket se ferme sur un test réussi, pas sur la modification.';
+  if (inst.verify && inst.verify.length) return 'Constate le retour à la normale sur l’équipement concerné.';
+  if (hosts.length) return 'Refais depuis ' + hosts.join(' ou ') + ' ce qui échouait.';
+  return 'Vérifie que ça remarche sur l’équipement concerné.';
 };
 /* une question : la bonne réponse + (CHOICES − 1) réponses de pannes voisines, textes tous différents, ordre tiré par la graine */
 function question(id, label, help, inst, field, near, rng) {
@@ -25467,7 +25605,7 @@ UI.sceneSvg = function (which, theme) {
 const SIM = g.SIM, U = SIM.U, UI = SIM.ui, Game = SIM.game, h = UI.h;
 
 /* #legacy dans l'adresse : jeu d'origine (accueil ouvert sur le bac à sable, pas de fiche d'intervention). Sert aux tests d'interface antérieurs à la campagne. */
-function App(root) { this.root = root; this.run = null; this.legacy = /legacy/.test(String(g.location && g.location.hash)); this.home(); }
+function App(root) { this.root = root; this.run = null; this.legacy = /legacy/.test(String(g.location && g.location.hash)); if (g.document) g.document.documentElement.classList.toggle('v3ui', !this.legacy); this.home(); }
 UI.App = App;
 const P = App.prototype;
 
@@ -25525,7 +25663,7 @@ P.home = function () {
   const skillsRows = Object.keys(prof.skills).map(id => ({ id, ok: prof.skills[id].ok, ko: prof.skills[id].ko })).filter(r => r.ok + r.ko > 0).sort((a, b) => (b.ko - b.ok) - (a.ko - a.ok)).slice(0, 6);
   const hist = prof.history.slice(-5).reverse();
   const tagOf = x => x.stars > 0 ? h('span.tag.ok', x.perfect ? 'Parfait' : 'Validé') : h('span.tag.bad', x.kind === 'resolved' ? 'À repasser' : x.kind === 'timeout' ? 'Temps écoulé' : 'Abandonné');
-  const side = h('aside.hside',
+  const side = !this.legacy ? UI.simple.side(self, prof, theme, { stat, passed, avgNote, avgMttr, hist, tagOf }) : h('aside.hside',
     UI.prog.profileCard(prof, self),
     h('div.hcard', h('h3', 'Progression'), h('div.hstats', stat(String(passed.length), 'validés'), stat(passed.length ? avgNote + ' / 100' : '—', 'note moyenne'), stat(avgMttr ? UI.fmtDur(avgMttr) : '—', 'MTTR moyen')),
       prof.badges.length ? h('div.hbadges', prof.badges.slice(-6).map(b => { const bd = Game.BADGES.find(x => x.id === b) || { label: b }; return h('span.tag.ok', { title: bd.desc || '' }, bd.label); })) : h('div.muted', 'Aucun badge pour l’instant.')),
@@ -25625,8 +25763,8 @@ P.begin = function (opts) {
   const root = UI.clear(this.root);
   const timer = h('span.timer', '00:00'); const pillSite = h('span.pill', '');
   const btnHint = h('button.btn.small', { on: { click: () => self.hint() } }, 'Indice');
-  const btnClose = h('button.btn.small.primary', { on: { click: () => self.closeTicket() } }, 'Clôturer le ticket');
-  const btnGive = h('button.btn.small.danger', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
+  const btnClose = h('button.btn.small.primary.gclose', { on: { click: () => self.closeTicket() } }, UI.icon('check', 16), ' Clôturer le ticket');
+  const btnGive = h('button.btn.small.danger.ggive', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
   const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), UI.rewards.contractPills(m), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
   const t = m.fault.ticket;
   const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', UI.rewards.ticketBody(m, t.body)), UI.camp.verifBox(m), UI.prog.goalsBox(run));
@@ -25732,38 +25870,35 @@ P.debrief = function (m, rec) {
   const line = (k, v) => v ? h('tr', h('td', k), h('td', { style: { textAlign: 'right' } }, (v > 0 ? '+' : '') + v)) : null;
   const tl = d.path.timeline;
   const cls = c => c === 'progress' ? h('span.tag.ok', 'progrès') : c === 'regress' ? h('span.tag.bad', 'recul') : c === 'detour' ? h('span.tag.warn', 'sans effet') : c === 'false-close' || c === 'wrong-close' ? h('span.tag.bad', 'clôture refusée') : h('span.tag', 'lecture');
-  const scr = h('div.screen',
-    h('div.row', UI.svg(UI.iconSvg(ok ? 'check' : 'warning'), 40), h('div', h('h1', head), h('div.muted', 'Ticket ' + this.run.id + ' — ' + d.fault.title), h('div.muted.dseed', 'Graine de l’incident : ', h('code', m.seed), ' ', h('button.btn.small', { title: 'Copier la graine', on: { click: () => { try { try { navigator.clipboard.writeText(m.seed).then(() => UI.toast('Graine copiée.', 'ok'), () => UI.toast('Copie impossible : sélectionne la graine et copie-la à la main.', 'warn')); } catch (e) { UI.toast('Copie impossible : sélectionne la graine et copie-la à la main.', 'warn'); } } catch (e) { UI.toast('Copie impossible : graine ' + m.seed, 'warn'); } } } }, 'Copier')))),
-    h('div.grid.c3', { style: { marginTop: '14px' } },
-      h('div.card.dnote' + (r.passed ? '.ok' : '.ko'), h('h3', 'Note'), h('div.stars', { style: { fontSize: '22px' }, 'aria-label': (r.stars || 0) + ' étoile(s) sur 3' }, UI.stars(r.stars || 0)), h('div', { style: { fontSize: '30px', fontWeight: 800 } }, r.total, h('small.muted', ' / 100'), ' ', h('span.tag' + (r.passed ? '.ok' : '.bad'), r.tier)), h('div.muted', r.passed ? 'Validé (seuil ' + Game.PASS + ')' : 'Seuil de validation : ' + Game.PASS + ' / 100'), h('div.muted', r.ranked ? 'Partie classée' : 'Mode guidé : non classé')),
-      h('div.card', h('h3', 'Temps de résolution (MTTR)'), h('div', { style: { fontSize: '26px', fontWeight: 700 } }, UI.fmtDur(d.mttrSec)), h('div.muted', 'Temps cible ' + UI.fmtDur(d.parSec) + (d.firstFixedSec !== null ? ' — correction effective à ' + UI.fmtDur(d.firstFixedSec) : ''))),
-      h('div.card', h('h3', 'Démarche'), h('div', d.path.actions + ' actions, ' + d.path.counters.change + ' modifications'), h('div.muted', d.path.counters.progress + ' progrès, ' + d.path.counters.detour + ' sans effet, ' + d.path.counters.regress + ' reculs'), h('div.muted', d.hints.length + ' indice(s), ' + d.wrongCloses + ' clôture(s) refusée(s)'))),
-    UI.camp.debriefCamp(self, rec && rec.camp),
-    UI.rewards.debriefUnlocks(rec && rec.prog),
-    UI.prog.debriefPanel(rec && rec.prog),
-    UI.camp.debriefReport(r.report),
-    h('h2', 'Cause racine et correction'),
-    h('div.card', d.fault.parts.length > 1 ? d.fault.parts.map((p, i) => h('div', { style: { marginBottom: '8px' } }, h('b', (i + 1) + '. ' + p.title), h('div', p.cause), h('div.muted', 'Correction : ' + p.solution))) : [h('div', d.fault.cause), h('div.muted', { style: { marginTop: '4px' } }, 'Correction : ' + d.fault.solution)]),
-    d.closeRefusals && d.closeRefusals.length ? [h('h2', 'Pourquoi la clôture a été refusée'), h('div.card', [...new Set(d.closeRefusals.map(x => x.note))].map(x => h('div', x)))] : null,
-    d.fault.traps.length ? [h('h2', 'Pièges de ce scénario'), h('div.card', d.fault.traps.map(x => h('div', '• ' + x)))] : null,
-    h('h2', 'Chemin suivi et chemin optimal'),
-    h('div.grid.c2', h('div.card', h('h3', 'Chemin optimal'), d.path.optimal.map((s, i) => h('div', (i + 1) + '. ' + s))), h('div.card', h('h3', 'Impasses (modifications sans effet ou régressions)'), d.path.deadEnds.length ? d.path.deadEnds.slice(0, 10).map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), (x.dev ? x.dev + ' — ' : '') + x.text)) : h('div.muted', 'Aucune.'))),
-    d.sideEffects && d.sideEffects.length ? [h('h2', 'Effets de bord de tes actions'), h('div.card', d.sideEffects.map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), h('span.tag.warn', 'Blocage'), ' Ton action « ', h('code', x.text), ' »' + (x.dev ? ' (' + x.dev + ')' : '') + ' a déclenché la règle Snort SID ' + x.sid + (x.msg ? ' (« ' + x.msg + ' »)' : '') + ' et fait inscrire ' + (x.host || 'l’hôte') + ' (' + x.ip + ') dans la table des hôtes bloqués de ' + x.on + '. Un hôte bloqué n’atteint plus rien : le test a bloqué celui qui le lance.')))] : null,
-    d.aids && d.aids.length ? [h('h2', 'Aides consultées'), h('div.card', h('div.muted', 'Tracées pour information : aucun point n’est retiré.'), d.aids.map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), x.kind === 'plan' ? 'Plan d’adressage' : 'Aide-mémoire des commandes')))] : null,
-    d.dangers.length || d.impacts.length ? [h('h2', 'Actions dangereuses ou à impact'), h('div.card', d.dangers.map(x => h('div', h('span.tag.bad', 'Danger'), ' ', h('b', x.label), ' — ', x.why)), d.impacts.map(x => h('div', h('span.tag.warn', 'Impact'), ' ', x.text, ' ', h('span.muted', '(' + x.kind + ')'))))] : null,
-    h('h2', 'Compétences travaillées'),
-    h('div.card', d.skills.map(s => h('div', h('span.tag' + (s.ok ? '.ok' : '.warn'), s.ok ? 'maîtrisée sur ce ticket' : 'à revoir'), ' ', h('b', s.label), s.why.length ? h('span.muted', ' — ' + s.why.join(' ; ')) : null))),
-    d.review.length ? [h('h2', 'Notions à revoir'), h('div.card', d.review.map(x => h('div', '• ', h('b', x.label), ' : ', x.why.join(' ; '))))] : null,
-    r.passed ? null : self.courseLinks(d),
-    h('h2', 'Barème'),
-    h('div.card', h('table.tbl', h('tbody', h('tr', h('td', 'Départ'), h('td', { style: { textAlign: 'right' } }, sc.start)), line('Panne non résolue (plafond)', sc.unsolved), line('Pénalité de durée (temps cible ' + UI.fmtDur(d.parSec) + ')', sc.time), line('Indices', sc.hints), line('Actions dangereuses', sc.danger), line('Actions à impact', sc.impact), line('Clôtures prématurées', sc.wrongClose), line('Contournement pris pour une résolution', sc.falseRes), line('Fiche d’intervention (cause ou correction mal identifiée)', sc.report), h('tr', h('td', h('b', 'Note')), h('td', { style: { textAlign: 'right' } }, h('b', r.total + ' / 100'))))), h('small.muted', 'Validé à partir de ' + Game.PASS + '. La durée seule ne peut pas faire passer sous ' + Game.PASS + ' une résolution propre (sans indice, sans action dangereuse, sans clôture prématurée).')),
-    h('h2', 'Historique complet des actions'),
-    h('div.card', { style: { maxHeight: '260px', overflow: 'auto' } }, tl.length ? h('table.tbl', h('tbody', tl.map(x => h('tr', h('td.muted', UI.fmtDur(x.t)), h('td', x.dev || ''), h('td', x.text || ''), h('td', cls(x.cls)))))) : h('div.muted', 'Aucune action enregistrée.')),
-    h('div.row', { style: { margin: '20px 0 40px' } },
-      UI.camp.debriefNext(self, m, rec && rec.camp),
-      h('button.btn' + (m.camp ? '' : '.primary'), { on: { click: () => m.camp ? self.begin(Object.assign({}, self.run.opts)) : self.begin({ daily: m.daily, level: m.lv.level, mode: m.mode.id, seed: m.seed, faultId: m.fault.bundle ? undefined : m.fault.id, skill: m.opts.skill, parts: m.opts.parts, chain: m.opts.chain }) } }, 'Rejouer cet incident'),
-      h('button.btn', { on: { click: () => { self.lastSeed = ''; self.home(); } } }, m.camp ? 'Retour à l’accueil' : 'Nouveau ticket'),
-      h('button.btn', { on: { click: () => self.exportTrace(m, d) } }, 'Exporter la trace (JSON)')));
+  /* blocs du débrief : assemblés tels quels en mode d'origine (#legacy), réorganisés sinon (UI.simple.debrief : l'essentiel en haut, le détail repliable) */
+  const B = {
+    title: head,
+    head: h('div.row', UI.svg(UI.iconSvg(ok ? 'check' : 'warning'), 40), h('div', h('h1', head), h('div.muted', 'Ticket ' + this.run.id + ' — ' + d.fault.title), h('div.muted.dseed', 'Graine de l’incident : ', h('code', m.seed), ' ', h('button.btn.small', { title: 'Copier la graine', on: { click: () => { try { try { navigator.clipboard.writeText(m.seed).then(() => UI.toast('Graine copiée.', 'ok'), () => UI.toast('Copie impossible : sélectionne la graine et copie-la à la main.', 'warn')); } catch (e) { UI.toast('Copie impossible : sélectionne la graine et copie-la à la main.', 'warn'); } } catch (e) { UI.toast('Copie impossible : graine ' + m.seed, 'warn'); } } } }, 'Copier')))),
+    stats: h('div.grid.c3', { style: { marginTop: '14px' } }, h('div.card.dnote' + (r.passed ? '.ok' : '.ko'), h('h3', 'Note'), h('div.stars', { style: { fontSize: '22px' }, 'aria-label': (r.stars || 0) + ' étoile(s) sur 3' }, UI.stars(r.stars || 0)), h('div', { style: { fontSize: '30px', fontWeight: 800 } }, r.total, h('small.muted', ' / 100'), ' ', h('span.tag' + (r.passed ? '.ok' : '.bad'), r.tier)), h('div.muted', r.passed ? 'Validé (seuil ' + Game.PASS + ')' : 'Seuil de validation : ' + Game.PASS + ' / 100'), h('div.muted', r.ranked ? 'Partie classée' : 'Mode guidé : non classé')), h('div.card', h('h3', 'Temps de résolution (MTTR)'), h('div', { style: { fontSize: '26px', fontWeight: 700 } }, UI.fmtDur(d.mttrSec)), h('div.muted', 'Temps cible ' + UI.fmtDur(d.parSec) + (d.firstFixedSec !== null ? ' — correction effective à ' + UI.fmtDur(d.firstFixedSec) : ''))), h('div.card', h('h3', 'Démarche'), h('div', d.path.actions + ' actions, ' + d.path.counters.change + ' modifications'), h('div.muted', d.path.counters.progress + ' progrès, ' + d.path.counters.detour + ' sans effet, ' + d.path.counters.regress + ' reculs'), h('div.muted', d.hints.length + ' indice(s), ' + d.wrongCloses + ' clôture(s) refusée(s)'))),
+    camp: UI.camp.debriefCamp(self, rec && rec.camp),
+    unlocks: UI.rewards.debriefUnlocks(rec && rec.prog),
+    prog: UI.prog.debriefPanel(rec && rec.prog),
+    report: UI.camp.debriefReport(r.report),
+    cause: [h('h2', 'Cause racine et correction'), h('div.card', d.fault.parts.length > 1 ? d.fault.parts.map((p, i) => h('div', { style: { marginBottom: '8px' } }, h('b', (i + 1) + '. ' + p.title), h('div', p.cause), h('div.muted', 'Correction : ' + p.solution))) : [h('div', d.fault.cause), h('div.muted', { style: { marginTop: '4px' } }, 'Correction : ' + d.fault.solution)])],
+    causeCard: h('div.card', d.fault.parts.length > 1 ? d.fault.parts.map((p, i) => h('div', { style: { marginBottom: '8px' } }, h('b', (i + 1) + '. ' + p.title), h('div', p.cause), h('div.muted', 'Correction : ' + p.solution))) : [h('div', d.fault.cause), h('div.muted', { style: { marginTop: '4px' } }, 'Correction : ' + d.fault.solution)]),
+    refusals: d.closeRefusals && d.closeRefusals.length ? [h('h2', 'Pourquoi la clôture a été refusée'), h('div.card', [...new Set(d.closeRefusals.map(x => x.note))].map(x => h('div', x)))] : null,
+    traps: d.fault.traps.length ? [h('h2', 'Pièges de ce scénario'), h('div.card', d.fault.traps.map(x => h('div', '• ' + x)))] : null,
+    path: [h('h2', 'Chemin suivi et chemin optimal'), h('div.grid.c2', h('div.card', h('h3', 'Chemin optimal'), d.path.optimal.map((s, i) => h('div', (i + 1) + '. ' + s))), h('div.card', h('h3', 'Impasses (modifications sans effet ou régressions)'), d.path.deadEnds.length ? d.path.deadEnds.slice(0, 10).map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), (x.dev ? x.dev + ' — ' : '') + x.text)) : h('div.muted', 'Aucune.')))],
+    sideFx: d.sideEffects && d.sideEffects.length ? [h('h2', 'Effets de bord de tes actions'), h('div.card', d.sideEffects.map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), h('span.tag.warn', 'Blocage'), ' Ton action « ', h('code', x.text), ' »' + (x.dev ? ' (' + x.dev + ')' : '') + ' a déclenché la règle Snort SID ' + x.sid + (x.msg ? ' (« ' + x.msg + ' »)' : '') + ' et fait inscrire ' + (x.host || 'l’hôte') + ' (' + x.ip + ') dans la table des hôtes bloqués de ' + x.on + '. Un hôte bloqué n’atteint plus rien : le test a bloqué celui qui le lance.')))] : null,
+    aids: d.aids && d.aids.length ? [h('h2', 'Aides consultées'), h('div.card', h('div.muted', 'Tracées pour information : aucun point n’est retiré.'), d.aids.map(x => h('div', h('span.muted', UI.fmtDur(x.t) + ' '), x.kind === 'plan' ? 'Plan d’adressage' : 'Aide-mémoire des commandes')))] : null,
+    dangers: d.dangers.length || d.impacts.length ? [h('h2', 'Actions dangereuses ou à impact'), h('div.card', d.dangers.map(x => h('div', h('span.tag.bad', 'Danger'), ' ', h('b', x.label), ' — ', x.why)), d.impacts.map(x => h('div', h('span.tag.warn', 'Impact'), ' ', x.text, ' ', h('span.muted', '(' + x.kind + ')'))))] : null,
+    skills: [h('h2', 'Compétences travaillées'), h('div.card', d.skills.map(s => h('div', h('span.tag' + (s.ok ? '.ok' : '.warn'), s.ok ? 'maîtrisée sur ce ticket' : 'à revoir'), ' ', h('b', s.label), s.why.length ? h('span.muted', ' — ' + s.why.join(' ; ')) : null)))],
+    review: d.review.length ? [h('h2', 'Notions à revoir'), h('div.card', d.review.map(x => h('div', '• ', h('b', x.label), ' : ', x.why.join(' ; '))))] : null,
+    courses: r.passed ? null : self.courseLinks(d),
+    bareme: [h('h2', 'Barème'), h('div.card', h('table.tbl', h('tbody', h('tr', h('td', 'Départ'), h('td', { style: { textAlign: 'right' } }, sc.start)), line('Panne non résolue (plafond)', sc.unsolved), line('Pénalité de durée (temps cible ' + UI.fmtDur(d.parSec) + ')', sc.time), line('Indices', sc.hints), line('Actions dangereuses', sc.danger), line('Actions à impact', sc.impact), line('Clôtures prématurées', sc.wrongClose), line('Contournement pris pour une résolution', sc.falseRes), line('Fiche d’intervention (cause ou correction mal identifiée)', sc.report), h('tr', h('td', h('b', 'Note')), h('td', { style: { textAlign: 'right' } }, h('b', r.total + ' / 100'))))), h('small.muted', 'Validé à partir de ' + Game.PASS + '. La durée seule ne peut pas faire passer sous ' + Game.PASS + ' une résolution propre (sans indice, sans action dangereuse, sans clôture prématurée).'))],
+    hist: [h('h2', 'Historique complet des actions'), h('div.card', { style: { maxHeight: '260px', overflow: 'auto' } }, tl.length ? h('table.tbl', h('tbody', tl.map(x => h('tr', h('td.muted', UI.fmtDur(x.t)), h('td', x.dev || ''), h('td', x.text || ''), h('td', cls(x.cls)))))) : h('div.muted', 'Aucune action enregistrée.'))],
+    next: UI.camp.debriefNext(self, m, rec && rec.camp),
+    replay: h('button.btn' + (m.camp ? '' : '.primary'), { on: { click: () => m.camp ? self.begin(Object.assign({}, self.run.opts)) : self.begin({ daily: m.daily, level: m.lv.level, mode: m.mode.id, seed: m.seed, faultId: m.fault.bundle ? undefined : m.fault.id, skill: m.opts.skill, parts: m.opts.parts, chain: m.opts.chain }) } }, 'Rejouer cet incident'),
+    home: h('button.btn', { on: { click: () => { self.lastSeed = ''; self.home(); } } }, m.camp ? 'Retour à l’accueil' : 'Nouveau ticket'),
+    exp: h('button.btn', { on: { click: () => self.exportTrace(m, d) } }, 'Exporter la trace (JSON)')
+  };
+  const scr = this.legacy ? h('div.screen', B.head, B.stats, B.camp, B.unlocks, B.prog, B.report, B.cause, B.refusals, B.traps, B.path, B.sideFx, B.aids, B.dangers, B.skills, B.review, B.courses, B.bareme, B.hist,
+    h('div.row', { style: { margin: '20px 0 40px' } }, B.next, B.replay, B.home, B.exp)) : UI.simple.debrief(self, m, rec, d, r, B);
   root.append(scr);
   if (r.perfect) UI.themes.celebrate(UI.themes.saved(), r.total);
 };
@@ -26275,6 +26410,14 @@ P.campExam = function (n) {
     [{ label: 'Pas maintenant' }, { label: 'Commencer l’examen', primary: true, fn: () => self.begin(sp) }]);
 };
 
+/* Contrats repliés : rien tant qu'aucun n'est débloqué ; ouverts quand au moins un est coché (le multiplicateur reste visible). */
+UC.contractsFold = function (app, prof, off) {
+  const RW = SIM.rewards; if (app.legacy || !RW.CONTRACTS.some(c => RW.contractOwned(prof, c.id))) return null;
+  const tag = h('span.cctrn'); const upd = ids => { tag.textContent = ids.length ? 'XP × ' + RW.contractFactor(ids).toFixed(2).replace('.', ',') : ''; };
+  const on = UI.rewards.contracts(); upd(on);
+  return h('details.cctr', on.length ? { open: true } : {}, h('summary', 'Contrats', tag, h('span.muted.cctrh', 'plus d’XP contre une contrainte')), UI.rewards.contractPicker(app, { off, onChange: upd }));
+};
+
 /* ------------------------------------------------------------------ écran « chantier » : ce que le chapitre ajoute */
 UC.chantier = function (app, n, then) {
   const ch = C.chapter(n); const p = Game.profile(); const st = C.chapterState(p, n);
@@ -26285,7 +26428,7 @@ UC.chantier = function (app, n, then) {
     h('p.chstory', ch.story),
     devs.length ? [h('h3', n === 1 ? 'Ton périmètre' : 'Nouveau dans ton périmètre'), h('div.chdevs', devs)] : [h('h3', 'Ton périmètre'), h('p.muted', 'Aucun nouvel équipement : tu approfondis ceux que tu connais déjà.')],
     h('h3', 'Au programme'), h('ul.chlearn', ch.learn.map(x => h('li', x))),
-    h('h3', 'Objectif'), h('p', 'Valider ' + plural(st.need, 'ticket') + ' (' + Game.PASS + ' / 100 ou plus) parmi les ' + st.pool + ' pannes du chapitre, puis réussir l’examen' + (n < C.last() ? ' pour ouvrir le chapitre ' + (n + 1) + '.' : ' final.')));
+    h('div.chgoal', h('b', plural(st.need, 'ticket') + ' validé' + (st.need > 1 ? 's' : '')), ' puis l’examen ', h('span.muted', '(' + Game.PASS + ' / 100 ou plus)')));
   const mm = UI.modal(ch.title, body, [{ label: then ? 'C’est parti' : 'Fermer', primary: true, fn: then || null }]);
   mm.el.classList.add('chmodal'); return mm;
 };
@@ -26302,7 +26445,7 @@ UC.homeLeft = function (app, prof, parts) {
     UI.clear(pane);
     if (tab === 'camp') pane.append(UC.campPane(app, draw));
     else if (tab === 'duty') pane.append(UC.dutyPane(app, parts, prof));
-    else pane.append(h('p.muted.cintro', 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.'), app.legacy ? null : UI.rewards.contractPicker(app), ...parts.sandbox);
+    else pane.append(h('p.muted.cintro', app.legacy ? 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.' : 'Tout est ouvert. Rien ici ne fait avancer la campagne.'), UC.contractsFold(app, prof, ''), ...parts.sandbox);
   };
   draw(); left.append(nav, pane); return left;
 };
@@ -26312,28 +26455,29 @@ UC.campPane = function (app, redraw) {
   const st = S.chapters.find(c => c.n === sel), ch = st.ch; const mode = app.campMode();
   const left = Math.max(0, st.need - st.validated);
   const due = C.dueReviews(prof).filter(d => C.faultChapter(d) === sel).length;
-  const modeBtn = (id, label, sub) => h('button.cmodeb' + (mode === id ? '.on' : ''), { 'data-mode': id, on: { click: () => { app.setCampMode(id); redraw(); } } }, h('b', label), h('small', sub));
-  const ticketBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo' : ''), { 'data-act': 'ticket', on: { click: () => app.campTicket(sel) } }, label);
-  const examBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo' : ''), { 'data-act': 'exam', disabled: !st.examReady, title: st.examReady ? '' : 'Valide encore ' + plural(left, 'ticket') + ' pour ouvrir l’examen', on: { click: () => app.campExam(sel) } }, label);
-  const acts = st.done ? [ticketBtn(true, 'S’entraîner sur ce chapitre ▶'), examBtn(false, 'Repasser l’examen (meilleure note : ' + st.examBest + ')')]
-    : st.examReady ? [examBtn(true, 'Passer l’examen du chapitre ▶'), ticketBtn(false, 'S’entraîner encore')]
-    : [ticketBtn(true, 'Prendre un ticket ▶'), examBtn(false, 'Examen du chapitre')];
+  const modeBtn = (id, label, sub) => h('button.cmodeb' + (mode === id ? '.on' : ''), { 'data-mode': id, title: sub, 'aria-pressed': mode === id ? 'true' : 'false', on: { click: () => { app.setCampMode(id); redraw(); } } }, h('b', label));
+  const ticketBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo' : '.csec'), { 'data-act': 'ticket', on: { click: () => app.campTicket(sel) } }, label);
+  const examBtn = (primary, label) => h('button.btn' + (primary ? '.primary.cgo.cexam' : '.csec'), { 'data-act': 'exam', disabled: !st.examReady, title: st.examReady ? '' : 'Valide encore ' + plural(left, 'ticket') + ' pour ouvrir l’examen', on: { click: () => app.campExam(sel) } }, label);
+  /* une action principale, énorme ; la seconde, discrète */
+  const acts = st.done ? [ticketBtn(true, 'S’entraîner ▶'), examBtn(false, 'Repasser l’examen · ' + st.examBest)]
+    : st.examReady ? [examBtn(true, 'Passer l’examen ▶'), ticketBtn(false, 'S’entraîner encore')]
+    : [ticketBtn(true, 'Prendre un ticket ▶'), examBtn(false, '🔒 Examen dans ' + plural(left, 'ticket'))];
+  const pips = h('div.cpips', { role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': st.need, 'aria-valuenow': Math.min(st.validated, st.need), 'aria-label': 'Tickets validés' },
+    Array.from({ length: st.need }, (x, i) => h('i' + (i < st.validated ? '.on' : ''))), h('span.cpipx' + (st.done ? '.on' : st.examReady ? '.ready' : ''), { title: 'Examen' }, '★'));
+  const contracts = UC.contractsFold(app, prof, mode === 'guided' ? 'indisponibles en mode accompagné' : '');
   const card = h('div.ccard' + (st.done ? '.done' : ''),
-    h('div.ckick', 'Chapitre ' + sel + ' / ' + C.last() + ' · ' + ch.kicker, st.done ? h('span.tag.ok', 'Examen réussi · ' + st.examBest + ' / 100') : null),
-    h('h2.ctitle', ch.title), h('p.cstory', ch.story),
-    h('div.cprog', h('div.cbar', { role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': st.need, 'aria-valuenow': Math.min(st.validated, st.need) }, h('i', { style: { width: Math.round(100 * Math.min(1, st.need ? st.validated / st.need : 1)) + '%' } })),
-      h('span.cprogt', h('b', Math.min(st.validated, st.need) + ' / ' + st.need), ' tickets validés', st.validated > st.need ? ' (' + st.validated + ' sur les ' + st.pool + ' du chapitre)' : ' · ' + st.pool + ' pannes dans ce chapitre')),
-    h('div.cstate', st.done ? 'Chapitre terminé. Tu peux continuer à t’entraîner : les pannes pas encore vues passent en premier.' : st.examReady ? 'L’examen est ouvert : chronométré, sans indice ni assistant.' : 'Encore ' + plural(left, 'ticket') + ' à valider (' + Game.PASS + ' / 100 ou plus) pour ouvrir l’examen.',
-      due ? h('div.cdue', '↻ ' + plural(due, 'panne') + ' à revoir : ' + (due > 1 ? 'elles reviennent' : 'elle revient') + ' en priorité au prochain ticket.') : null),
-    h('div.cmode', h('span.muted', 'Comment tu joues ce ticket :'), modeBtn('guided', 'Accompagné', 'Indices gratuits, assistant pas à pas'), modeBtn('free', 'Autonome', 'Indices payants, plus d’XP')),
-    app.legacy ? null : UI.rewards.contractPicker(app, { off: mode === 'guided' ? 'indisponibles en mode accompagné' : '' }),
-    h('div.cact', acts, h('button.btn', { 'data-act': 'chantier', on: { click: () => UC.chantier(app, sel, null) } }, 'Voir le chantier')));
+    h('div.ckick', 'Chapitre ' + sel + ' / ' + C.last(), st.done ? h('span.tag.ok', '✓ Examen réussi · ' + st.examBest) : null, due ? h('span.cdue', '↻ ' + plural(due, 'panne') + ' à revoir') : null),
+    h('h2.ctitle', ch.title),
+    h('div.cprog', pips, h('span.cprogt', h('b', Math.min(st.validated, st.need) + ' / ' + st.need), ' tickets')),
+    h('div.cact', acts[0], h('div.cmode', modeBtn('guided', 'Accompagné', 'Indices gratuits, assistant pas à pas'), modeBtn('free', 'Autonome', 'Indices payants, plus d’XP'))),
+    h('div.cmore', acts[1], h('button.flink', { 'data-act': 'chantier', on: { click: () => UC.chantier(app, sel, null) } }, 'Voir le chantier')),
+    contracts);
   const path = h('div.cpath', { 'aria-label': 'Chapitres de la campagne' }, S.chapters.map(c => {
     const cls = (c.done ? '.done' : '') + (c.n === S.current && !c.done ? '.cur' : '') + (c.unlocked ? '' : '.lock') + (c.n === sel ? '.sel' : '');
     return h('button.cnode' + cls, { disabled: !c.unlocked, 'data-ch': c.n, title: c.unlocked ? c.ch.title : 'Réussis l’examen du chapitre ' + (c.n - 1) + ' pour l’ouvrir', on: { click: () => { app.campSel = c.n; redraw(); } } },
       h('span.cnn', c.done ? '✓' : c.unlocked ? String(c.n) : '🔒'), h('span.cnt', c.ch.title), h('small', c.done ? 'Terminé' : c.unlocked ? Math.min(c.validated, c.need) + ' / ' + c.need : 'Verrouillé'));
   }));
-  return h('div', S.finished ? h('div.cfin', h('b', 'Campagne terminée.'), ' Toute l’infrastructure est sous ta responsabilité. Reste l’astreinte, le ticket du jour, et les pannes que tu n’as pas encore croisées.') : null, card, h('h2.cpatht', 'Le parcours'), path);
+  return h('div', S.finished ? h('div.cfin', h('b', 'Campagne terminée.'), ' Toute l’infrastructure est sous ta responsabilité. Reste l’astreinte, le ticket du jour, et les pannes que tu n’as pas encore croisées.') : null, card, h('div.cpatht', 'Le parcours'), path);
 };
 UC.dutyPane = function (app, parts, prof) {
   let timed = app._dutyTimed === true;
@@ -26342,9 +26486,9 @@ UC.dutyPane = function (app, parts, prof) {
     UI.clear(box);
     const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
     box.append(parts.daily(),
-      h('p.muted.cintro', 'Incidents majeurs : plusieurs pannes de natures différentes dans le même ticket, tirées dans toute l’infrastructure. À garder pour quand la campagne est bien avancée.'),
+      h('p.muted.cintro', 'Plusieurs pannes dans le même ticket, dans toute l’infrastructure.'),
       h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => { const open = SIM.rewards.dutyOpen(prof, x[0]); const need = (SIM.rewards.DUTY.find(d => d.level === x[0]) || {}).lv; return h('button.cdutyb' + (open ? '' : '.lock'), { 'data-level': x[0], disabled: !open, title: open ? '' : 'S’ouvre au niveau ' + need, on: { click: () => go(x[0]) } }, h('b', (open ? '' : '🔒 ') + x[1]), h('small', x[2]), h('span.muted', open ? 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min' : 'S’ouvre au niveau ' + need)); })),
-      UI.rewards.contractPicker(app),
+      UC.contractsFold(app, prof, '') || '',
       h('label.cchk', h('input', { type: 'checkbox', checked: timed, on: { change: e => { timed = e.target.checked; app._dutyTimed = timed; } } }), ' Chronométré, sans indice'));
   };
   draw(); return box;
@@ -26358,27 +26502,39 @@ UC.verifBox = function (m) {
 
 /* ------------------------------------------------------------------ fiche d'intervention (ticket résolu, avant le débrief) */
 UC.reportModal = function (app, run, spec) {
-  const m = run.m; const ans = {}; const DK = '?';
-  const submit = h('button.btn.primary', { disabled: true, on: { click: () => { ov.remove(); const a = {}; Object.keys(ans).forEach(k => { if (ans[k] !== DK) a[k] = ans[k]; }); run.finalize(a); } } }, 'Fermer le ticket');
-  const left = h('span.muted');
-  const refresh = () => { const n = spec.questions.length - Object.keys(ans).length; submit.disabled = n > 0; left.textContent = n > 0 ? plural(n, 'réponse') + ' manquante' + (n > 1 ? 's' : '') : 'Fiche complète.'; };
-  const qbox = q => {
+  /* Une question à la fois, comme un quiz : un clic sur une réponse passe à la suivante ; « ◂ Précédente » permet de corriger.
+     Le bouton « Fermer le ticket » s'active quand tout est répondu. */
+  const m = run.m; const ans = {}; const DK = '?'; const Q = spec.questions; let cur = 0;
+  const submit = h('button.btn.primary.fgo', { disabled: true, on: { click: () => { ov.remove(); const a = {}; Object.keys(ans).forEach(k => { if (ans[k] !== DK) a[k] = ans[k]; }); run.finalize(a); } } }, 'Fermer le ticket ▸');
+  const back = h('button.flink', { type: 'button', on: { click: () => { if (cur > 0) { cur--; show(); } } } }, '◂ Précédente');
+  const dots = h('div.fdots', { 'aria-hidden': 'true' });
+  const step = h('span.fstep');
+  const boxes = Q.map((q, qi) => {
     const box = h('div.fq', { 'data-q': q.id }, h('div.fql', q.label), h('div.fqh', q.help));
     const opts = q.options.concat([{ id: DK, text: 'Je ne sais pas', dk: true }]).map(o => {
-      const b = h('button.fopt' + (o.dk ? '.dk' : ''), { 'data-o': o.id, 'aria-pressed': 'false', on: { click: () => { ans[q.id] = o.id; box.querySelectorAll('.fopt').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }); b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); refresh(); } } }, h('span.fob'), h('span', o.text));
+      const b = h('button.fopt' + (o.dk ? '.dk' : ''), { 'data-o': o.id, 'aria-pressed': 'false', on: { click: () => {
+        ans[q.id] = o.id; box.querySelectorAll('.fopt').forEach(x => { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }); b.classList.add('on'); b.setAttribute('aria-pressed', 'true');
+        if (qi < Q.length - 1) cur = qi + 1; show(); if (Object.keys(ans).length === Q.length) submit.focus();
+      } } }, h('span.fob'), h('span', o.text));
       return b;
     });
     box.append(h('div.fopts', opts)); return box;
+  });
+  const show = () => {
+    boxes.forEach((b, i) => b.classList.toggle('cur', i === cur));
+    UI.clear(dots); Q.forEach((q, i) => dots.append(h('i' + (i === cur ? '.on' : '') + (ans[q.id] ? '.done' : ''))));
+    step.textContent = 'Question ' + (cur + 1) + ' / ' + Q.length;
+    back.style.visibility = cur > 0 ? 'visible' : 'hidden';
+    const n = Q.length - Object.keys(ans).length; submit.disabled = n > 0;
+    submit.textContent = n > 0 ? 'Encore ' + n + ' réponse' + (n > 1 ? 's' : '') : 'Fermer le ticket ▸';
   };
-  const rule = m.mode.hintsFree ? 'Mode accompagné : la fiche est corrigée au débrief, elle n’enlève aucun point.' : 'Cause mal identifiée : −' + SIM.report.CAUSE_COST + ' · correction mal identifiée : −' + SIM.report.FIX_COST + '. La fiche ne fait jamais échouer un ticket réparé : elle départage les étoiles.';
+  const rule = m.mode.hintsFree ? 'Mode accompagné : aucun point en jeu.' : 'Cause fausse −' + SIM.report.CAUSE_COST + ' · correction fausse −' + SIM.report.FIX_COST + ' · jamais sous ' + Game.PASS;
   const ov = h('div.overlay.frep', h('div.modal.fmodal', { role: 'dialog', 'aria-label': 'Fiche d’intervention' },
-    h('div.fhead', UI.rewards.stamp(), h('span.tag.ok', 'Ticket résolu'), h('span.muted', 'Ticket ' + run.id + ' · chrono arrêté à ' + UI.fmtDur(m.result.mttrSec))),
-    h('h2', 'Fiche d’intervention'),
-    h('p.muted', 'Le demandeur est dépanné. Avant de fermer le ticket, consigne ce que tu as trouvé : c’est ce qui sépare une panne réparée d’une panne comprise.'),
-    spec.questions.map(qbox),
-    h('div.frule', rule),
-    h('div.actions', left, submit)));
-  document.body.appendChild(ov); refresh();
+    h('div.fhead', UI.rewards.stamp(), h('span.tag.ok', '✓ Dépanné'), h('span.muted', UI.fmtDur(m.result.mttrSec)), h('span.grow'), step, dots),
+    h('h2', 'Qu’as-tu trouvé ?'),
+    boxes,
+    h('div.ffoot', back, h('span.frule', rule), h('div.actions', submit))));
+  document.body.appendChild(ov); show();
 };
 
 /* ------------------------------------------------------------------ débrief */
@@ -26444,7 +26600,7 @@ UR.contractPicker = function (app, o) {
     const nextC = RW.CONTRACTS.filter(c => !c.prestige && !RW.contractOwned(prof, c.id))[0];
     const f = RW.contractFactor(on);
     box.append(h('div.rwch', h('b', 'Contrats'), h('span.muted', owned.length ? (o.off ? ' — ' + o.off : on.length ? ' — XP × ' + f.toFixed(2).replace('.', ',') + ' sur un ticket validé' : ' — des contraintes en échange d’XP. La note n’est jamais touchée.') : ' — premier contrat au niveau ' + (nextC ? nextC.lv : '?'))));
-    if (owned.length) box.append(h('div.rwcl', owned.map(c => h('button.rwcb' + (on.indexOf(c.id) >= 0 ? '.on' : ''), { 'data-contract': c.id, disabled: !!o.off, title: c.desc, 'aria-pressed': on.indexOf(c.id) >= 0 ? 'true' : 'false', on: { click: () => { const cur = UR.contracts(); const i = cur.indexOf(c.id); if (i >= 0) cur.splice(i, 1); else cur.push(c.id); UR.setContracts(cur); draw(); } } }, h('b', c.label), h('small', '× ' + String(c.f).replace('.', ','))))));
+    if (owned.length) box.append(h('div.rwcl', owned.map(c => h('button.rwcb' + (on.indexOf(c.id) >= 0 ? '.on' : ''), { 'data-contract': c.id, disabled: !!o.off, title: c.desc, 'aria-pressed': on.indexOf(c.id) >= 0 ? 'true' : 'false', on: { click: () => { const cur = UR.contracts(); const i = cur.indexOf(c.id); if (i >= 0) cur.splice(i, 1); else cur.push(c.id); UR.setContracts(cur); draw(); if (o.onChange) o.onChange(UR.contracts()); } } }, h('b', c.label), h('small', '× ' + String(c.f).replace('.', ','))))));
     if (owned.length && nextC) box.append(h('div.muted.rwcn', 'Prochain contrat : « ' + nextC.label + ' » au niveau ' + nextC.lv + '.'));
   };
   draw(); return box;
@@ -26552,6 +26708,106 @@ UR.debriefUnlocks = function (prog) {
   const list = RW.between(prog.from.level, prog.to.level); if (!list.length) return null;
   return h('div.card.rwnew', h('h3', 'Débloqué par ton niveau ' + prog.to.level), list.map(r => h('div.rwrow.on', h('span.rwic', icon(KIND_ICON[r.kind] || 'spark', 20)), h('div.grow', h('b', r.label), h('div.muted', r.desc)))),
     h('div.muted', { style: { marginTop: '6px' } }, 'À retrouver dans Carrière → Récompenses.'));
+};
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== ui/97-simple.js ===== */
+/* ============================================================================
+   Interface V3 allégée : chaque écran montre d'abord l'essentiel et UNE action principale, bien visible ;
+   le détail reste disponible, replié.
+   - Débrief : bandeau de résultat (note, étoiles, XP) avec le bouton « Ticket suivant » tout de suite visible,
+     puis « ce qu'il fallait trouver » (la panne et ta fiche côte à côte), puis le détail en sections repliables.
+   - Accueil : colonne de droite réduite à la carrière, trois chiffres et les derniers tickets ; les outils sont repliés.
+   Le mode d'origine (#legacy) garde l'assemblage complet d'avant : les tests antérieurs le voient inchangé.
+   Styles : src/css/42-simple.css (portés par la classe .v3ui sur <html>).
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, UI = SIM.ui, Game = SIM.game, P = SIM.prog, h = UI.h;
+const US = UI.simple = {};
+
+/* section repliable du débrief */
+const fold = (title, sub, body, open) => {
+  const parts = [].concat(body).filter(Boolean); if (!parts.length) return null;
+  return h('details.dfold', open ? { open: true } : {}, h('summary', h('span.dft', title), sub ? h('span.dfs', sub) : null), h('div.dfb', parts));
+};
+
+/* ------------------------------------------------------------------ débrief */
+US.debrief = function (app, m, rec, d, r, B) {
+  const pg = rec && rec.prog; const camp = rec && rec.camp;
+  const state = r.perfect ? 'perfect' : r.passed ? 'ok' : 'ko';
+  const sub = r.passed ? (r.perfect ? 'Parfait' : 'Validé') : 'Seuil : ' + Game.PASS;
+  /* titre court : le détail (seuil, raisons) est dans le barème */
+  const title = r.perfect ? 'Ticket parfait !' : r.passed ? 'Ticket validé' : r.kind === 'resolved' ? 'Réparé, pas assez propre' : r.kind === 'timeout' ? 'Temps écoulé' : 'Ticket abandonné';
+  /* XP : chiffre et barre, le détail est plus bas */
+  let xp = null;
+  if (pg) {
+    const bar = h('div.xpbar', h('i', { style: { width: pg.from.level === pg.to.level ? pg.from.pct + '%' : '0%' } }));
+    setTimeout(() => { if (bar.firstChild) bar.firstChild.style.width = pg.to.pct + '%'; }, 150);
+    xp = h('div.dhxp', h('div.dhxpn', '+' + pg.xp, h('small', ' XP')), h('div.dhxpl', 'Niveau ' + pg.to.level), bar,
+      pg.levelUps.length ? h('div.dhup', '★ Niveau ' + pg.levelUps[pg.levelUps.length - 1] + ' atteint') : null);
+  }
+  /* actions : une principale, deux discrètes */
+  const main = m.camp ? B.next : B.replay;
+  if (main && main.classList) { main.classList.add('primary', 'dgo'); }
+  const second = [m.camp ? B.replay : null, B.home].filter(Boolean);
+  second.forEach(b => { if (b.classList) b.classList.remove('primary'); });
+  const hero = h('section.dhero.' + state,
+    h('div.dhres',
+      h('div.stars.dhstars', { 'aria-label': (r.stars || 0) + ' étoile(s) sur 3' }, UI.stars(r.stars || 0)),
+      h('div.dhnote', String(r.total), h('small', ' / 100')),
+      h('div.dhsub', sub)),
+    h('div.dhmid',
+      h('h1', title),
+      h('div.dhfault', d.fault.title),
+      h('div.dhchips',
+        h('span.dchip', UI.icon('clock', 14), ' ' + UI.fmtDur(d.mttrSec), h('small', ' / cible ' + UI.fmtDur(d.parSec))),
+        h('span.dchip', d.path.actions + ' action' + (d.path.actions > 1 ? 's' : '')),
+        h('span.dchip' + (d.hints.length ? '.warn' : ''), d.hints.length + ' indice' + (d.hints.length > 1 ? 's' : '')),
+        d.dangers.length ? h('span.dchip.bad', d.dangers.length + ' action' + (d.dangers.length > 1 ? 's' : '') + ' dangereuse' + (d.dangers.length > 1 ? 's' : '')) : null)),
+    xp,
+    h('div.dhact', [].concat(main || []), h('div.dhact2', second)));
+  /* ce qu'il fallait trouver : la panne, et ta fiche quand il y en a une */
+  const report = B.report ? [].concat(B.report).filter(x => x && x.classList && x.classList.contains('dfiche'))[0] : null;
+  const found = h('section.dfound' + (report ? '.two' : ''),
+    h('div.dfcol', h('h2', d.fault.parts.length > 1 ? 'Les pannes' : 'La panne'), B.causeCard),
+    report ? h('div.dfcol', h('h2', 'Ta fiche'), report) : null);
+  const seed = h('div.muted.dseed', 'Graine de l’incident : ', h('code', m.seed), ' ', B.exp);
+  const failed = !r.passed;
+  return h('div.screen.dsimple',
+    hero,
+    camp ? B.camp : null,
+    B.unlocks,
+    found,
+    failed ? fold('À revoir', 'notions et cours', [B.review, B.courses, B.skills], true) : null,
+    fold('Expérience gagnée', pg ? '+' + pg.xp + ' XP' : '', B.prog),
+    fold('Ta démarche', d.path.actions + ' actions · chemin optimal', [B.stats, B.refusals, B.traps, B.path, B.sideFx, B.aids, B.dangers]),
+    failed ? null : fold('Compétences', d.skills.length + ' travaillée' + (d.skills.length > 1 ? 's' : ''), [B.skills, B.review]),
+    fold('Barème et historique', 'note détaillée, actions, graine', [B.bareme, B.hist, seed]));
+};
+
+/* ------------------------------------------------------------------ accueil : colonne de droite */
+US.side = function (app, prof, theme, o) {
+  const card = UI.prog.profileCard(prof, app);
+  const pts = P.pointsLeft(prof); const st = P.streakInfo(prof);
+  const btns = card.querySelector('.hbtns');
+  if (btns) { UI.clear(btns); btns.append(h('button.btn' + (pts ? '.primary' : ''), { 'data-act': 'career', on: { click: () => UI.prog.screen(app, 'tree') } }, pts ? 'Ma carrière · ' + pts + ' point' + (pts > 1 ? 's' : '') + ' à dépenser' : 'Ma carrière')); }
+  /* les pastilles ne restent que si elles disent quelque chose : la série en cours */
+  const chips = card.querySelector('.pchips'); if (chips) { UI.clear(chips); if (st.alive) chips.append(h('span.pchip', UI.icon('flame', 14), 'Série : ' + st.n + ' jour' + (st.n > 1 ? 's' : ''))); else chips.remove(); }
+  const tools = h('details.hcard.htools', h('summary', 'Outils et options'), h('div.hbtns',
+    h('button.btn', { on: { click: () => app.startTour() } }, 'Revoir le tutoriel'),
+    h('button.btn', { on: { click: () => app.vaultModal() } }, 'Mots de passe de l’infra'),
+    h('button.btn', { on: { click: () => app.planModal() } }, 'Plan d’adressage'),
+    h('button.btn', { on: { click: () => app.scenarioModal() } }, 'Scénarios formateur'),
+    h('button.btn', { on: { click: () => UI.prog.backupModal(app) } }, 'Sauvegarde du profil'),
+    h('button.btn.hthemebtn', { on: { click: () => app.themeModal() } }, 'Thème : ' + theme.name),
+    h('button.btn', { on: { click: () => app.aboutModal() } }, 'À propos et limites')));
+  const passed = o.passed;
+  return h('aside.hside',
+    card,
+    passed.length ? h('div.hcard.hmini', h('div.hstats', o.stat(String(passed.length), 'validés'), o.stat(o.avgNote + '', 'note moy.'), o.stat(o.avgMttr ? UI.fmtDur(o.avgMttr) : '—', 'MTTR moy.')),
+      o.hist.slice(0, 3).map(x => h('div.hhist', o.tagOf(x), h('span.grow', (SIM.faults.find(f => f.id === x.id) || { title: 'Ticket' }).title), h('b', x.total ? String(x.total) : '—')))) : null,
+    tools);
 };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
