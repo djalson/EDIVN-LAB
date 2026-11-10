@@ -2,6 +2,16 @@
 
 *Tenu par Claude Code. Il ne décide rien : les décisions sont dans `DECISIONS.md` (projet). Chaque entrée dit ce qui est vrai dans le code à la date indiquée.*
 
+## 0. Mise à jour du 10/11/2026 (V3)
+
+| Compte | Avant | Maintenant |
+|---|---|---|
+| Pannes non prouvées réparables par l'interface | 18 (17 `px` + `multi_vitrine`) | **0** : les 17 `px` sont réparées par l'interface, 37 variantes sur 37 (`tests/ui/proxy-sweep.js`) |
+| Pannes retirées de tous les tirages | 0 | **1** : `multi_vitrine` (certificat expiré, aucun renouvellement émulé : irréparable par le joueur) |
+| Variantes retirées | 2 | 2 (inchangé) |
+
+Les sections ci-dessous décrivent l'état au 30/10/2026 ; ce tableau prévaut là où elles divergent.
+
 ## 1. Statut « livrée, non terminée » (D-100, D-108)
 
 *Mis à jour le 29/10/2026 (soir), selon la consigne de suite (travail 1). Trois comptes à rapporter à chaque séance :*

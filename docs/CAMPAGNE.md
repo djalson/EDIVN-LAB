@@ -33,9 +33,9 @@ Le bac à sable est donc strictement le jeu d'origine, et tous les tests antéri
 | 8 | Deuxième site : Bordeaux | pfsense-bdx, R-B1, SW-B1, SRV-DC2, PC-B1 | 12 | 4 |
 | 9 | Le labo de Ramonville | R-RV1, SW-RVA, SW-RVB, SRV-RV, PC-RV1, PC-RV2 | 9 | 4 |
 | 10 | Haute disponibilité | Labège (anneau OSPF) et Colomiers (EtherChannel, STP) | 12 | 4 |
-| 11 | Astreinte | (tout) | 5 | 3 |
+| 11 | Astreinte | (tout) | 4 | 3 |
 
-Total : 187 pannes, 55 tickets à valider et 11 examens pour terminer la campagne.
+Total : 186 pannes jouables (187 au catalogue, dont `multi_vitrine` retirée du tirage : voir plus bas), 55 tickets à valider et 11 examens pour terminer la campagne.
 
 ### Rattachement d'une panne à un chapitre (calculé, jamais écrit à la main)
 
@@ -150,3 +150,8 @@ Au niveau 40, le joueur peut repartir du niveau 1. La campagne, les succès, les
 ### Ajouter une récompense
 
 Une ligne dans `RW.CONTRACTS`, `RW.COS`, `TOOLS` ou `DUTY` : la piste (`RW.TRACK`) se construit seule. `tests/rewards.js` vérifie qu'il n'y a jamais plus de 5 niveaux sans récompense.
+
+## Pannes proxy et panne retirée (10/11/2026)
+
+- `tests/ui/proxy-sweep.js` répare les 17 pannes proxy, toutes variantes comprises (37), par clics et saisies dans l'interface web de pfSense (Squid, squidGuard, gestionnaire de paquets, services, résolveur DNS, règles LAN) et dans les Options Internet de PC-02. Elles ne sont donc plus écartées de l'évaluation chronométrée ni des examens.
+- La même vérification a établi que `multi_vitrine` n'est pas réparable par un joueur : une de ses trois causes est un certificat expiré et aucune commande de renouvellement n'est émulée. Elle est retirée de tous les tirages (`src/content/09-unproven.js`), campagne comprise. Un formateur peut encore la choisir explicitement.
