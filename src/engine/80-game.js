@@ -143,6 +143,8 @@ Game.pick = function (level, seed, profile, opts) {
   let pool = SIM.faults.filter(d => d.level === level);
   /* évaluation chronométrée : les pannes dont la réparabilité par l'interface n'est pas prouvée (SIM.UNPROVEN_FAULTS) ne sont pas tirées ; jamais de pool vide */
   if (opts.timed) { const ok = pool.filter(d => !SIM.isUnproven(d.id)); if (ok.length) pool = ok; }
+  /* pannes irréparables par le joueur (SIM.isRetiredFault) : jamais tirées, quel que soit le mode ; une panne demandée par son identifiant reste servie */
+  if (!opts.faultId && SIM.isRetiredFault) { const ok = pool.filter(d => !SIM.isRetiredFault(d.id)); if (ok.length) pool = ok; }
   if (opts.skill) { const sp = pool.filter(d => d.skills.indexOf(opts.skill) >= 0); if (sp.length) pool = sp; }
   if (opts.faultId) { const f = SIM.faults.find(d => d.id === opts.faultId); if (f) return f; }
   const done = (profile && profile.done) || {};
@@ -164,9 +166,9 @@ function Mission(o) {
   else if (this.lv.faults > 1) {
     /* Admin = 2 pannes, Cyber = 3, Chaos = 4 (ou o.parts) : assemblage validé par simulation, natures différentes, rejet des paires incompatibles. */
     const spec = { count: o.parts || this.lv.faults, mode: o.chain === false ? 'indep' : 'auto' };
-    if (this.mode.timed) spec.exclude = (SIM.UNPROVEN_FAULTS || []).map(u => u.fault);   /* chronométré : pas de panne non prouvée dans une mission composée */
+    spec.exclude = (SIM.UNPROVEN_FAULTS || []).filter(u => u.retired || this.mode.timed).map(u => u.fault);   /* chronométré : pas de panne non prouvée dans une mission composée */
     if (this.lv.pool) { spec.levels = this.lv.pool; spec.needLevel = this.lv.need; }
-    if (o.skill) { const a = SIM.faults.filter(d => d.skills.indexOf(o.skill) >= 0 && (!spec.levels || spec.levels.indexOf(d.level) >= 0) && !(this.mode.timed && SIM.isUnproven(d.id))).map(d => d.id); if (a.length) spec.anchor = a; }
+    if (o.skill) { const a = SIM.faults.filter(d => d.skills.indexOf(o.skill) >= 0 && (!spec.levels || spec.levels.indexOf(d.level) >= 0) && !(this.mode.timed && SIM.isUnproven(d.id)) && !SIM.isRetiredFault(d.id)).map(d => d.id); if (a.length) spec.anchor = a; }
     this.fault = F.bundle(this.seed, spec);
   } else this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, timed: !!this.mode.timed }), this.seed);
   this.parts = this.fault.bundle ? this.fault.parts : [this.fault];

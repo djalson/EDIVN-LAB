@@ -33,7 +33,7 @@ t('Moteur', 'ios-noeffect (D-99/D-111 : avis « sans effet dans le simulateur »
 t('Moteur', 'ios-parcours (D-66/D-93 : pannes de redondance et OSPF, du ticket à la clôture par les terminaux ; clôture sur ping refusée avec motif ; neutralisation)', ['tests/ios-parcours.js'], { timeout: 300, expect: /0 échec/ });
 t('Moteur', 'lx-impact (D-109 : le terminal Linux marque reboot / poweroff / arrêt de service ; needsReboot neutralisé)', ['tests/lx-impact.js'], { expect: /^OK/m });
 t('Moteur', 'impact-net (règle par le résultat : stop puis start du même service = 0 ; reboot jamais remboursé ; Linux, cmd, PowerShell, interface)', ['tests/impact-net.js'], { expect: /^OK/m });
-t('Moteur', 'unproven-timed (pannes non prouvées par l’interface : jamais tirées en chronométré, tirées en guidé / libre ; liste vidée → reviennent)', ['tests/unproven-timed.js'], { expect: /^OK/m });
+t('Moteur', 'unproven-timed (panne irréparable retirée de tous les tirages ; pannes proxy revenues en chronométré ; liste vidée → revient)', ['tests/unproven-timed.js'], { expect: /^OK/m });
 t('Moteur', 'codes-audit (D-106 : registre des codes d’erreur, masquage, audit statique + exécution, neutralisation)', ['tests/codes-audit.js'], { expect: /^OK/m });
 t('Moteur', 'build-guard (livrable autonome : toute ressource externe arrête la construction ; neutralisation)', ['tests/build-guard.js'], { timeout: 300, expect: /0 échec/ });
 t('Moteur', 'faults', ['tests/faults.js'], { expect: /(\d+)\/\1 pannes valides, 0 erreur/ });
@@ -93,6 +93,7 @@ t('Baie / physique', 'rig-sites (câble débranché à Bordeaux et à Ramonville
 t('pfSense', 'pfw1', ['tests/ui/pfw1.js']);
 t('pfSense', 'pfw3', ['tests/ui/pfw3.js']);
 t('pfSense', 'proxy (pages Squid / squidGuard / Options Internet)', ['tests/ui/proxy.js']);
+t('pfSense', 'proxy-sweep (17 pannes proxy × variantes réparées par clics dans l’interface pfSense et les Options Internet)', ['tests/ui/proxy-sweep.js'], { timeout: 900, expect: /, 0 à reprendre$/m });
 t('pfSense', 'proxy-faults (réparations par l’interface)', ['tests/ui/proxy-faults.js']);
 t('pfSense', 'snort-faults (réparations par l’interface Snort)', ['tests/ui/snort-faults.js']);
 t('Réseau', 'colomiers-map (carte du site, panne EtherChannel)', ['tests/ui/colomiers-map.js']);

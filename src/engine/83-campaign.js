@@ -52,7 +52,8 @@ C.faultChapter = function (def) {
   return (faultCh[def.id] = Math.min(C.last(), n));
 };
 C.isBase = def => !SIM.BASE_FAULT_IDS || SIM.BASE_FAULT_IDS.indexOf(def.id) >= 0;
-C.pool = function (n) { return SIM.faults.filter(d => C.isBase(d) && C.faultChapter(d) === n); };
+/* la campagne ne propose que des pannes qu'un joueur peut réparer */
+C.pool = function (n) { return SIM.faults.filter(d => C.isBase(d) && C.faultChapter(d) === n && !(SIM.isRetiredFault && SIM.isRetiredFault(d.id))); };
 C.resetCache = function () { faultCh = null; devCh = null; devRe = null; };
 
 /* Graine dérivée dont la variante tient dans le périmètre du chapitre (une panne à variantes peut viser un serveur

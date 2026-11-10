@@ -1,8 +1,8 @@
 # État du build
 
 - fichier : `dist/EDIVN-Lab.html`
-- taille : 2716624 octets
-- sha256 : `573d76f6d8f2384c01b7e4d161c521cc637f3a65bbb5e48f9e5daab07d6ab565`
+- taille : 2717015 octets
+- sha256 : `f3cc55ca5ef5612cdc7a688823ddcd8a57743bb6f4f5ec6ff1a818d9bf3f15fb`
 - fichiers source assemblés : 127
 - pannes de base : 187
 - compétences : 50

@@ -21,7 +21,8 @@ ok(world.every(d => declared.indexOf(d) >= 0), 'chaque équipement du monde appa
 ok(declared.filter(d => d !== 'PATCH-T').every(d => world.indexOf(d) >= 0), 'aucun équipement inconnu dans les chapitres : ' + declared.filter(d => d !== 'PATCH-T' && world.indexOf(d) < 0).join(','));
 ok(new Set(declared).size === declared.length, 'aucun équipement dans deux chapitres');
 let total = 0; chs.forEach(c => { const pool = C.pool(c.n); total += pool.length; ok(pool.length >= c.need, 'chapitre ' + c.n + ' : ' + pool.length + ' pannes pour ' + c.need + ' à valider'); });
-ok(total === SIM.faults.length, 'toute panne du catalogue a un chapitre (' + total + ' / ' + SIM.faults.length + ')');
+const retiredN = SIM.faults.filter(d => SIM.isRetiredFault(d.id)).length;
+ok(total === SIM.faults.length - retiredN, 'toute panne réparable du catalogue a un chapitre (' + total + ' / ' + SIM.faults.length + ', dont ' + retiredN + ' retirée du tirage)');
 Object.keys(SIM.CHAPTER_RULES.skills).forEach(s => ok(!!SIM.skills[s], 'règle de chapitre sur une compétence existante : ' + s));
 ok(C.faultChapter(SIM.faults.find(d => d.id === 'phys_eth')) === 1 && C.faultChapter(SIM.faults.find(d => d.id === 'ospf_timers')) === 10 && C.faultChapter(SIM.faults.find(d => d.id === 'multi_share')) === 11, 'rattachements témoins');
 /* une panne n'exige jamais un équipement hors du périmètre de son chapitre (graine dérivée) */
