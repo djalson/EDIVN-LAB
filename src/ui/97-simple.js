@@ -72,6 +72,14 @@ US.debrief = function (app, m, rec, d, r, B) {
     fold('Barème et historique', 'note détaillée, actions, graine', [B.bareme, B.hist, seed]));
 };
 
+/* ------------------------------------------------------------------ partie : objectifs bonus repliés (ils ne rapportent que de l'XP) */
+US.goalsFold = function (run) {
+  const box = UI.prog.goalsBox(run); if (!box) return null;
+  const n = h('span.gfn'); const upd = () => { const g = P.goalLive(run.m); const alive = g.filter(x => x.alive).length; n.textContent = alive + ' / ' + g.length + ' en jeu'; };
+  upd(); run.on('act', upd); run.on('clock', () => { if (!run.ended) upd(); });
+  return h('details.gfold', h('summary', 'Objectifs bonus', n), box);
+};
+
 /* ------------------------------------------------------------------ accueil : colonne de droite */
 US.side = function (app, prof, theme, o) {
   const card = UI.prog.profileCard(prof, app);

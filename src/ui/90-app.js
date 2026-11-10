@@ -169,10 +169,11 @@ P.begin = function (opts) {
   const btnGive = h('button.btn.small.danger.ggive', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
   const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), UI.rewards.contractPills(m), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
   const t = m.fault.ticket;
-  const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', UI.rewards.ticketBody(m, t.body)), UI.camp.verifBox(m), UI.prog.goalsBox(run));
+  const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', UI.rewards.ticketBody(m, t.body)), UI.camp.verifBox(m), this.legacy ? UI.prog.goalsBox(run) : UI.simple.goalsFold(run));
   const hintsBox = h('div'); const guide = h('div'); const log = h('div.actlog');
   const guideCard = m.mode.steps ? h('div.card', h('h3', 'Assistant pas à pas'), guide) : null;
-  const side = h('div.side', ticket, guideCard, h('div.card', h('h3', 'Indices'), hintsBox), h('div.card', h('h3', 'Journal de vos actions'), log));
+  const hintsCard = h('div.card.hintscard', h('h3', 'Indices'), hintsBox);
+  const side = h('div.side', ticket, guideCard, hintsCard, h('div.card', h('h3', 'Journal de vos actions'), log));
   const tabs = h('div.tabs'); const view = h('div.view');
   const stage = h('div.stage', tabs, view);
   root.append(bar, h('div.main', side, stage));
@@ -238,7 +239,7 @@ P.begin = function (opts) {
   run.on('act', () => drawLog()); drawLog(); drawGuide();
   run.on('report', (mm, spec) => UI.camp.reportModal(self, run, spec));
   run.on('end', (mm, rec) => self.debrief(mm, rec));
-  this.drawHints = () => { UI.clear(hintsBox); if (m.mode.noHints) hintsBox.append(h('div.muted', 'Indices désactivés en évaluation chronométrée.')); else if (!m.hintLog.length) hintsBox.append(h('div.muted', m.mode.hintsFree ? 'Indices gratuits en mode guidé.' : 'Chaque indice coûte des points sur 100 (' + Game.HINT_COST.map(c => '−' + c).join(' / ') + ').')); m.hintLog.forEach(x => hintsBox.append(h('div.hintbox', h('b', 'Indice ' + x.n + ' — '), x.text))); btnHint.disabled = !!m.mode.noHints || m.hintsUsed >= 3; };
+  this.drawHints = () => { UI.clear(hintsBox); if (m.mode.noHints) hintsBox.append(h('div.muted', 'Indices désactivés en évaluation chronométrée.')); else if (!m.hintLog.length) hintsBox.append(h('div.muted', m.mode.hintsFree ? 'Indices gratuits en mode guidé.' : 'Chaque indice coûte des points sur 100 (' + Game.HINT_COST.map(c => '−' + c).join(' / ') + ').')); m.hintLog.forEach(x => hintsBox.append(h('div.hintbox', h('b', 'Indice ' + x.n + ' — '), x.text))); hintsCard.classList.toggle('empty', !m.hintLog.length); btnHint.disabled = !!m.mode.noHints || m.hintsUsed >= 3; };
   this.drawHints();
   /* site de départ */
   const ts = t.site; firstSite = Array.isArray(ts) ? ts[0] : ts; if (!UI.SITES[firstSite] || siteIds.indexOf(firstSite) < 0) firstSite = siteIds[0];

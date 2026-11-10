@@ -134,3 +134,13 @@
 .dfb > .card, .dfb .grid { margin-top: 8px; }
 /* correctif : les pastilles « Juste / Faux » de la fiche ne s'étirent plus sur toute la hauteur de la ligne */
 .dfrow > .tag { align-self: start; justify-self: start; }
+
+/* ---------- partie : panneau de gauche ---------- */
+.gfold { margin-top: 10px; border: 1px dashed var(--line); }
+.gfold > summary { cursor: pointer; list-style: none; display: flex; gap: 8px; align-items: baseline; padding: 8px 10px; font-weight: 700; font-size: 13px; }
+.gfold > summary::before { content: '▸'; color: var(--hc); transition: transform .15s; }
+.gfold[open] > summary::before { transform: rotate(90deg); }
+.gfold .gfn { margin-left: auto; font: 600 11px var(--mono); color: var(--muted); }
+.gfold .pgoalbox { border: none; margin: 0; padding: 0 10px 8px; }
+.gfold .pgoalh { display: none; }
+.v3ui .hintscard.empty { display: none; }
