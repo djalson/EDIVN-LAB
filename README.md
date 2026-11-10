@@ -27,7 +27,7 @@ les postes et serveurs ont aussi leur vue « poste physique ».
 Niveaux, XP, arbre de compétences, maîtrise par compétence, succès, série, **ticket du jour**, thèmes à débloquer, coffre-fort d'identifiants et carnet de bord : voir `docs/PROGRESSION.md`. Rien de ce qui se gagne ne change la note.
 
 ## Contenu
-187 pannes de base réparties sur 4 niveaux (28 / 67 / 69 / 22) ; Junior et Confirmé = 1 panne, **Admin = 2 pannes, Cyber = 3, Chaos = 4** assemblées par le moteur (pannes de natures différentes, validées par simulation : 120 à 137 pannes combinables), dont 21 pannes proxy Squid/SquidGuard (`docs/PANNES-PROXY.md`) et des chaînes multi-causes scriptées de niveau 4, rattachées aux 50 compétences de la fiche
+187 pannes de base réparties sur 4 niveaux (29 / 67 / 69 / 22) ; Junior et Confirmé = 1 panne, **Admin = 2 pannes, Cyber = 3, Chaos = 4** assemblées par le moteur (pannes de natures différentes, validées par simulation : 120 à 137 pannes combinables), dont 21 pannes proxy Squid/SquidGuard (`docs/PANNES-PROXY.md`) et des chaînes multi-causes scriptées de niveau 4, rattachées aux 50 compétences de la fiche
 v21 (voir `docs/COUVERTURE-UI.md`). Les mêmes graines rejouent les mêmes incidents.
 
 ## Créer / modifier un scénario sans coder
