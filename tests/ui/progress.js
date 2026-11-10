@@ -17,7 +17,7 @@ const { chromium } = require('playwright');
 
   console.log('== thèmes verrouillés');
   await p.click('.hthemetop'); await p.waitForSelector('.thcard');
-  const locked = await p.$$eval('.thcard', cs => cs.map(c => ({ n: c.querySelector('b').textContent, lock: /Débloquer dans l’arbre/.test(c.innerText) })));
+  const locked = await p.$$eval('.thcard', cs => cs.map(c => ({ n: c.querySelector('b').textContent, lock: /Débloquer dans l’arbre|🔒 Niveau/.test(c.innerText) })));
   chk('7 thèmes verrouillés (5 dans l’arbre, 2 de prestige), 3 libres (Néon Arcade, Dev Dark, Papier Clair)', locked.filter(x => x.lock).length === 7 && locked.filter(x => !x.lock).map(x => x.n).sort().join() === 'Dev Dark,Néon Arcade,Papier Clair');
   await p.keyboard.press('Escape'); await p.evaluate(() => document.querySelector('.overlay') && document.querySelector('.overlay').remove());
 
