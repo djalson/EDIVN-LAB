@@ -1,8 +1,15 @@
-# EDIVN Lab — simulateur de pannes d'infrastructure (V2)
+# EDIVN Lab — simulateur de pannes d'infrastructure (V3)
 
 Jeu autonome (un seul fichier HTML, hors ligne) : `dist/EDIVN-Lab.html`. Ouvrir dans Chrome / Edge / Firefox.
 
-## Jouer
+## Trois façons de jouer
+- **Campagne** (mise en avant) : 11 chapitres. Tu commences avec un étage de bureaux ; chaque examen réussi ajoute des équipements à ton périmètre, jusqu'à l'infrastructure complète (5 sites). Détail : `docs/CAMPAGNE.md`.
+- **Astreinte** : ticket du jour et incidents à plusieurs pannes.
+- **Bac à sable** : tout est ouvert, tu choisis niveau, mode et panne (c'est le jeu de la V2, inchangé).
+
+Après chaque ticket résolu, une **fiche d'intervention** demande la cause racine et la correction durable : elle entre dans la note et décide des révisions.
+
+## Jouer (bac à sable)
 Au premier lancement, un **tutoriel de prise en main** (≈ 2 min, passable) propose de découvrir le ticket, la carte,
 le bureau Windows, les indices et la clôture. Il se relance depuis l'accueil (« Revoir le tutoriel »).
 1. Sur l'accueil (décor pixel-art de salle serveur, mascotte), choisir le niveau (Junior → Chaos) et le mode (guidé, libre, évaluation chronométrée). La graine est tirée au hasard (le formateur peut la fixer dans « Options formateur ») ; elle est rappelée au débrief avec « Rejouer cet incident ». La mascotte donne un conseil au clic ; 4 chats se cachent dans le décor. Le thème de l'interface se change depuis l'accueil (7 thèmes).
@@ -29,6 +36,8 @@ Format : `docs/FORMAT-SCENARIO.md`.
 
 ## Développer
 ```
+npm run build ; npm run test:fast     # après chaque modification (quelques minutes)
+npm test                              # batterie complète avant de livrer
 node build.js                 # assemble src/ → dist/EDIVN-Lab.html et docs/A-VERIFIER.md
 node tests/faults.js          # 179 pannes : sain → cassé → réparé → contournement
 node tests/validate.js        # validation de scénarios
