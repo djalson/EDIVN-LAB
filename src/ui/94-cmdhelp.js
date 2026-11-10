@@ -47,6 +47,7 @@ CH.open = function (term) {
 CH.refresh = function (term) { if (term.helpBtn) term.helpBtn.style.display = CH.kindOf(term) ? '' : 'none'; };
 CH.attach = function (term) {
   if (term.helpBtn || ['ios', 'ps', 'cmd', 'bash'].indexOf(term.theme) < 0) return;
+  if (UI.rewards && UI.rewards.run && UI.rewards.has(UI.rewards.run.m, 'nohelp')) return;   /* contrat « Sans aide-mémoire » */
   term.helpBtn = h('button.thelp', { type: 'button', title: 'Aide-mémoire : liste des commandes disponibles', 'aria-label': 'Aide-mémoire des commandes', on: { click: e => { e.stopPropagation(); CH.open(term); }, mousedown: e => e.stopPropagation() } }, 'Aide-mémoire');
   term.el.append(term.helpBtn); CH.refresh(term);
 };

@@ -25,9 +25,9 @@ const { chromium } = require('playwright');
   await p.evaluate(() => { const pr = SIM.game.profile(); SIM.prog.TREE.forEach(n => { if (n.theme) pr.tree[n.id] = 1; }); SIM.game.saveProfile(pr); });
   console.log('== thèmes');
   await p.click('.hthemetop'); await p.waitForSelector('.thcard');
-  chk('sélecteur : 8 thèmes proposés', (await p.$$('.thcard')).length === 8);
+  chk('sélecteur : 10 thèmes proposés (8 + 2 de prestige)', (await p.$$('.thcard')).length === 10);
   const names = await p.$$eval('.thcard b', e => e.map(x => x.textContent));
-  chk('noms génériques (aucune marque ni œuvre citée)', !names.some(n => /matrix|blade|tron|game ?boy|dracula|nintendo|microsoft|cisco/i.test(n)) && names.join() === 'Néon Arcade,Pluie de code,Synthwave 80s,Cyberpunk,Console 8-bit,Terminal Ambre,Dev Dark,Papier Clair');
+  chk('noms génériques (aucune marque ni œuvre citée)', !names.some(n => /matrix|blade|tron|game ?boy|dracula|nintendo|microsoft|cisco/i.test(n)) && names.join() === 'Néon Arcade,Pluie de code,Synthwave 80s,Cyberpunk,Console 8-bit,Terminal Ambre,Dev Dark,Papier Clair,Or noir,Boréal');
   await p.click('.thcard:nth-child(4) button:has-text("Appliquer")'); await p.waitForTimeout(300);
   chk('thème appliqué (data-theme) et mémorisé', await p.evaluate(() => document.documentElement.getAttribute('data-theme') === 'cyber' && SIM.game.store.get('theme') === 'cyber'));
   chk('l’accueil est redessiné avec le thème (variable --accent)', await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() === '#fcee0a'));
@@ -38,7 +38,7 @@ const { chromium } = require('playwright');
   const pal = await p.evaluate(() => SIM.ui.themes.list.map(t => ({ id: t.id, acc: t.vars['--accent'], acc2: t.vars['--accent2'], on: t.vars['--onaccent'], bg: t.vars['--bg'], text: t.vars['--text'], panel: t.vars['--panel'], muted: t.vars['--muted'], bub: t.vars['--bubble'], bubt: t.vars['--bubbletxt'] })));
   const cr = (a, c) => { const A = lum(hex(a)), B = lum(hex(c)); return (Math.max(A, B) + .05) / (Math.min(A, B) + .05); };
   const bad = []; pal.forEach(t => { const ck = (n, a, c, min) => { const v = cr(a, c); if (v < min) bad.push(t.id + ' ' + n + ' ' + v.toFixed(2)); }; ck('bouton principal', t.on, t.acc, 4.5); ck('texte/fond', t.text, t.bg, 4.5); ck('texte/panneau', t.text, t.panel, 4.5); ck('discret/panneau', t.muted, t.panel, 4.5); ck('bulle', t.bubt, t.bub, 4.5); });
-  chk('contrastes AA sur les 8 thèmes' + (bad.length ? ' : ' + bad.join(' ; ') : ''), bad.length === 0);
+  chk('contrastes AA sur les 10 thèmes' + (bad.length ? ' : ' + bad.join(' ; ') : ''), bad.length === 0);
 
   console.log('== animations du 100');
   for (const id of ['neon', 'rain', 'synth', 'cyber', 'bit', 'amber', 'dev', 'paper']) {

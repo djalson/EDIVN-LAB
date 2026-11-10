@@ -74,6 +74,7 @@ P.buy = function (p, id) { const why = P.whyNot(p, id); if (why) return { ok: fa
 P.reset = function (p) { p.tree = {}; if (p.title && !P.has(p, 'titles')) delete p.title; return { ok: true }; };
 P.themeOwned = function (p, themeId) {
   if (P.FREE_THEMES.indexOf(themeId) >= 0 || p.giftTheme === themeId) return true;
+  if (SIM.rewards && SIM.rewards.THEMES[themeId] !== undefined) return SIM.rewards.themeOwned(p, themeId);   /* thèmes de prestige : au niveau, pas dans l'arbre */
   const n = P.TREE.find(x => x.theme === themeId); return !!n && P.has(p, n.id);
 };
 /* Les avantages de confort sont coupés en évaluation chronométrée : les notes restent comparables. */
@@ -172,6 +173,8 @@ P.xpFor = function (m, r, p, prev) {
   if (m.daily && !P.dailyDone(p, P.today())) mul('Ticket du jour', 1.5);
   const st = P.streakInfo(p, P.today()); const nextStreak = st.state === 'today' ? st.n : (st.alive ? st.n + 1 : 1);
   const sb = P.streakBonus(nextStreak); if (sb) mul('Série de ' + nextStreak + ' jours', 1 + sb);
+  /* contrats (85-rewards.js) : uniquement de l'XP, uniquement sur un ticket validé ; « Tout ou rien » annule l'XP sous 90 */
+  if (r.passed && m.contracts && m.contracts.length && SIM.rewards) m.contracts.forEach(id => { const c = SIM.rewards.contract(id); if (!c) return; if (id === 'allin') mul('Contrat « ' + c.label + ' »' + (r.total >= 90 ? '' : ' : moins de 90'), r.total >= 90 ? c.f : 0); else mul('Contrat « ' + c.label + ' »', c.f); });
   let perk = 0; if (P.has(p, 'xp1')) perk += 0.05; if (P.has(p, 'xp2')) perk += 0.05; if (perk) mul('Réputation', 1 + perk);
   let total = sub; mult.forEach(x => { total *= x.f; });
   return { total: Math.round(total), subtotal: sub, parts, mult, goals };

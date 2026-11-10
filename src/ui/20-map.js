@@ -79,22 +79,29 @@ MapView.prototype.siteView = function (id) {
     const x1 = Math.max.apply(null, zs.map(z => z.x + z.w).concat(ns.map(n => n[1] + 130))), y1 = Math.max.apply(null, zs.map(z => z.y + z.h).concat(ns.map(n => n[2] + 90)));
     if (isFinite(x0) && isFinite(y0)) { ox = x0 - pad; oy = y0 - pad; MW = Math.max(520, x1 - x0 + 2 * pad); MH = Math.max(300, y1 - y0 + 2 * pad); }
   }
+  /* contrat « Sans plan » : plus de topologie, une simple liste d'équipements rangés par nom */
+  const flat = !!(UI.rewards && UI.rewards.has(run.m, 'nomap')); const flatPos = {};
+  if (flat) { const ns = S.nodes.filter(n => vis(n[0])).map(n => n[0]).sort(); ns.forEach((id, i) => { flatPos[id] = [30 + (i % 5) * 150, 30 + Math.floor(i / 5) * 110]; }); ox = 0; oy = 0; MW = 800; MH = Math.max(300, 60 + Math.ceil(ns.length / 5) * 110); }
   inner.style.width = MW + 'px'; inner.style.height = MH + 'px';
-  S.zones.filter(z => !scope || inZone(z)).forEach(z => inner.append(h('div.zone', { style: { left: (z.x - ox) + 'px', top: (z.y - oy) + 'px', width: z.w + 'px', height: z.h + 'px' } }, z.t)));
+  S.zones.filter(z => !flat && (!scope || inZone(z))).forEach(z => inner.append(h('div.zone', { style: { left: (z.x - ox) + 'px', top: (z.y - oy) + 'px', width: z.w + 'px', height: z.h + 'px' } }, z.t)));
   const svgNS = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('class', 'links'); svg.setAttribute('width', MW); svg.setAttribute('height', MH);
   inner.append(svg);
   S.nodes.filter(n => vis(n[0])).forEach(([nid, x, y, type, sub]) => {
-    x -= ox; y -= oy; pos[nid] = { x: x + 56, y: y + 26 };
+    if (flat) { x = flatPos[nid][0]; y = flatPos[nid][1]; if (type !== 'patch') sub = ''; } else { x -= ox; y -= oy; } pos[nid] = { x: x + 56, y: y + 26 };
     const dev = run.W.dev[nid];
     const label = type === 'patch' ? 'Baie de brassage' : nid;
     const ic = h('div.ic', UI.icon(TYPE_ICON[type], 36));
     const n = h('div.node', { style: { left: x + 'px', top: y + 'px' }, title: label, on: { click: ev => { ev.stopPropagation(); self.popup(nid, type, n, inner, sub); } } }, ic, h('div.nm', label), h('div.sub', sub));
     inner.append(n);
   });
-  S.links.filter(([a, b]) => pos[a] && pos[b]).forEach(([a, b]) => {
+  const lines = [];
+  S.links.filter(([a, b]) => !flat && pos[a] && pos[b]).forEach(([a, b]) => {
     const l = document.createElementNS(svgNS, 'line'); l.setAttribute('x1', pos[a].x); l.setAttribute('y1', pos[a].y); l.setAttribute('x2', pos[b].x); l.setAttribute('y2', pos[b].y);
-    l.setAttribute('stroke', '#4a6286'); l.setAttribute('stroke-width', '2'); svg.append(l);
+    l.setAttribute('stroke', '#4a6286'); l.setAttribute('stroke-width', '2'); svg.append(l); lines.push({ a, b, el: l });
   });
+  /* outil « voyants de liaison » : liens colorés selon l'état réel, repeints à chaque action */
+  this._lines = lines; if (UI.rewards) { UI.rewards.paintLinks(run, lines); if (!this._ledHook) { this._ledHook = true; run.on('act', () => { if (self._lines) UI.rewards.paintLinks(run, self._lines); }); } }
+  if (flat) map.append(h('div.mapscope', 'Contrat « Sans plan » : la topologie n’est pas affichée.'));
   map.append(inner); map.addEventListener('click', () => this.closePop());
   if (scope) { const hidden = S.nodes.filter(n => !vis(n[0])).length; if (hidden) map.append(h('div.mapscope', UI.icon('network', 14), ' Chapitre ' + run.scope.n + ' : tu vois ton périmètre d’intervention. Le reste de l’infrastructure se dévoile au fil de la campagne.')); }
   /* mise à l'échelle : la carte tient toujours dans la zone visible (jamais de nœud rogné) */
@@ -116,6 +123,7 @@ MapView.prototype.popup = function (nid, type, nodeEl, inner, sub) {
   else if (dev && dev.kind === 'pf') { items.push(btn('Console de la VM (menu pfSense)', () => self.onOpen(nid, 'main'))); items.push(btn('Alimentation et câblage', () => self.onOpen(nid, 'rig'))); }
   else if (dev && dev.kind === 'printer') { items.push(btn('Panneau de commande', () => self.onOpen(nid, 'main'))); items.push(btn('Alimentation et câblage', () => self.onOpen(nid, 'rig'))); }
   else items.push(btn('Voyants, câbles et alimentation', () => self.onOpen(nid, 'rig')));
+  if (UI.rewards) UI.rewards.popupItems(run, nid, btn).forEach(x => items.push(x));
   const pop = h('div.pop', { on: { click: e => e.stopPropagation() } }, h('h4', type === 'patch' ? 'Baie de brassage' : nid), h('div.muted', { style: { marginBottom: '6px' } }, sub), items);
   const left = parseInt(nodeEl.style.left, 10) + 120, top = parseInt(nodeEl.style.top, 10);
   pop.style.left = Math.min(left, parseInt(inner.style.width, 10) - 260) + 'px'; pop.style.top = top + 'px';

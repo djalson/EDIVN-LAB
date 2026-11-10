@@ -98,3 +98,55 @@ Les profils d'avant la V3 ne sont pas repris : au premier lancement, le profil e
 1. Une entrée dans `SIM.CHAPTERS` (`src/content/31-chapters.js`) : titre, récit, `devices`, `sites`, `need`.
 2. Si besoin, le chapitre minimal des nouvelles compétences dans `SIM.CHAPTER_RULES.skills`.
 3. `node tests/campaign.js` : contrôle que tout équipement du monde a un chapitre et que chaque chapitre a assez de pannes.
+
+## Récompenses de niveau
+
+Code : `src/engine/85-rewards.js` (sans DOM), `src/ui/96-rewards.js`, `src/css/41-rewards.css`. Tests : `tests/rewards.js`, `tests/ui/rewards.js`.
+
+L'arbre de compétences s'achète avec des points et se vide vers le niveau 18. La piste des récompenses donne quelque chose à chaque palier jusqu'au niveau 40, sans rien acheter. Elle se consulte dans Carrière → Récompenses.
+
+| Niveau | Récompense |
+|---|---|
+| 2 | Couleurs de terminal « Phosphore vert » |
+| 3 | Fond d'écran « Circuit imprimé » |
+| 4 | Contrat « Sans aide-mémoire » (XP × 1,1) |
+| 5 | Outil : voyants de liaison sur la carte |
+| 6 | Habillage de carte « Plan d'architecte » |
+| 7 | Second avis : un indice gratuit par jour |
+| 8 | Contrat « Ticket vague » (XP × 1,15) |
+| 9 | Couleurs de terminal « Solarisé sombre » |
+| 10 | Astreinte : incident double |
+| 11 | Fond d'écran « Aurore » |
+| 12 | Outil : ping rapide depuis la carte |
+| 13 | Contrat « Temps réduit » (XP × 1,2) |
+| 14 | Habillage de carte « Schéma technique » |
+| 15 | Couleurs de terminal « Nuit violette » |
+| 16 | Contrat « Sans plan » (XP × 1,2) |
+| 17 | Outil : historique des commandes entre tickets |
+| 18 | Fond d'écran « Crépuscule » |
+| 20 | Astreinte : incident critique |
+| 22 | Habillage de carte « Nuit » |
+| 24 | Couleurs de terminal « Papier clair » |
+| 26 | Fond d'écran « Grille rétro » |
+| 30 | Astreinte : nuit noire ; thème « Or noir » |
+| 35 | Fond d'écran « Sommet » |
+| 40 | Thème « Boréal » ; prestige |
+
+Insignes de profil (et tampon de la fiche d'intervention) : liés aux chapitres terminés, pas au niveau. Bronze au chapitre 3, argent au 6, or au 10, astreinte au 11.
+
+### Règles d'équité
+
+- **Contrats** : ne changent que l'XP d'un ticket validé, jamais la note. Indisponibles en mode accompagné, en examen et dans le tutoriel.
+- **Outils et second avis** : coupés en évaluation chronométrée et en examen de chapitre (`RW.fair`), comme le coffre-fort.
+- **Ping rapide** : diagnostic seulement. Il est journalisé mais n'observe rien : il ne peut pas clore un ticket.
+- **Historique entre tickets** : seulement les lignes tapées dans un interpréteur (cmd, bash, IOS, pfSense, MariaDB). Jamais un écran d'ouverture de session ni une réponse à une invite de mot de passe.
+- **Cosmétiques** : les fonds d'écran, les couleurs de terminal et la carte ne changent ni le contenu ni le comportement des consoles.
+- **Astreinte** : les incidents à 2, 3 et 4 pannes s'ouvrent aux niveaux 10, 20 et 30. Le bac à sable reste entièrement ouvert.
+
+### Prestige
+
+Au niveau 40, le joueur peut repartir du niveau 1. La campagne, les succès, les maîtrises et toutes les récompenses de niveau restent acquis ; l'arbre est rendu et se regagne en remontant. Il gagne une étoile et le contrat « Tout ou rien » (90 ou plus : XP × 1,5 ; en dessous : aucune XP).
+
+### Ajouter une récompense
+
+Une ligne dans `RW.CONTRACTS`, `RW.COS`, `TOOLS` ou `DUTY` : la piste (`RW.TRACK`) se construit seule. `tests/rewards.js` vérifie qu'il n'y a jamais plus de 5 niveaux sans récompense.

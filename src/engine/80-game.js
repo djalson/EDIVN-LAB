@@ -274,7 +274,7 @@ Mission.prototype._finish = function (kind, st) {
   /* Non résolu : plafond sous le seuil de validation, au prorata des causes réparées. */
   if (kind !== 'resolved') sc.unsolved = -(100 - Math.round((kind === 'timeout' ? Game.PARTIAL_TIMEOUT : Game.PARTIAL_GIVEUP) * (st.total ? st.solved / st.total : 0)));
   else if (t > this.parSec) sc.time = -Math.min(Game.TIME_MAX, Math.round(Game.TIME_MAX * (t - this.parSec) / (1.5 * this.parSec)));
-  sc.hints = this.mode.hintsFree ? 0 : -this.hintLog.reduce((a, h) => a + Game.HINT_COST[h.n - 1], 0);
+  sc.hints = this.mode.hintsFree ? 0 : -this.hintLog.reduce((a, h) => a + (h.free ? 0 : Game.HINT_COST[h.n - 1]), 0);   /* h.free : « second avis » (85-rewards.js) */
   sc.danger = -Math.min(Game.DANGER_CAP, this.dangers.length * Game.DANGER_COST);
   sc.impact = -Math.min(Game.IMPACT_CAP, this.impacts.length * Game.IMPACT_COST);
   sc.wrongClose = -(this.wrongCloses - this.falseRes) * Game.WRONG_CLOSE; sc.falseRes = -this.falseRes * Game.FALSE_RES;

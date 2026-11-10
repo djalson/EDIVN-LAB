@@ -1,0 +1,76 @@
+/* Récompenses de niveau : piste, contrats, apparence (fonds d'écran, terminaux, carte, insignes), prestige. */
+.rwc { margin: 0 0 14px; padding: 8px 10px; border: 1px dashed var(--line); }
+.rwch { font-size: 13px; } .rwcn { font-size: 11.5px; margin-top: 6px; }
+.rwcl { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.rwcb { color: var(--text); background: var(--panel2); border: 2px solid var(--line); padding: 5px 10px; cursor: pointer; display: flex; gap: 8px; align-items: baseline; }
+.rwcb small { color: var(--muted); font: 700 11px var(--mono); }
+.rwcb.on { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, var(--panel2)); }
+.rwcb.on small { color: var(--warn); }
+.rwcb:disabled { opacity: .5; cursor: default; }
+.pill.rwpill { border-color: var(--warn); }
+.cdutyb.lock { opacity: .55; cursor: default; border-top-color: var(--line); } .cdutyb.lock:hover { transform: none; }
+.rwnext { margin-top: 10px; font-size: 12px; color: var(--muted); } .rwnext b { color: var(--hc); }
+.rwstar { color: #ffd166; letter-spacing: 1px; }
+.rwview .rwcols { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 900px) { .rwview .rwcols { grid-template-columns: 1fr; } }
+.rwview h3 { margin: 4px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.rwtrack { display: flex; flex-direction: column; gap: 6px; }
+.rwrow { display: grid; grid-template-columns: 34px 24px 1fr auto; gap: 10px; align-items: center; padding: 7px 10px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; opacity: .62; }
+.rwrow.on { opacity: 1; border-color: color-mix(in srgb, var(--ok) 55%, var(--line)); }
+.rwrow .rwlv { font: 700 13px var(--mono); text-align: center; color: var(--muted); border: 2px solid var(--line); border-radius: 6px; padding: 2px 0; }
+.rwrow.on .rwlv { color: var(--ok); border-color: var(--ok); }
+.rwrow .rwic { color: var(--hc); display: grid; place-items: center; }
+.rwrow .muted { font-size: 12px; } .rwst { font-size: 11.5px; white-space: nowrap; }
+.rwnew { margin-top: 14px; border-color: var(--hc); } .rwnew .rwrow { grid-template-columns: 24px 1fr; margin-top: 6px; }
+.rwslot { margin-bottom: 14px; }
+.rwopts { display: flex; gap: 8px; flex-wrap: wrap; }
+.rwopt { color: var(--text); background: var(--panel2); border: 2px solid var(--line); border-radius: 8px; padding: 6px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 92px; font-size: 12px; }
+.rwopt.on { border-color: var(--hc); } .rwopt.lock { opacity: .5; cursor: default; } .rwopt small { color: var(--muted); font-size: 10.5px; }
+.rwsw { display: block; width: 72px; height: 40px; border-radius: 5px; border: 1px solid #0006; background: #1c3f6e; }
+.rwprest { margin-top: 18px; padding: 12px; border: 2px solid var(--line); }
+
+/* aperçus et rendus : fonds d'écran des postes Windows */
+.rwsw[data-slot=wall][data-v=default], .desk .wall { }
+.rwsw[data-slot=wall][data-v=default] { background: radial-gradient(60px 34px at 70% 30%, #3d86d6 0%, transparent 60%), linear-gradient(160deg, #0b2a52 0%, #1b5aa6 55%, #0d3566 100%); }
+.rwsw[data-slot=wall][data-v=circuit], html[data-wall=circuit] .desk .wall { background: linear-gradient(#0a5c4a 1px, transparent 1px) 0 0/100% 22px, linear-gradient(90deg, #0a5c4a 1px, transparent 1px) 0 0/22px 100%, radial-gradient(circle at 30% 40%, #0f766e 0%, #052e2b 70%); }
+.rwsw[data-slot=wall][data-v=aurora], html[data-wall=aurora] .desk .wall { background: radial-gradient(120% 80% at 20% 100%, #34d399 0%, transparent 55%), radial-gradient(120% 90% at 85% 90%, #a78bfa 0%, transparent 60%), linear-gradient(180deg, #06121f 0%, #0b2540 100%); }
+.rwsw[data-slot=wall][data-v=dusk], html[data-wall=dusk] .desk .wall { background: linear-gradient(180deg, #1e1b4b 0%, #7c2d5a 55%, #f59e0b 100%); }
+.rwsw[data-slot=wall][data-v=grid], html[data-wall=grid] .desk .wall { background: linear-gradient(#ff4fa355 1px, transparent 1px) 0 0/100% 26px, linear-gradient(90deg, #ff4fa355 1px, transparent 1px) 0 0/26px 100%, linear-gradient(180deg, #14062b 0%, #3b0f6b 100%); }
+.rwsw[data-slot=wall][data-v=summit], html[data-wall=summit] .desk .wall { background: linear-gradient(135deg, transparent 49%, #e2e8f0 50%, #94a3b8 72%, transparent 73%) 0 100%/60% 70% no-repeat, linear-gradient(225deg, transparent 49%, #cbd5e1 50%, #64748b 75%, transparent 76%) 100% 100%/70% 55% no-repeat, linear-gradient(180deg, #0f172a 0%, #38bdf8 100%); }
+
+/* couleurs des terminaux (le contenu et le comportement ne changent pas) */
+.rwsw[data-slot=term][data-v=default] { background: #0c0c0c; box-shadow: inset 0 0 0 9px #0c0c0c, inset 30px 0 0 9px #cccccc; }
+.rwsw[data-slot=term][data-v=green] { background: #33ff66; box-shadow: inset 0 0 0 9px #020a04, inset -30px 0 0 9px #020a04; }
+.rwsw[data-slot=term][data-v=solar] { background: #93a1a1; box-shadow: inset 0 0 0 9px #002b36, inset -30px 0 0 9px #002b36; }
+.rwsw[data-slot=term][data-v=violet] { background: #f8f8f2; box-shadow: inset 0 0 0 9px #282a36, inset -30px 0 0 9px #282a36; }
+.rwsw[data-slot=term][data-v=paper] { background: #24292f; box-shadow: inset 0 0 0 9px #fbf8ef, inset -30px 0 0 9px #fbf8ef; }
+html[data-term=green] .term { background: #020a04; color: #33ff66; } html[data-term=green] .term .tcur, html[data-term=green] .term .tpre .vcur { background: #33ff66; color: #020a04; }
+html[data-term=solar] .term { background: #002b36; color: #93a1a1; } html[data-term=solar] .term .tcur, html[data-term=solar] .term .tpre .vcur { background: #93a1a1; color: #002b36; }
+html[data-term=violet] .term { background: #282a36; color: #f8f8f2; } html[data-term=violet] .term .tcur, html[data-term=violet] .term .tpre .vcur { background: #f8f8f2; color: #282a36; }
+html[data-term=paper] .term { background: #fbf8ef; color: #24292f; } html[data-term=paper] .term .tcur, html[data-term=paper] .term .tpre .vcur { background: #24292f; color: #fbf8ef; }
+
+/* habillages de la carte */
+.rwsw[data-slot=map][data-v=default] { background: linear-gradient(#0e1826 1px, transparent 1px) 0 0/100% 10px, linear-gradient(90deg, #0e1826 1px, transparent 1px) 0 0/10px 100%, #0c0820; }
+.rwsw[data-slot=map][data-v=blueprint], html[data-map=blueprint] .map { background: #0b3a6b; }
+.rwsw[data-slot=map][data-v=blueprint] { background: linear-gradient(#ffffff2e 1px, transparent 1px) 0 0/100% 10px, linear-gradient(90deg, #ffffff2e 1px, transparent 1px) 0 0/10px 100%, #0b3a6b; }
+html[data-map=blueprint] .mapin { background: linear-gradient(#ffffff1f 1px, transparent 1px) 0 0/100% 40px, linear-gradient(90deg, #ffffff1f 1px, transparent 1px) 0 0/40px 100%; }
+html[data-map=blueprint] .mapin svg.links line { stroke: #cfe6ff; } html[data-map=blueprint] .mapin .zone { border-color: #9cc9ff; color: #cfe6ff; }
+html[data-map=blueprint] .node .nm, html[data-map=blueprint] .node .sub { background: #0b3a6b; color: #eaf4ff; } html[data-map=blueprint] .node .ic { background: #0e4a88; border-color: #9cc9ff; color: #eaf4ff; }
+.rwsw[data-slot=map][data-v=schema] { background: radial-gradient(#94a3b8 1px, transparent 1.4px) 0 0/8px 8px, #f1f5f9; }
+html[data-map=schema] .map { background: #f1f5f9; } html[data-map=schema] .mapin { background: radial-gradient(#94a3b8 1px, transparent 1.4px) 0 0/20px 20px; }
+html[data-map=schema] .mapin svg.links line { stroke: #334155; } html[data-map=schema] .mapin .zone { border-color: #64748b; color: #334155; }
+html[data-map=schema] .node .nm { background: #f1f5f9; color: #0f172a; } html[data-map=schema] .node .sub { background: #f1f5f9; color: #475569; } html[data-map=schema] .node .ic { background: #ffffff; border-color: #334155; color: #0f172a; }
+html[data-map=schema] .mapscope { color: #475569; }
+.rwsw[data-slot=map][data-v=night] { background: radial-gradient(#ffffff 0.6px, transparent 1px) 0 0/9px 9px, #02030a; }
+html[data-map=night] .map { background: #02030a; } html[data-map=night] .mapin { background: radial-gradient(#ffffff55 0.7px, transparent 1.2px) 0 0/34px 34px; }
+html[data-map=night] .mapin svg.links line { stroke: #6366f1; } html[data-map=night] .mapin .zone { border-color: #312e81; color: #818cf8; }
+html[data-map=night] .node .nm, html[data-map=night] .node .sub { background: #02030a; } html[data-map=night] .node .ic { background: #0b0d24; border-color: #4338ca; }
+
+/* insignes (chapitres terminés) : cadre de la carte de carrière et tampon de la fiche */
+.rwsw[data-slot=frame] { width: 40px; height: 40px; border-radius: 50%; background: var(--panel); border: 4px solid var(--line); }
+.rwsw[data-slot=frame][data-v=bronze], .pcard[data-frame=bronze] .lvchip { border-color: #cd7f32; box-shadow: 0 0 0 2px #cd7f3255; }
+.rwsw[data-slot=frame][data-v=silver], .pcard[data-frame=silver] .lvchip { border-color: #c0c7d1; box-shadow: 0 0 0 2px #c0c7d155; }
+.rwsw[data-slot=frame][data-v=gold], .pcard[data-frame=gold] .lvchip { border-color: #ffd166; box-shadow: 0 0 10px #ffd16688; }
+.rwsw[data-slot=frame][data-v=onyx], .pcard[data-frame=onyx] .lvchip { border-color: #e879f9; box-shadow: 0 0 12px #e879f9aa, inset 0 0 0 2px #0b0a08; }
+.rwstamp { font: 800 10.5px var(--mono); letter-spacing: .14em; padding: 3px 8px; border: 2px solid currentColor; border-radius: 4px; transform: rotate(-4deg); color: #cd7f32; }
+.rwstamp[data-frame=silver] { color: #c0c7d1; } .rwstamp[data-frame=gold] { color: #ffd166; } .rwstamp[data-frame=onyx] { color: #e879f9; }

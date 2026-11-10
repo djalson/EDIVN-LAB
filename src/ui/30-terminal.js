@@ -159,7 +159,7 @@ P._key = function (e) {
 P._wordLeft = function () { let p = this.pos; while (p > 0 && /\s/.test(this.buf[p - 1])) p--; while (p > 0 && !/\s/.test(this.buf[p - 1])) p--; return p; };
 P._wordRight = function () { let p = this.pos; const n = this.buf.length; while (p < n && !/\s/.test(this.buf[p])) p++; while (p < n && /\s/.test(this.buf[p])) p++; return p; };
 P._hist = function (dir) {
-  const s = this.session(); if (s.ask) return; const H = s.history || [];
+  const s = this.session(); if (s.ask) return; const H = (UI.rewards ? UI.rewards.histSeed(s) : []).concat(s.history || []);   /* outil « historique entre tickets » */
   if (dir < 0) { if (this.hi === -1) { this.draft = this.buf; this.hi = H.length; } if (this.hi > 0) this.hi--; this.buf = H[this.hi] || ''; }
   else { if (this.hi === -1) return; this.hi++; if (this.hi >= H.length) { this.hi = -1; this.buf = this.draft; } else this.buf = H[this.hi]; }
   this.pos = this.buf.length; this.render();

@@ -82,7 +82,7 @@ UP.screen = function (app, tab) {
     return h('div.pghead', UP.levelChip(lv.level), h('div.grow', h('div.ptitle', P.displayTitle(prof)), UP.xpBar(lv, { big: true })),
       h('div.pgpts' + (pts ? '.glow' : ''), h('b', String(pts)), h('span', 'point' + (pts > 1 ? 's' : '') + ' à dépenser')),
       h('button.btn', { on: { click: close } }, 'Fermer')); };
-  const tabsEl = () => h('div.pgtabs', [['tree', 'Arbre de compétences'], ['mastery', 'Maîtrises'], ['ach', 'Succès']].map(t => h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
+  const tabsEl = () => h('div.pgtabs', [['tree', 'Arbre de compétences'], ['rewards', 'Récompenses'], ['mastery', 'Maîtrises'], ['ach', 'Succès']].map(t => h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
   /* --- arbre --- */
   const treeView = () => {
     const cols = P.BRANCHES.map(br => h('div.pgcol', h('h3', br.label), h('div.pgchain', P.TREE.filter(n => n.branch === br.id).map(n => {
@@ -124,7 +124,7 @@ UP.screen = function (app, tab) {
           pr && !o ? h('div.xpbar.small', h('i', { style: { width: Math.min(100, Math.round(100 * pr[0] / pr[1])) + '%' } }), h('span', Math.min(pr[0], pr[1]) + ' / ' + pr[1])) : null),
           h('span.pgxp', '+' + (b.xp || 0) + ' XP')); })));
   };
-  const draw = () => { UI.clear(box); box.append(head(), tabsEl(), h('div.pgbody', cur === 'tree' ? treeView() : cur === 'mastery' ? masteryView() : achView())); };
+  const draw = () => { UI.clear(box); box.append(head(), tabsEl(), h('div.pgbody', cur === 'tree' ? treeView() : cur === 'rewards' ? UI.rewards.view(app, prof, save, draw) : cur === 'mastery' ? masteryView() : achView())); };
   document.body.appendChild(ov); draw();
   ov.addEventListener('keydown', e => { if (e.key === 'Escape') close(); }); ov.tabIndex = -1; ov.focus();
   return { close };

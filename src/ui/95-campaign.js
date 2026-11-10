@@ -59,7 +59,7 @@ UC.homeLeft = function (app, prof, parts) {
     UI.clear(pane);
     if (tab === 'camp') pane.append(UC.campPane(app, draw));
     else if (tab === 'duty') pane.append(UC.dutyPane(app, parts, prof));
-    else pane.append(h('p.muted.cintro', 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.'), ...parts.sandbox);
+    else pane.append(h('p.muted.cintro', 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.'), app.legacy ? null : UI.rewards.contractPicker(app), ...parts.sandbox);
   };
   draw(); left.append(nav, pane); return left;
 };
@@ -83,6 +83,7 @@ UC.campPane = function (app, redraw) {
     h('div.cstate', st.done ? 'Chapitre terminé. Tu peux continuer à t’entraîner : les pannes pas encore vues passent en premier.' : st.examReady ? 'L’examen est ouvert : chronométré, sans indice ni assistant.' : 'Encore ' + plural(left, 'ticket') + ' à valider (' + Game.PASS + ' / 100 ou plus) pour ouvrir l’examen.',
       due ? h('div.cdue', '↻ ' + plural(due, 'panne') + ' à revoir : ' + (due > 1 ? 'elles reviennent' : 'elle revient') + ' en priorité au prochain ticket.') : null),
     h('div.cmode', h('span.muted', 'Comment tu joues ce ticket :'), modeBtn('guided', 'Accompagné', 'Indices gratuits, assistant pas à pas'), modeBtn('free', 'Autonome', 'Indices payants, plus d’XP')),
+    app.legacy ? null : UI.rewards.contractPicker(app, { off: mode === 'guided' ? 'indisponibles en mode accompagné' : '' }),
     h('div.cact', acts, h('button.btn', { 'data-act': 'chantier', on: { click: () => UC.chantier(app, sel, null) } }, 'Voir le chantier')));
   const path = h('div.cpath', { 'aria-label': 'Chapitres de la campagne' }, S.chapters.map(c => {
     const cls = (c.done ? '.done' : '') + (c.n === S.current && !c.done ? '.cur' : '') + (c.unlocked ? '' : '.lock') + (c.n === sel ? '.sel' : '');
@@ -99,7 +100,8 @@ UC.dutyPane = function (app, parts, prof) {
     const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
     box.append(parts.daily(),
       h('p.muted.cintro', 'Incidents majeurs : plusieurs pannes de natures différentes dans le même ticket, tirées dans toute l’infrastructure. À garder pour quand la campagne est bien avancée.'),
-      h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => h('button.cdutyb', { 'data-level': x[0], on: { click: () => go(x[0]) } }, h('b', x[1]), h('small', x[2]), h('span.muted', 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min')))),
+      h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => { const open = SIM.rewards.dutyOpen(prof, x[0]); const need = (SIM.rewards.DUTY.find(d => d.level === x[0]) || {}).lv; return h('button.cdutyb' + (open ? '' : '.lock'), { 'data-level': x[0], disabled: !open, title: open ? '' : 'S’ouvre au niveau ' + need, on: { click: () => go(x[0]) } }, h('b', (open ? '' : '🔒 ') + x[1]), h('small', x[2]), h('span.muted', open ? 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min' : 'S’ouvre au niveau ' + need)); })),
+      UI.rewards.contractPicker(app),
       h('label.cchk', h('input', { type: 'checkbox', checked: timed, on: { change: e => { timed = e.target.checked; app._dutyTimed = timed; } } }), ' Chronométré, sans indice'));
   };
   draw(); return box;
@@ -127,7 +129,7 @@ UC.reportModal = function (app, run, spec) {
   };
   const rule = m.mode.hintsFree ? 'Mode accompagné : la fiche est corrigée au débrief, elle n’enlève aucun point.' : 'Cause mal identifiée : −' + SIM.report.CAUSE_COST + ' · correction mal identifiée : −' + SIM.report.FIX_COST + '. La fiche ne fait jamais échouer un ticket réparé : elle départage les étoiles.';
   const ov = h('div.overlay.frep', h('div.modal.fmodal', { role: 'dialog', 'aria-label': 'Fiche d’intervention' },
-    h('div.fhead', h('span.tag.ok', 'Ticket résolu'), h('span.muted', 'Ticket ' + run.id + ' · chrono arrêté à ' + UI.fmtDur(m.result.mttrSec))),
+    h('div.fhead', UI.rewards.stamp(), h('span.tag.ok', 'Ticket résolu'), h('span.muted', 'Ticket ' + run.id + ' · chrono arrêté à ' + UI.fmtDur(m.result.mttrSec))),
     h('h2', 'Fiche d’intervention'),
     h('p.muted', 'Le demandeur est dépanné. Avant de fermer le ticket, consigne ce que tu as trouvé : c’est ce qui sépare une panne réparée d’une panne comprise.'),
     spec.questions.map(qbox),

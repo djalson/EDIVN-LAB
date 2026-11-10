@@ -992,6 +992,84 @@ textarea.pgnotes { width: 100%; min-width: 360px; background: var(--ink); color:
 .dfko { color: var(--bad); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--bad) 50%, transparent); }
 .dfsum { margin-top: 8px; }
 
+/* 41-rewards.css */
+/* Récompenses de niveau : piste, contrats, apparence (fonds d'écran, terminaux, carte, insignes), prestige. */
+.rwc { margin: 0 0 14px; padding: 8px 10px; border: 1px dashed var(--line); }
+.rwch { font-size: 13px; } .rwcn { font-size: 11.5px; margin-top: 6px; }
+.rwcl { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.rwcb { color: var(--text); background: var(--panel2); border: 2px solid var(--line); padding: 5px 10px; cursor: pointer; display: flex; gap: 8px; align-items: baseline; }
+.rwcb small { color: var(--muted); font: 700 11px var(--mono); }
+.rwcb.on { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, var(--panel2)); }
+.rwcb.on small { color: var(--warn); }
+.rwcb:disabled { opacity: .5; cursor: default; }
+.pill.rwpill { border-color: var(--warn); }
+.cdutyb.lock { opacity: .55; cursor: default; border-top-color: var(--line); } .cdutyb.lock:hover { transform: none; }
+.rwnext { margin-top: 10px; font-size: 12px; color: var(--muted); } .rwnext b { color: var(--hc); }
+.rwstar { color: #ffd166; letter-spacing: 1px; }
+.rwview .rwcols { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; }
+@media (max-width: 900px) { .rwview .rwcols { grid-template-columns: 1fr; } }
+.rwview h3 { margin: 4px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.rwtrack { display: flex; flex-direction: column; gap: 6px; }
+.rwrow { display: grid; grid-template-columns: 34px 24px 1fr auto; gap: 10px; align-items: center; padding: 7px 10px; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; opacity: .62; }
+.rwrow.on { opacity: 1; border-color: color-mix(in srgb, var(--ok) 55%, var(--line)); }
+.rwrow .rwlv { font: 700 13px var(--mono); text-align: center; color: var(--muted); border: 2px solid var(--line); border-radius: 6px; padding: 2px 0; }
+.rwrow.on .rwlv { color: var(--ok); border-color: var(--ok); }
+.rwrow .rwic { color: var(--hc); display: grid; place-items: center; }
+.rwrow .muted { font-size: 12px; } .rwst { font-size: 11.5px; white-space: nowrap; }
+.rwnew { margin-top: 14px; border-color: var(--hc); } .rwnew .rwrow { grid-template-columns: 24px 1fr; margin-top: 6px; }
+.rwslot { margin-bottom: 14px; }
+.rwopts { display: flex; gap: 8px; flex-wrap: wrap; }
+.rwopt { color: var(--text); background: var(--panel2); border: 2px solid var(--line); border-radius: 8px; padding: 6px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 92px; font-size: 12px; }
+.rwopt.on { border-color: var(--hc); } .rwopt.lock { opacity: .5; cursor: default; } .rwopt small { color: var(--muted); font-size: 10.5px; }
+.rwsw { display: block; width: 72px; height: 40px; border-radius: 5px; border: 1px solid #0006; background: #1c3f6e; }
+.rwprest { margin-top: 18px; padding: 12px; border: 2px solid var(--line); }
+
+/* aperçus et rendus : fonds d'écran des postes Windows */
+.rwsw[data-slot=wall][data-v=default], .desk .wall { }
+.rwsw[data-slot=wall][data-v=default] { background: radial-gradient(60px 34px at 70% 30%, #3d86d6 0%, transparent 60%), linear-gradient(160deg, #0b2a52 0%, #1b5aa6 55%, #0d3566 100%); }
+.rwsw[data-slot=wall][data-v=circuit], html[data-wall=circuit] .desk .wall { background: linear-gradient(#0a5c4a 1px, transparent 1px) 0 0/100% 22px, linear-gradient(90deg, #0a5c4a 1px, transparent 1px) 0 0/22px 100%, radial-gradient(circle at 30% 40%, #0f766e 0%, #052e2b 70%); }
+.rwsw[data-slot=wall][data-v=aurora], html[data-wall=aurora] .desk .wall { background: radial-gradient(120% 80% at 20% 100%, #34d399 0%, transparent 55%), radial-gradient(120% 90% at 85% 90%, #a78bfa 0%, transparent 60%), linear-gradient(180deg, #06121f 0%, #0b2540 100%); }
+.rwsw[data-slot=wall][data-v=dusk], html[data-wall=dusk] .desk .wall { background: linear-gradient(180deg, #1e1b4b 0%, #7c2d5a 55%, #f59e0b 100%); }
+.rwsw[data-slot=wall][data-v=grid], html[data-wall=grid] .desk .wall { background: linear-gradient(#ff4fa355 1px, transparent 1px) 0 0/100% 26px, linear-gradient(90deg, #ff4fa355 1px, transparent 1px) 0 0/26px 100%, linear-gradient(180deg, #14062b 0%, #3b0f6b 100%); }
+.rwsw[data-slot=wall][data-v=summit], html[data-wall=summit] .desk .wall { background: linear-gradient(135deg, transparent 49%, #e2e8f0 50%, #94a3b8 72%, transparent 73%) 0 100%/60% 70% no-repeat, linear-gradient(225deg, transparent 49%, #cbd5e1 50%, #64748b 75%, transparent 76%) 100% 100%/70% 55% no-repeat, linear-gradient(180deg, #0f172a 0%, #38bdf8 100%); }
+
+/* couleurs des terminaux (le contenu et le comportement ne changent pas) */
+.rwsw[data-slot=term][data-v=default] { background: #0c0c0c; box-shadow: inset 0 0 0 9px #0c0c0c, inset 30px 0 0 9px #cccccc; }
+.rwsw[data-slot=term][data-v=green] { background: #33ff66; box-shadow: inset 0 0 0 9px #020a04, inset -30px 0 0 9px #020a04; }
+.rwsw[data-slot=term][data-v=solar] { background: #93a1a1; box-shadow: inset 0 0 0 9px #002b36, inset -30px 0 0 9px #002b36; }
+.rwsw[data-slot=term][data-v=violet] { background: #f8f8f2; box-shadow: inset 0 0 0 9px #282a36, inset -30px 0 0 9px #282a36; }
+.rwsw[data-slot=term][data-v=paper] { background: #24292f; box-shadow: inset 0 0 0 9px #fbf8ef, inset -30px 0 0 9px #fbf8ef; }
+html[data-term=green] .term { background: #020a04; color: #33ff66; } html[data-term=green] .term .tcur, html[data-term=green] .term .tpre .vcur { background: #33ff66; color: #020a04; }
+html[data-term=solar] .term { background: #002b36; color: #93a1a1; } html[data-term=solar] .term .tcur, html[data-term=solar] .term .tpre .vcur { background: #93a1a1; color: #002b36; }
+html[data-term=violet] .term { background: #282a36; color: #f8f8f2; } html[data-term=violet] .term .tcur, html[data-term=violet] .term .tpre .vcur { background: #f8f8f2; color: #282a36; }
+html[data-term=paper] .term { background: #fbf8ef; color: #24292f; } html[data-term=paper] .term .tcur, html[data-term=paper] .term .tpre .vcur { background: #24292f; color: #fbf8ef; }
+
+/* habillages de la carte */
+.rwsw[data-slot=map][data-v=default] { background: linear-gradient(#0e1826 1px, transparent 1px) 0 0/100% 10px, linear-gradient(90deg, #0e1826 1px, transparent 1px) 0 0/10px 100%, #0c0820; }
+.rwsw[data-slot=map][data-v=blueprint], html[data-map=blueprint] .map { background: #0b3a6b; }
+.rwsw[data-slot=map][data-v=blueprint] { background: linear-gradient(#ffffff2e 1px, transparent 1px) 0 0/100% 10px, linear-gradient(90deg, #ffffff2e 1px, transparent 1px) 0 0/10px 100%, #0b3a6b; }
+html[data-map=blueprint] .mapin { background: linear-gradient(#ffffff1f 1px, transparent 1px) 0 0/100% 40px, linear-gradient(90deg, #ffffff1f 1px, transparent 1px) 0 0/40px 100%; }
+html[data-map=blueprint] .mapin svg.links line { stroke: #cfe6ff; } html[data-map=blueprint] .mapin .zone { border-color: #9cc9ff; color: #cfe6ff; }
+html[data-map=blueprint] .node .nm, html[data-map=blueprint] .node .sub { background: #0b3a6b; color: #eaf4ff; } html[data-map=blueprint] .node .ic { background: #0e4a88; border-color: #9cc9ff; color: #eaf4ff; }
+.rwsw[data-slot=map][data-v=schema] { background: radial-gradient(#94a3b8 1px, transparent 1.4px) 0 0/8px 8px, #f1f5f9; }
+html[data-map=schema] .map { background: #f1f5f9; } html[data-map=schema] .mapin { background: radial-gradient(#94a3b8 1px, transparent 1.4px) 0 0/20px 20px; }
+html[data-map=schema] .mapin svg.links line { stroke: #334155; } html[data-map=schema] .mapin .zone { border-color: #64748b; color: #334155; }
+html[data-map=schema] .node .nm { background: #f1f5f9; color: #0f172a; } html[data-map=schema] .node .sub { background: #f1f5f9; color: #475569; } html[data-map=schema] .node .ic { background: #ffffff; border-color: #334155; color: #0f172a; }
+html[data-map=schema] .mapscope { color: #475569; }
+.rwsw[data-slot=map][data-v=night] { background: radial-gradient(#ffffff 0.6px, transparent 1px) 0 0/9px 9px, #02030a; }
+html[data-map=night] .map { background: #02030a; } html[data-map=night] .mapin { background: radial-gradient(#ffffff55 0.7px, transparent 1.2px) 0 0/34px 34px; }
+html[data-map=night] .mapin svg.links line { stroke: #6366f1; } html[data-map=night] .mapin .zone { border-color: #312e81; color: #818cf8; }
+html[data-map=night] .node .nm, html[data-map=night] .node .sub { background: #02030a; } html[data-map=night] .node .ic { background: #0b0d24; border-color: #4338ca; }
+
+/* insignes (chapitres terminés) : cadre de la carte de carrière et tampon de la fiche */
+.rwsw[data-slot=frame] { width: 40px; height: 40px; border-radius: 50%; background: var(--panel); border: 4px solid var(--line); }
+.rwsw[data-slot=frame][data-v=bronze], .pcard[data-frame=bronze] .lvchip { border-color: #cd7f32; box-shadow: 0 0 0 2px #cd7f3255; }
+.rwsw[data-slot=frame][data-v=silver], .pcard[data-frame=silver] .lvchip { border-color: #c0c7d1; box-shadow: 0 0 0 2px #c0c7d155; }
+.rwsw[data-slot=frame][data-v=gold], .pcard[data-frame=gold] .lvchip { border-color: #ffd166; box-shadow: 0 0 10px #ffd16688; }
+.rwsw[data-slot=frame][data-v=onyx], .pcard[data-frame=onyx] .lvchip { border-color: #e879f9; box-shadow: 0 0 12px #e879f9aa, inset 0 0 0 2px #0b0a08; }
+.rwstamp { font: 800 10.5px var(--mono); letter-spacing: .14em; padding: 3px 8px; border: 2px solid currentColor; border-radius: 4px; transform: rotate(-4deg); color: #cd7f32; }
+.rwstamp[data-frame=silver] { color: #c0c7d1; } .rwstamp[data-frame=gold] { color: #ffd166; } .rwstamp[data-frame=onyx] { color: #e879f9; }
+
 </style>
 </head>
 <body>
@@ -6492,7 +6570,7 @@ Mission.prototype._finish = function (kind, st) {
   /* Non résolu : plafond sous le seuil de validation, au prorata des causes réparées. */
   if (kind !== 'resolved') sc.unsolved = -(100 - Math.round((kind === 'timeout' ? Game.PARTIAL_TIMEOUT : Game.PARTIAL_GIVEUP) * (st.total ? st.solved / st.total : 0)));
   else if (t > this.parSec) sc.time = -Math.min(Game.TIME_MAX, Math.round(Game.TIME_MAX * (t - this.parSec) / (1.5 * this.parSec)));
-  sc.hints = this.mode.hintsFree ? 0 : -this.hintLog.reduce((a, h) => a + Game.HINT_COST[h.n - 1], 0);
+  sc.hints = this.mode.hintsFree ? 0 : -this.hintLog.reduce((a, h) => a + (h.free ? 0 : Game.HINT_COST[h.n - 1]), 0);   /* h.free : « second avis » (85-rewards.js) */
   sc.danger = -Math.min(Game.DANGER_CAP, this.dangers.length * Game.DANGER_COST);
   sc.impact = -Math.min(Game.IMPACT_CAP, this.impacts.length * Game.IMPACT_COST);
   sc.wrongClose = -(this.wrongCloses - this.falseRes) * Game.WRONG_CLOSE; sc.falseRes = -this.falseRes * Game.FALSE_RES;
@@ -6637,6 +6715,7 @@ P.buy = function (p, id) { const why = P.whyNot(p, id); if (why) return { ok: fa
 P.reset = function (p) { p.tree = {}; if (p.title && !P.has(p, 'titles')) delete p.title; return { ok: true }; };
 P.themeOwned = function (p, themeId) {
   if (P.FREE_THEMES.indexOf(themeId) >= 0 || p.giftTheme === themeId) return true;
+  if (SIM.rewards && SIM.rewards.THEMES[themeId] !== undefined) return SIM.rewards.themeOwned(p, themeId);   /* thèmes de prestige : au niveau, pas dans l'arbre */
   const n = P.TREE.find(x => x.theme === themeId); return !!n && P.has(p, n.id);
 };
 /* Les avantages de confort sont coupés en évaluation chronométrée : les notes restent comparables. */
@@ -6735,6 +6814,8 @@ P.xpFor = function (m, r, p, prev) {
   if (m.daily && !P.dailyDone(p, P.today())) mul('Ticket du jour', 1.5);
   const st = P.streakInfo(p, P.today()); const nextStreak = st.state === 'today' ? st.n : (st.alive ? st.n + 1 : 1);
   const sb = P.streakBonus(nextStreak); if (sb) mul('Série de ' + nextStreak + ' jours', 1 + sb);
+  /* contrats (85-rewards.js) : uniquement de l'XP, uniquement sur un ticket validé ; « Tout ou rien » annule l'XP sous 90 */
+  if (r.passed && m.contracts && m.contracts.length && SIM.rewards) m.contracts.forEach(id => { const c = SIM.rewards.contract(id); if (!c) return; if (id === 'allin') mul('Contrat « ' + c.label + ' »' + (r.total >= 90 ? '' : ' : moins de 90'), r.total >= 90 ? c.f : 0); else mul('Contrat « ' + c.label + ' »', c.f); });
   let perk = 0; if (P.has(p, 'xp1')) perk += 0.05; if (P.has(p, 'xp2')) perk += 0.05; if (perk) mul('Réputation', 1 + perk);
   let total = sub; mult.forEach(x => { total *= x.f; });
   return { total: Math.round(total), subtotal: sub, parts, mult, goals };
@@ -7195,6 +7276,136 @@ Game.Mission.prototype.fileReport = function (answers) {
   r.perfect = r.kind === 'resolved' && r.note === 100 && !causeKo && !fixKo; r.tier = Game.tierOf(r.note);
   r.report = { rows, causeOk: causeKo === 0, fixOk: fixKo === 0, allOk: causeKo === 0 && fixKo === 0, penalty: pen, guided: !!this.mode.hintsFree };
   return r.report;
+};
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== engine/85-rewards.js ===== */
+/* ============================================================================
+   Récompenses de niveau : ce que chaque palier d'expérience débloque. Aucune dépendance au DOM (tests/rewards.js).
+
+   L'arbre de compétences (81-progress.js) s'achète avec des points et se vide vers le niveau 18. Cette piste, elle,
+   donne quelque chose à CHAQUE palier jusqu'au niveau 40, sans rien acheter :
+     - contrats   : contraintes choisies avant un ticket, qui multiplient l'XP (jamais la note) ;
+     - outils     : aides de diagnostic (voyants de liaison, ping rapide, historique des commandes) ;
+     - astreinte  : incidents à 2, 3 puis 4 pannes ;
+     - second avis: un indice gratuit par jour ;
+     - cosmétiques: fonds d'écran des postes, couleurs de terminal, habillages de carte, thèmes de prestige ;
+     - insignes   : liés aux chapitres de campagne terminés (pas au niveau) ;
+     - prestige   : au niveau 40, repartir du niveau 1 en gardant tout.
+
+   Équité : les outils et le second avis sont coupés en évaluation chronométrée et en examen de chapitre (`toolOn`),
+   comme le coffre-fort. Les contrats ne touchent que l'XP. Les notes restent comparables d'un joueur à l'autre.
+   Rien n'est stocké qui puisse se déduire : une récompense est acquise si le niveau (ou le prestige) le dit.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, Game = SIM.game, P = SIM.prog;
+const RW = SIM.rewards = {};
+
+/* ------------------------------------------------------------------ contrats */
+/* f : multiplicateur d'XP d'un ticket VALIDÉ. lv : niveau requis. prestige : nombre de prestiges requis. */
+RW.CONTRACTS = [
+  { id: 'nohelp', lv: 4, f: 1.10, label: 'Sans aide-mémoire', desc: 'Le bouton d’aide-mémoire des terminaux est retiré : tu connais tes commandes.' },
+  { id: 'vague', lv: 8, f: 1.15, label: 'Ticket vague', desc: 'Le demandeur n’écrit qu’une ligne. À toi de poser le diagnostic sans son récit.' },
+  { id: 'fast', lv: 13, f: 1.20, label: 'Temps réduit', desc: 'Le temps cible est réduit d’un quart : la pénalité de durée tombe plus tôt.' },
+  { id: 'nomap', lv: 16, f: 1.20, label: 'Sans plan', desc: 'La carte n’affiche plus la topologie : une simple liste d’équipements, sans zones ni liens.' },
+  { id: 'allin', lv: 1, prestige: 1, f: 1.50, label: 'Tout ou rien', desc: 'Réservé au prestige. 90 / 100 ou plus : XP × 1,5. En dessous : aucune XP pour ce ticket.' }
+];
+RW.contract = id => RW.CONTRACTS.find(c => c.id === id) || null;
+RW.VAGUE_BODY = 'Bonjour, ça ne marche plus. Merci de regarder rapidement.';
+
+/* ------------------------------------------------------------------ cosmétiques */
+/* lv : niveau requis ; ch : chapitre de campagne terminé requis. Le premier de chaque famille est celui d'origine. */
+RW.COS = {
+  wall: [{ id: 'default', label: 'Bleu d’origine' }, { id: 'circuit', lv: 3, label: 'Circuit imprimé' }, { id: 'aurora', lv: 11, label: 'Aurore' }, { id: 'dusk', lv: 18, label: 'Crépuscule' }, { id: 'grid', lv: 26, label: 'Grille rétro' }, { id: 'summit', lv: 35, label: 'Sommet' }],
+  term: [{ id: 'default', label: 'Gris d’origine' }, { id: 'green', lv: 2, label: 'Phosphore vert' }, { id: 'solar', lv: 9, label: 'Solarisé sombre' }, { id: 'violet', lv: 15, label: 'Nuit violette' }, { id: 'paper', lv: 24, label: 'Papier clair' }],
+  map: [{ id: 'default', label: 'Grille d’origine' }, { id: 'blueprint', lv: 6, label: 'Plan d’architecte' }, { id: 'schema', lv: 14, label: 'Schéma technique' }, { id: 'night', lv: 22, label: 'Nuit' }],
+  frame: [{ id: 'default', label: 'Aucun insigne' }, { id: 'bronze', ch: 3, label: 'Insigne de bronze' }, { id: 'silver', ch: 6, label: 'Insigne d’argent' }, { id: 'gold', ch: 10, label: 'Insigne d’or' }, { id: 'onyx', ch: 11, label: 'Insigne d’astreinte' }]
+};
+RW.COS_LABEL = { wall: 'Fond d’écran des postes Windows', term: 'Couleurs des terminaux', map: 'Habillage de la carte', frame: 'Insigne de profil' };
+RW.THEMES = { gold: 30, boreal: 40 };   /* thèmes de prestige : identifiant → niveau */
+
+/* ------------------------------------------------------------------ piste des récompenses (une ligne par déblocage) */
+const TOOLS = [
+  { id: 'leds', lv: 5, label: 'Voyants de liaison', desc: 'Sur la carte, chaque lien est vert ou rouge selon l’état réel de la liaison.' },
+  { id: 'qping', lv: 12, label: 'Ping rapide', desc: 'Depuis la carte, un ping vers un équipement sans ouvrir de terminal. Il ne clôt jamais un ticket.' },
+  { id: 'hist', lv: 17, label: 'Historique entre tickets', desc: 'La flèche haut des terminaux rappelle aussi les commandes de tes tickets précédents.' }
+];
+const DUTY = [{ id: 'duty3', lv: 10, level: 3, label: 'Astreinte : incident double' }, { id: 'duty4', lv: 20, level: 4, label: 'Astreinte : incident critique' }, { id: 'duty5', lv: 30, level: 5, label: 'Astreinte : nuit noire' }];
+RW.TOOLS = TOOLS; RW.DUTY = DUTY;
+RW.TRACK = (function () {
+  const t = [];
+  RW.CONTRACTS.filter(c => !c.prestige).forEach(c => t.push({ lv: c.lv, id: 'contract:' + c.id, kind: 'contract', label: 'Contrat « ' + c.label + ' »', desc: c.desc + ' XP × ' + String(c.f).replace('.', ',') + '.' }));
+  TOOLS.forEach(x => t.push({ lv: x.lv, id: 'tool:' + x.id, kind: 'tool', label: 'Outil : ' + x.label, desc: x.desc }));
+  DUTY.forEach(x => t.push({ lv: x.lv, id: x.id, kind: 'duty', label: x.label, desc: 'Un nouveau palier d’incidents à plusieurs pannes s’ouvre dans l’onglet Astreinte.' }));
+  t.push({ lv: 7, id: 'second', kind: 'perk', label: 'Second avis', desc: 'Une fois par jour, un indice qui ne coûte aucun point.' });
+  Object.keys(RW.COS).forEach(slot => RW.COS[slot].filter(c => c.lv).forEach(c => t.push({ lv: c.lv, id: 'cos:' + slot + ':' + c.id, kind: 'cos', label: RW.COS_LABEL[slot].split(' ')[0] + ' « ' + c.label + ' »', desc: RW.COS_LABEL[slot] + '.' })));
+  t.push({ lv: 30, id: 'theme:gold', kind: 'theme', label: 'Thème de prestige « Or noir »', desc: 'Un thème d’interface réservé aux architectes.' });
+  t.push({ lv: 40, id: 'theme:boreal', kind: 'theme', label: 'Thème de prestige « Boréal »', desc: 'Le thème des légendes du datacenter.' });
+  t.push({ lv: 40, id: 'prestige', kind: 'prestige', label: 'Prestige', desc: 'Repartir du niveau 1 en gardant tout ce qui est débloqué, avec une étoile de prestige et le contrat « Tout ou rien ».' });
+  return t.sort((a, b) => a.lv - b.lv || (a.id < b.id ? -1 : 1));
+})();
+
+/* ------------------------------------------------------------------ acquis */
+RW.prestige = p => (p && typeof p.prestige === 'number' && p.prestige > 0 ? Math.min(99, Math.floor(p.prestige)) : 0);
+/* niveau qui compte pour les récompenses : après un prestige, tout reste acquis */
+RW.level = p => (RW.prestige(p) > 0 ? P.MAX_LEVEL : P.levelOf(p.xp).level);
+RW.has = function (p, id) { const r = RW.TRACK.find(x => x.id === id); return !!r && RW.level(p) >= r.lv; };
+RW.between = (from, to) => RW.TRACK.filter(r => r.lv > from && r.lv <= to);
+RW.next = p => RW.TRACK.find(r => r.lv > RW.level(p)) || null;
+RW.themeOwned = (p, id) => RW.THEMES[id] !== undefined && RW.level(p) >= RW.THEMES[id];
+const chDone = (p, n) => !!SIM.camp && SIM.camp.examPassed(p, n);
+RW.cosOwned = function (p, slot, id) { const c = (RW.COS[slot] || []).find(x => x.id === id); if (!c) return false; if (c.lv) return RW.level(p) >= c.lv; if (c.ch) return chDone(p, c.ch); return true; };
+RW.cosOf = function (p, slot) { const v = p.cos && p.cos[slot]; return v && RW.cosOwned(p, slot, v) ? v : 'default'; };
+RW.setCos = function (p, slot, id) { if (!RW.cosOwned(p, slot, id)) return false; p.cos = p.cos || {}; p.cos[slot] = id; return true; };
+RW.cleanCos = function (c) { const out = {}; if (c && typeof c === 'object' && !Array.isArray(c)) Object.keys(RW.COS).forEach(s => { if (typeof c[s] === 'string' && RW.COS[s].some(x => x.id === c[s])) out[s] = c[s]; }); return out; };
+/* insigne le plus élevé mérité (tampon de la fiche d'intervention) */
+RW.bestFrame = function (p) { let b = null; RW.COS.frame.forEach(f => { if (f.ch && chDone(p, f.ch)) b = f; }); return b; };
+
+/* outils et second avis : coupés en évaluation chronométrée et en examen de chapitre */
+RW.fair = m => P.perkActive(m && m.mode) && !(m && m.camp && m.camp.exam);
+RW.toolOn = (p, id, m) => RW.has(p, 'tool:' + id) && RW.fair(m);
+RW.dutyOpen = (p, level) => { const d = DUTY.find(x => x.level === level); return !d || RW.has(p, d.id); };
+
+/* contrats réellement applicables à une mission : acquis, hors mode guidé (indices gratuits), hors examen, hors tutoriel */
+RW.contractOwned = (p, id) => { const c = RW.contract(id); return !!c && (c.prestige ? RW.prestige(p) >= c.prestige : RW.level(p) >= c.lv); };
+RW.validContracts = function (p, ids, o) {
+  o = o || {}; if (!Array.isArray(ids) || o.guided || o.exam || o.tour) return [];
+  return RW.CONTRACTS.map(c => c.id).filter(id => ids.indexOf(id) >= 0 && RW.contractOwned(p, id));
+};
+RW.contractFactor = ids => (ids || []).reduce((a, id) => a * ((RW.contract(id) || { f: 1 }).f), 1);
+
+/* second avis : un indice gratuit par jour */
+RW.secondReady = (p, m, day) => RW.has(p, 'second') && RW.fair(m) && !(m && m.mode && m.mode.hintsFree) && p.second !== (day || P.today());
+RW.useSecond = (p, day) => { p.second = day || P.today(); };
+
+/* prestige : au niveau 40, l'XP repart de zéro ; campagne, succès, cosmétiques et récompenses restent acquis ; l'arbre est rendu (points regagnés en remontant) */
+RW.canPrestige = p => P.levelOf(p.xp).level >= P.MAX_LEVEL;
+RW.doPrestige = function (p) { if (!RW.canPrestige(p)) return false; p.prestige = RW.prestige(p) + 1; p.xp = 0; P.reset(p); return true; };
+
+/* ------------------------------------------------------------------ branchements sur le moteur */
+/* profil : champs nettoyés comme le reste */
+const cleanBase = Game.cleanProfile;
+Game.cleanProfile = function (p) {
+  const out = cleanBase(p); const ok = p && typeof p === 'object' && !Array.isArray(p);
+  out.cos = RW.cleanCos(ok ? p.cos : null);
+  out.prestige = ok && typeof p.prestige === 'number' && isFinite(p.prestige) ? Math.min(99, Math.max(0, Math.floor(p.prestige))) : 0;
+  out.second = ok && typeof p.second === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.second) ? p.second : '';
+  return out;
+};
+/* mission : contrats validés à la création ; « temps réduit » raccourcit le temps cible */
+const create = Game.create;
+Game.create = function (o) {
+  const m = create(o); const ids = o && o.contracts; const prof = (o && o.profile) || (Array.isArray(ids) && ids.length ? Game.profile() : null);
+  m.contracts = prof ? RW.validContracts(prof, o.contracts, { guided: !!m.mode.hintsFree, exam: !!(m.camp && m.camp.exam), tour: !!o.tour }) : [];
+  if (m.contracts.indexOf('fast') >= 0) m.parSec = Math.max(60, Math.round(m.parSec * 0.75));
+  return m;
+};
+/* indice gratuit : tracé comme un indice (le ticket n'est plus « sans indice »), mais sans point retiré */
+const hint = Game.Mission.prototype.hint;
+Game.Mission.prototype.hint = function (partIdx, opts) {
+  const r = hint.call(this, partIdx); if (r && r.n && opts && opts.free) { this.hintLog[this.hintLog.length - 1].free = true; r.cost = 0; r.free = true; }
+  return r;
 };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
@@ -18552,7 +18763,7 @@ const SIM = g.SIM, U = SIM.U, UI = SIM.ui, E = SIM.emu, Game = SIM.game;
 const TICK_SEC = 5;
 function Run(opts) {
   this.opts = opts; this.listeners = {};
-  this.m = Game.create({ level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, clock: () => Date.now() });
+  this.m = Game.create({ level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
   /* campagne : périmètre affiché (équipements et sites du chapitre) ; null = toute l'infrastructure (bac à sable) */
   this.scope = SIM.camp ? SIM.camp.missionScope(this.m) : null;
   this.W = this.m.W; this.surfaces = {}; this.ended = false; this.ticks = 0;
@@ -18698,22 +18909,29 @@ MapView.prototype.siteView = function (id) {
     const x1 = Math.max.apply(null, zs.map(z => z.x + z.w).concat(ns.map(n => n[1] + 130))), y1 = Math.max.apply(null, zs.map(z => z.y + z.h).concat(ns.map(n => n[2] + 90)));
     if (isFinite(x0) && isFinite(y0)) { ox = x0 - pad; oy = y0 - pad; MW = Math.max(520, x1 - x0 + 2 * pad); MH = Math.max(300, y1 - y0 + 2 * pad); }
   }
+  /* contrat « Sans plan » : plus de topologie, une simple liste d'équipements rangés par nom */
+  const flat = !!(UI.rewards && UI.rewards.has(run.m, 'nomap')); const flatPos = {};
+  if (flat) { const ns = S.nodes.filter(n => vis(n[0])).map(n => n[0]).sort(); ns.forEach((id, i) => { flatPos[id] = [30 + (i % 5) * 150, 30 + Math.floor(i / 5) * 110]; }); ox = 0; oy = 0; MW = 800; MH = Math.max(300, 60 + Math.ceil(ns.length / 5) * 110); }
   inner.style.width = MW + 'px'; inner.style.height = MH + 'px';
-  S.zones.filter(z => !scope || inZone(z)).forEach(z => inner.append(h('div.zone', { style: { left: (z.x - ox) + 'px', top: (z.y - oy) + 'px', width: z.w + 'px', height: z.h + 'px' } }, z.t)));
+  S.zones.filter(z => !flat && (!scope || inZone(z))).forEach(z => inner.append(h('div.zone', { style: { left: (z.x - ox) + 'px', top: (z.y - oy) + 'px', width: z.w + 'px', height: z.h + 'px' } }, z.t)));
   const svgNS = 'http://www.w3.org/2000/svg'; const svg = document.createElementNS(svgNS, 'svg'); svg.setAttribute('class', 'links'); svg.setAttribute('width', MW); svg.setAttribute('height', MH);
   inner.append(svg);
   S.nodes.filter(n => vis(n[0])).forEach(([nid, x, y, type, sub]) => {
-    x -= ox; y -= oy; pos[nid] = { x: x + 56, y: y + 26 };
+    if (flat) { x = flatPos[nid][0]; y = flatPos[nid][1]; if (type !== 'patch') sub = ''; } else { x -= ox; y -= oy; } pos[nid] = { x: x + 56, y: y + 26 };
     const dev = run.W.dev[nid];
     const label = type === 'patch' ? 'Baie de brassage' : nid;
     const ic = h('div.ic', UI.icon(TYPE_ICON[type], 36));
     const n = h('div.node', { style: { left: x + 'px', top: y + 'px' }, title: label, on: { click: ev => { ev.stopPropagation(); self.popup(nid, type, n, inner, sub); } } }, ic, h('div.nm', label), h('div.sub', sub));
     inner.append(n);
   });
-  S.links.filter(([a, b]) => pos[a] && pos[b]).forEach(([a, b]) => {
+  const lines = [];
+  S.links.filter(([a, b]) => !flat && pos[a] && pos[b]).forEach(([a, b]) => {
     const l = document.createElementNS(svgNS, 'line'); l.setAttribute('x1', pos[a].x); l.setAttribute('y1', pos[a].y); l.setAttribute('x2', pos[b].x); l.setAttribute('y2', pos[b].y);
-    l.setAttribute('stroke', '#4a6286'); l.setAttribute('stroke-width', '2'); svg.append(l);
+    l.setAttribute('stroke', '#4a6286'); l.setAttribute('stroke-width', '2'); svg.append(l); lines.push({ a, b, el: l });
   });
+  /* outil « voyants de liaison » : liens colorés selon l'état réel, repeints à chaque action */
+  this._lines = lines; if (UI.rewards) { UI.rewards.paintLinks(run, lines); if (!this._ledHook) { this._ledHook = true; run.on('act', () => { if (self._lines) UI.rewards.paintLinks(run, self._lines); }); } }
+  if (flat) map.append(h('div.mapscope', 'Contrat « Sans plan » : la topologie n’est pas affichée.'));
   map.append(inner); map.addEventListener('click', () => this.closePop());
   if (scope) { const hidden = S.nodes.filter(n => !vis(n[0])).length; if (hidden) map.append(h('div.mapscope', UI.icon('network', 14), ' Chapitre ' + run.scope.n + ' : tu vois ton périmètre d’intervention. Le reste de l’infrastructure se dévoile au fil de la campagne.')); }
   /* mise à l'échelle : la carte tient toujours dans la zone visible (jamais de nœud rogné) */
@@ -18735,6 +18953,7 @@ MapView.prototype.popup = function (nid, type, nodeEl, inner, sub) {
   else if (dev && dev.kind === 'pf') { items.push(btn('Console de la VM (menu pfSense)', () => self.onOpen(nid, 'main'))); items.push(btn('Alimentation et câblage', () => self.onOpen(nid, 'rig'))); }
   else if (dev && dev.kind === 'printer') { items.push(btn('Panneau de commande', () => self.onOpen(nid, 'main'))); items.push(btn('Alimentation et câblage', () => self.onOpen(nid, 'rig'))); }
   else items.push(btn('Voyants, câbles et alimentation', () => self.onOpen(nid, 'rig')));
+  if (UI.rewards) UI.rewards.popupItems(run, nid, btn).forEach(x => items.push(x));
   const pop = h('div.pop', { on: { click: e => e.stopPropagation() } }, h('h4', type === 'patch' ? 'Baie de brassage' : nid), h('div.muted', { style: { marginBottom: '6px' } }, sub), items);
   const left = parseInt(nodeEl.style.left, 10) + 120, top = parseInt(nodeEl.style.top, 10);
   pop.style.left = Math.min(left, parseInt(inner.style.width, 10) - 260) + 'px'; pop.style.top = top + 'px';
@@ -19065,7 +19284,7 @@ P._key = function (e) {
 P._wordLeft = function () { let p = this.pos; while (p > 0 && /\s/.test(this.buf[p - 1])) p--; while (p > 0 && !/\s/.test(this.buf[p - 1])) p--; return p; };
 P._wordRight = function () { let p = this.pos; const n = this.buf.length; while (p < n && !/\s/.test(this.buf[p])) p++; while (p < n && /\s/.test(this.buf[p])) p++; return p; };
 P._hist = function (dir) {
-  const s = this.session(); if (s.ask) return; const H = s.history || [];
+  const s = this.session(); if (s.ask) return; const H = (UI.rewards ? UI.rewards.histSeed(s) : []).concat(s.history || []);   /* outil « historique entre tickets » */
   if (dir < 0) { if (this.hi === -1) { this.draft = this.buf; this.hi = H.length; } if (this.hi > 0) this.hi--; this.buf = H[this.hi] || ''; }
   else { if (this.hi === -1) return; this.hi++; if (this.hi >= H.length) { this.hi = -1; this.buf = this.draft; } else this.buf = H[this.hi]; }
   this.pos = this.buf.length; this.render();
@@ -24992,7 +25211,14 @@ const THEMES = [
     scene: { leds: ['#5ff2a0', '#ff7ac6', '#b79bff'], cables: ['#b79bff', '#5ff2a0', '#ff7ac6'] } },
   { id: 'paper', name: 'Papier Clair', desc: 'Fond crème et encre sombre, lisible en salle lumineuse ou en projection.', anim: 'paper', perfect: { title: 'VALIDÉ', sub: '100 / 100 — dossier clos, tampon apposé.' },
     vars: { '--bg': '#f4f1ea', '--panel': '#ffffff', '--panel2': '#ece8de', '--line': '#c9c2b0', '--text': '#1f2430', '--muted': '#575d6e', '--accent': '#4f32c8', '--accent2': '#3d27a0', '--hc': '#0f766e', '--hv': '#b4235f', '--ink': '#1f2430', '--shadow': '#a79f8a', '--onaccent': '#ffffff', '--bubble': '#1f2430', '--bubbletxt': '#f4f1ea' },
-    scene: { leds: ['#0f766e', '#b4235f', '#4f32c8'], cables: ['#4f32c8', '#0f766e', '#b4235f'] } }
+    scene: { leds: ['#0f766e', '#b4235f', '#4f32c8'], cables: ['#4f32c8', '#0f766e', '#b4235f'] } },
+  /* thèmes de prestige : débloqués par le niveau (src/engine/85-rewards.js), pas par l'arbre */
+  { id: 'gold', name: 'Or noir', desc: 'Prestige, niveau 30. Noir profond et or, sobre et tranchant.', anim: 'neon', perfect: { title: 'MAGISTRAL', sub: '100 / 100 — du travail d’architecte.' },
+    vars: { '--bg': '#0b0a08', '--panel': '#15130e', '--panel2': '#1f1c14', '--line': '#4a4127', '--text': '#f6efdc', '--muted': '#b9ad8c', '--accent': '#d4a017', '--accent2': '#a87c0c', '--hc': '#ffd76a', '--hv': '#e0b040', '--ink': '#0b0a08', '--shadow': '#000000', '--onaccent': '#0b0a08', '--bubble': '#f6efdc', '--bubbletxt': '#0b0a08' },
+    scene: { leds: ['#ffd76a', '#e0b040', '#f6efdc'], cables: ['#a87c0c', '#ffd76a', '#4a4127'] } },
+  { id: 'boreal', name: 'Boréal', desc: 'Prestige, niveau 40. Nuit polaire, turquoise et violet.', anim: 'synth', perfect: { title: 'LÉGENDE', sub: '100 / 100 — le datacenter s’incline.' },
+    vars: { '--bg': '#06121a', '--panel': '#0b1d28', '--panel2': '#112a38', '--line': '#23505f', '--text': '#e6fbff', '--muted': '#8fb8c4', '--accent': '#2dd4bf', '--accent2': '#14a39a', '--hc': '#7cf7d4', '--hv': '#a78bfa', '--ink': '#04121a', '--shadow': '#01080c', '--onaccent': '#04121a', '--bubble': '#e6fbff', '--bubbletxt': '#04121a' },
+    scene: { leds: ['#7cf7d4', '#a78bfa', '#2dd4bf'], cables: ['#2dd4bf', '#a78bfa', '#23505f'] } }
 ];
 const T = UI.themes = { list: THEMES };
 T.get = id => THEMES.find(x => x.id === id) || THEMES[0];
@@ -25333,7 +25559,7 @@ P.themeModal = function () {
   const self = this; const cur = UI.themes.saved(); let mm = null; const prof = Game.profile();
   const card = t => h('div.thcard' + (t.id === cur ? '.on' : ''), { style: '--t1:' + t.vars['--bg'] + ';--t2:' + t.vars['--panel2'] + ';--t3:' + t.vars['--hv'] + ';--t4:' + t.vars['--hc'] + ';--t5:' + t.vars['--text'] },
     h('div.thprev', h('i'), h('i'), h('i'), h('i'), h('i')), h('b', t.name), t.id === cur ? h('span.tag.ok', 'actuel') : null, h('div.muted', t.desc),
-    h('div.row', { style: { marginTop: '8px' } }, SIM.prog.themeOwned(prof, t.id) ? h('button.btn.small.primary', { on: { click: () => { UI.themes.apply(t.id, true); if (mm) mm.close(); self.home(); } } }, t.id === cur ? 'Garder' : 'Appliquer') : h('button.btn.small', { title: 'Se débloque dans l’arbre de compétences (branche Style)', on: { click: () => { if (mm) mm.close(); UI.prog.screen(self, 'tree'); } } }, '🔒 Débloquer dans l’arbre'), h('button.btn.small', { title: 'Aperçu de l’animation affichée pour une note de 100 / 100', on: { click: () => UI.themes.celebrate(t.id, 100) } }, 'Voir l’animation du 100')));
+    h('div.row', { style: { marginTop: '8px' } }, SIM.prog.themeOwned(prof, t.id) ? h('button.btn.small.primary', { on: { click: () => { UI.themes.apply(t.id, true); if (mm) mm.close(); self.home(); } } }, t.id === cur ? 'Garder' : 'Appliquer') : (SIM.rewards.THEMES[t.id] !== undefined ? h('button.btn.small', { title: 'Thème de prestige : se débloque en atteignant ce niveau', on: { click: () => { if (mm) mm.close(); UI.prog.screen(self, 'rewards'); } } }, '🔒 Niveau ' + SIM.rewards.THEMES[t.id]) : h('button.btn.small', { title: 'Se débloque dans l’arbre de compétences (branche Style)', on: { click: () => { if (mm) mm.close(); UI.prog.screen(self, 'tree'); } } }, '🔒 Débloquer dans l’arbre')), h('button.btn.small', { title: 'Aperçu de l’animation affichée pour une note de 100 / 100', on: { click: () => UI.themes.celebrate(t.id, 100) } }, 'Voir l’animation du 100')));
   mm = UI.modal('Thème de l’interface', h('div', h('p.muted', 'Le thème change l’accueil, la barre de jeu, le ticket et le débrief. Les consoles (Windows, Cisco, pfSense, terminaux) ne changent jamais : elles restent fidèles aux vrais systèmes.'), h('div.thgrid', UI.themes.list.map(card))), [{ label: 'Fermer', primary: true }]);
 };
 
@@ -25397,9 +25623,9 @@ P.begin = function (opts) {
   const btnHint = h('button.btn.small', { on: { click: () => self.hint() } }, 'Indice');
   const btnClose = h('button.btn.small.primary', { on: { click: () => self.closeTicket() } }, 'Clôturer le ticket');
   const btnGive = h('button.btn.small.danger', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
-  const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
+  const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), UI.rewards.contractPills(m), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
   const t = m.fault.ticket;
-  const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', t.body), UI.camp.verifBox(m), UI.prog.goalsBox(run));
+  const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', UI.rewards.ticketBody(m, t.body)), UI.camp.verifBox(m), UI.prog.goalsBox(run));
   const hintsBox = h('div'); const guide = h('div'); const log = h('div.actlog');
   const guideCard = m.mode.steps ? h('div.card', h('h3', 'Assistant pas à pas'), guide) : null;
   const side = h('div.side', ticket, guideCard, h('div.card', h('h3', 'Indices'), hintsBox), h('div.card', h('h3', 'Journal de vos actions'), log));
@@ -25509,6 +25735,7 @@ P.debrief = function (m, rec) {
       h('div.card', h('h3', 'Temps de résolution (MTTR)'), h('div', { style: { fontSize: '26px', fontWeight: 700 } }, UI.fmtDur(d.mttrSec)), h('div.muted', 'Temps cible ' + UI.fmtDur(d.parSec) + (d.firstFixedSec !== null ? ' — correction effective à ' + UI.fmtDur(d.firstFixedSec) : ''))),
       h('div.card', h('h3', 'Démarche'), h('div', d.path.actions + ' actions, ' + d.path.counters.change + ' modifications'), h('div.muted', d.path.counters.progress + ' progrès, ' + d.path.counters.detour + ' sans effet, ' + d.path.counters.regress + ' reculs'), h('div.muted', d.hints.length + ' indice(s), ' + d.wrongCloses + ' clôture(s) refusée(s)'))),
     UI.camp.debriefCamp(self, rec && rec.camp),
+    UI.rewards.debriefUnlocks(rec && rec.prog),
     UI.prog.debriefPanel(rec && rec.prog),
     UI.camp.debriefReport(r.report),
     h('h2', 'Cause racine et correction'),
@@ -25715,7 +25942,7 @@ UP.screen = function (app, tab) {
     return h('div.pghead', UP.levelChip(lv.level), h('div.grow', h('div.ptitle', P.displayTitle(prof)), UP.xpBar(lv, { big: true })),
       h('div.pgpts' + (pts ? '.glow' : ''), h('b', String(pts)), h('span', 'point' + (pts > 1 ? 's' : '') + ' à dépenser')),
       h('button.btn', { on: { click: close } }, 'Fermer')); };
-  const tabsEl = () => h('div.pgtabs', [['tree', 'Arbre de compétences'], ['mastery', 'Maîtrises'], ['ach', 'Succès']].map(t => h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
+  const tabsEl = () => h('div.pgtabs', [['tree', 'Arbre de compétences'], ['rewards', 'Récompenses'], ['mastery', 'Maîtrises'], ['ach', 'Succès']].map(t => h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
   /* --- arbre --- */
   const treeView = () => {
     const cols = P.BRANCHES.map(br => h('div.pgcol', h('h3', br.label), h('div.pgchain', P.TREE.filter(n => n.branch === br.id).map(n => {
@@ -25757,7 +25984,7 @@ UP.screen = function (app, tab) {
           pr && !o ? h('div.xpbar.small', h('i', { style: { width: Math.min(100, Math.round(100 * pr[0] / pr[1])) + '%' } }), h('span', Math.min(pr[0], pr[1]) + ' / ' + pr[1])) : null),
           h('span.pgxp', '+' + (b.xp || 0) + ' XP')); })));
   };
-  const draw = () => { UI.clear(box); box.append(head(), tabsEl(), h('div.pgbody', cur === 'tree' ? treeView() : cur === 'mastery' ? masteryView() : achView())); };
+  const draw = () => { UI.clear(box); box.append(head(), tabsEl(), h('div.pgbody', cur === 'tree' ? treeView() : cur === 'rewards' ? UI.rewards.view(app, prof, save, draw) : cur === 'mastery' ? masteryView() : achView())); };
   document.body.appendChild(ov); draw();
   ov.addEventListener('keydown', e => { if (e.key === 'Escape') close(); }); ov.tabIndex = -1; ov.focus();
   return { close };
@@ -26003,6 +26230,7 @@ CH.open = function (term) {
 CH.refresh = function (term) { if (term.helpBtn) term.helpBtn.style.display = CH.kindOf(term) ? '' : 'none'; };
 CH.attach = function (term) {
   if (term.helpBtn || ['ios', 'ps', 'cmd', 'bash'].indexOf(term.theme) < 0) return;
+  if (UI.rewards && UI.rewards.run && UI.rewards.has(UI.rewards.run.m, 'nohelp')) return;   /* contrat « Sans aide-mémoire » */
   term.helpBtn = h('button.thelp', { type: 'button', title: 'Aide-mémoire : liste des commandes disponibles', 'aria-label': 'Aide-mémoire des commandes', on: { click: e => { e.stopPropagation(); CH.open(term); }, mousedown: e => e.stopPropagation() } }, 'Aide-mémoire');
   term.el.append(term.helpBtn); CH.refresh(term);
 };
@@ -26070,7 +26298,7 @@ UC.homeLeft = function (app, prof, parts) {
     UI.clear(pane);
     if (tab === 'camp') pane.append(UC.campPane(app, draw));
     else if (tab === 'duty') pane.append(UC.dutyPane(app, parts, prof));
-    else pane.append(h('p.muted.cintro', 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.'), ...parts.sandbox);
+    else pane.append(h('p.muted.cintro', 'Le jeu libre : toutes les pannes, toute l’infrastructure visible, les options du formateur. Rien de ce que tu fais ici ne fait avancer la campagne.'), app.legacy ? null : UI.rewards.contractPicker(app), ...parts.sandbox);
   };
   draw(); left.append(nav, pane); return left;
 };
@@ -26094,6 +26322,7 @@ UC.campPane = function (app, redraw) {
     h('div.cstate', st.done ? 'Chapitre terminé. Tu peux continuer à t’entraîner : les pannes pas encore vues passent en premier.' : st.examReady ? 'L’examen est ouvert : chronométré, sans indice ni assistant.' : 'Encore ' + plural(left, 'ticket') + ' à valider (' + Game.PASS + ' / 100 ou plus) pour ouvrir l’examen.',
       due ? h('div.cdue', '↻ ' + plural(due, 'panne') + ' à revoir : ' + (due > 1 ? 'elles reviennent' : 'elle revient') + ' en priorité au prochain ticket.') : null),
     h('div.cmode', h('span.muted', 'Comment tu joues ce ticket :'), modeBtn('guided', 'Accompagné', 'Indices gratuits, assistant pas à pas'), modeBtn('free', 'Autonome', 'Indices payants, plus d’XP')),
+    app.legacy ? null : UI.rewards.contractPicker(app, { off: mode === 'guided' ? 'indisponibles en mode accompagné' : '' }),
     h('div.cact', acts, h('button.btn', { 'data-act': 'chantier', on: { click: () => UC.chantier(app, sel, null) } }, 'Voir le chantier')));
   const path = h('div.cpath', { 'aria-label': 'Chapitres de la campagne' }, S.chapters.map(c => {
     const cls = (c.done ? '.done' : '') + (c.n === S.current && !c.done ? '.cur' : '') + (c.unlocked ? '' : '.lock') + (c.n === sel ? '.sel' : '');
@@ -26110,7 +26339,8 @@ UC.dutyPane = function (app, parts, prof) {
     const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
     box.append(parts.daily(),
       h('p.muted.cintro', 'Incidents majeurs : plusieurs pannes de natures différentes dans le même ticket, tirées dans toute l’infrastructure. À garder pour quand la campagne est bien avancée.'),
-      h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => h('button.cdutyb', { 'data-level': x[0], on: { click: () => go(x[0]) } }, h('b', x[1]), h('small', x[2]), h('span.muted', 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min')))),
+      h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => { const open = SIM.rewards.dutyOpen(prof, x[0]); const need = (SIM.rewards.DUTY.find(d => d.level === x[0]) || {}).lv; return h('button.cdutyb' + (open ? '' : '.lock'), { 'data-level': x[0], disabled: !open, title: open ? '' : 'S’ouvre au niveau ' + need, on: { click: () => go(x[0]) } }, h('b', (open ? '' : '🔒 ') + x[1]), h('small', x[2]), h('span.muted', open ? 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min' : 'S’ouvre au niveau ' + need)); })),
+      UI.rewards.contractPicker(app),
       h('label.cchk', h('input', { type: 'checkbox', checked: timed, on: { change: e => { timed = e.target.checked; app._dutyTimed = timed; } } }), ' Chronométré, sans indice'));
   };
   draw(); return box;
@@ -26138,7 +26368,7 @@ UC.reportModal = function (app, run, spec) {
   };
   const rule = m.mode.hintsFree ? 'Mode accompagné : la fiche est corrigée au débrief, elle n’enlève aucun point.' : 'Cause mal identifiée : −' + SIM.report.CAUSE_COST + ' · correction mal identifiée : −' + SIM.report.FIX_COST + '. La fiche ne fait jamais échouer un ticket réparé : elle départage les étoiles.';
   const ov = h('div.overlay.frep', h('div.modal.fmodal', { role: 'dialog', 'aria-label': 'Fiche d’intervention' },
-    h('div.fhead', h('span.tag.ok', 'Ticket résolu'), h('span.muted', 'Ticket ' + run.id + ' · chrono arrêté à ' + UI.fmtDur(m.result.mttrSec))),
+    h('div.fhead', UI.rewards.stamp(), h('span.tag.ok', 'Ticket résolu'), h('span.muted', 'Ticket ' + run.id + ' · chrono arrêté à ' + UI.fmtDur(m.result.mttrSec))),
     h('h2', 'Fiche d’intervention'),
     h('p.muted', 'Le demandeur est dépanné. Avant de fermer le ticket, consigne ce que tu as trouvé : c’est ce qui sépare une panne réparée d’une panne comprise.'),
     spec.questions.map(qbox),
@@ -26174,6 +26404,150 @@ UC.debriefNext = function (app, m, camp) {
   if (camp.unlocked) return h('button.btn.primary', { 'data-act': 'next', on: { click: () => { app.campSel = camp.unlocked; app.campTicket(camp.unlocked); } } }, 'Découvrir le chapitre ' + camp.unlocked + ' ▶');
   if (camp.examReady && !C.examPassed(p, n)) return [h('button.btn.primary', { 'data-act': 'exam', on: { click: () => app.campExam(n) } }, camp.exam ? 'Repasser l’examen ▶' : 'Passer l’examen du chapitre ▶'), h('button.btn', { 'data-act': 'next', on: { click: () => app.campTicket(n) } }, 'Ticket suivant')];
   return h('button.btn.primary', { 'data-act': 'next', on: { click: () => app.campTicket(n) } }, 'Ticket suivant ▶');
+};
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== ui/96-rewards.js ===== */
+/* ============================================================================
+   Récompenses de niveau, côté interface : piste des récompenses, contrats, outils de diagnostic (voyants de liaison,
+   ping rapide, historique entre tickets), second avis, cosmétiques (fonds d'écran, terminaux, carte, insignes), prestige.
+   Moteur : src/engine/85-rewards.js. Styles : src/css/41-rewards.css.
+   En mode d'origine (#legacy) rien de tout cela n'est actif : les tests antérieurs voient le jeu tel qu'il était.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, UI = SIM.ui, Game = SIM.game, RW = SIM.rewards, P = SIM.prog, N = SIM.net, h = UI.h;
+const UR = UI.rewards = { run: null, seed: {} };
+const App = UI.App.prototype;
+const legacy = () => /legacy/.test(String(g.location && g.location.hash));
+const KIND_ICON = { contract: 'target', tool: 'network', duty: 'shield', perk: 'spark', cos: 'palette', theme: 'palette', prestige: 'medal' };
+const icon = (n, s) => { try { return UI.icon(n, s); } catch (e) { return null; } };
+
+/* ------------------------------------------------------------------ cosmétiques : attributs sur la racine, lus par la feuille de style */
+UR.applyCos = function (prof) {
+  if (typeof document === 'undefined') return; const root = document.documentElement; prof = prof || Game.profile();
+  ['wall', 'term', 'map'].forEach(s => { const v = legacy() ? 'default' : RW.cosOf(prof, s); if (v === 'default') root.removeAttribute('data-' + s); else root.setAttribute('data-' + s, v); });
+};
+
+/* ------------------------------------------------------------------ contrats */
+UR.contracts = function () { const v = Game.store.get('contracts'); const p = Game.profile(); return Array.isArray(v) ? v.filter(id => typeof id === 'string' && RW.contractOwned(p, id)) : []; };
+UR.setContracts = ids => Game.store.set('contracts', ids);
+/* sélecteur : note = ce qui rend les contrats inapplicables ici (mode accompagné) */
+UR.contractPicker = function (app, o) {
+  o = o || {}; const prof = Game.profile(); const box = h('div.rwc');
+  const draw = () => {
+    UI.clear(box); const on = UR.contracts(); const owned = RW.CONTRACTS.filter(c => RW.contractOwned(prof, c.id));
+    const nextC = RW.CONTRACTS.filter(c => !c.prestige && !RW.contractOwned(prof, c.id))[0];
+    const f = RW.contractFactor(on);
+    box.append(h('div.rwch', h('b', 'Contrats'), h('span.muted', owned.length ? (o.off ? ' — ' + o.off : on.length ? ' — XP × ' + f.toFixed(2).replace('.', ',') + ' sur un ticket validé' : ' — des contraintes en échange d’XP. La note n’est jamais touchée.') : ' — premier contrat au niveau ' + (nextC ? nextC.lv : '?'))));
+    if (owned.length) box.append(h('div.rwcl', owned.map(c => h('button.rwcb' + (on.indexOf(c.id) >= 0 ? '.on' : ''), { 'data-contract': c.id, disabled: !!o.off, title: c.desc, 'aria-pressed': on.indexOf(c.id) >= 0 ? 'true' : 'false', on: { click: () => { const cur = UR.contracts(); const i = cur.indexOf(c.id); if (i >= 0) cur.splice(i, 1); else cur.push(c.id); UR.setContracts(cur); draw(); } } }, h('b', c.label), h('small', '× ' + String(c.f).replace('.', ','))))));
+    if (owned.length && nextC) box.append(h('div.muted.rwcn', 'Prochain contrat : « ' + nextC.label + ' » au niveau ' + nextC.lv + '.'));
+  };
+  draw(); return box;
+};
+UR.ticketBody = (m, body) => (m.contracts && m.contracts.indexOf('vague') >= 0 ? RW.VAGUE_BODY : body);
+UR.has = (m, id) => !!(m && m.contracts && m.contracts.indexOf(id) >= 0);
+UR.contractPills = m => (m.contracts || []).map(id => h('span.pill.rwpill', { title: RW.contract(id).desc }, 'Contrat ', h('b', RW.contract(id).label)));
+
+/* ------------------------------------------------------------------ branchements sur la partie */
+const begin = App.begin;
+App.begin = function (opts) {
+  opts = Object.assign({}, opts || {});
+  if (!this.legacy && opts.contracts === undefined && !opts.tour) opts.contracts = UR.contracts();
+  UR.applyCos();
+  /* historique entre tickets : instantané pris au début de la partie */
+  UR.seed = {}; try { const st = Game.store.get('cmdhist'); if (st && typeof st === 'object') Object.keys(st).slice(0, 8).forEach(k => { if (Array.isArray(st[k])) UR.seed[k] = st[k].filter(x => typeof x === 'string').slice(-40); }); } catch (e) { /* stockage indisponible */ }
+  UR.run = null; const r = begin.call(this, opts); UR.run = this.run || null; return r;
+};
+const home = App.home;
+App.home = function () { UR.run = null; UR.applyCos(); const r = home.apply(this, arguments); if (!this.legacy) UR.decorateHome(this); return r; };
+
+/* outils actifs pour la partie en cours */
+UR.toolOn = (id, run) => { run = run || UR.run; return !legacy() && !!run && !run.ended && RW.toolOn(Game.profile(), id, run.m); };
+/* terminaux dont l'historique est conservé : jamais un écran d'ouverture de session */
+UR.HIST_KINDS = ['cmd', 'bash', 'ios', 'pf', 'mysql'];
+
+/* voyants de liaison : état réel du lien entre deux équipements de la carte (null : pas de câble direct connu) */
+UR.linkState = function (W, a, b) {
+  const A = W.dev[a]; if (!A) return null;
+  for (const name of Object.keys(A.ifaces || {}).concat(Object.keys(A.ports || {}))) { const q = N.portObj(A, name); if (q && q.cable && typeof q.cable.to === 'string' && (q.cable.to.split(':')[0] === b || (/^PATCH/.test(b) && /^wall:/.test(q.cable.to)))) return !!q.cable.plugged && N.linkUp(W, A, name); }
+  return null;
+};
+UR.paintLinks = function (run, lines) {
+  if (!UR.toolOn('leds', run)) return;
+  lines.forEach(x => { const st = UR.linkState(run.W, x.a, x.b); const s2 = st === null ? UR.linkState(run.W, x.b, x.a) : st; if (s2 === null) { x.el.style.stroke = ''; x.el.style.strokeDasharray = ''; return; } x.el.style.stroke = s2 ? '#22c55e' : '#ef4444'; x.el.style.strokeDasharray = s2 ? '' : '6 5'; x.el.setAttribute('data-link', s2 ? 'up' : 'down'); });
+};
+/* ping rapide : depuis le poste du demandeur (ou le poste d'administration) vers la première adresse de l'équipement. Diagnostic seulement : n'observe rien, ne clôt rien. */
+UR.quickPing = function (run, nid) {
+  const W = run.W, d = W.dev[nid]; if (!d) return;
+  let src = null; run.m.parts.forEach(p => (p.probes || []).forEach(pr => { if (!src && pr.from && W.dev[pr.from]) src = pr.from; })); if (!src || src === nid) src = W.dev['PC-ADM'] && nid !== 'PC-ADM' ? 'PC-ADM' : src;
+  const ip = Object.keys(d.ifaces || {}).map(k => d.ifaces[k].ip).filter(x => x && !/^169\.254\./.test(x))[0];
+  if (!src || !ip) { UI.toast('Ping rapide : pas d’adresse connue pour ' + nid + '.', 'warn', 3000); return; }
+  let ok = false; try { ok = !!N.ping(W, src, ip).ok; } catch (e) { ok = false; }
+  run.act(src, 'ping rapide → ' + nid + ' (' + ip + ') : ' + (ok ? 'réponse' : 'pas de réponse'), {});
+  UI.toast(src + ' → ' + nid + ' (' + ip + ') : ' + (ok ? 'réponse' : 'délai d’attente dépassé'), ok ? 'ok' : 'warn', 4500);
+};
+UR.popupItems = function (run, nid, btn) { return UR.toolOn('qping', run) && run.W.dev[nid] && nid !== 'ISP' ? [btn('Ping rapide (outil)', () => UR.quickPing(run, nid))] : []; };
+
+/* historique entre tickets : lignes des tickets précédents, placées avant celles de la session */
+UR.histSeed = s => (UR.toolOn('hist') && s && UR.HIST_KINDS.indexOf(s.kind) >= 0 && UR.seed[s.kind] ? UR.seed[s.kind] : []);
+if (SIM.emu && SIM.emu.Session) {
+  const exec = SIM.emu.Session.prototype.exec;
+  SIM.emu.Session.prototype.exec = function (line) {
+    const asking = !!this.ask; const r = exec.apply(this, arguments);
+    /* jamais une réponse à une invite (mot de passe, confirmation) */
+    if (!asking && typeof line === 'string' && line.trim() && UR.run && UR.HIST_KINDS.indexOf(this.kind) >= 0 && !legacy() && RW.has(Game.profile(), 'tool:hist')) {
+      try { const st = Game.store.get('cmdhist'); const all = st && typeof st === 'object' && !Array.isArray(st) ? st : {}; const k = String(this.kind || 'generic').slice(0, 12); const a = Array.isArray(all[k]) ? all[k] : []; if (a[a.length - 1] !== line) a.push(line.slice(0, 200)); all[k] = a.slice(-40); Game.store.set('cmdhist', all); } catch (e) { /* stockage indisponible */ }
+    }
+    return r;
+  };
+}
+
+/* second avis : le prochain indice est gratuit, une fois par jour */
+const hintUi = App.hint;
+App.hint = function () {
+  const run = this.run, m = run && run.m; if (!m || this.legacy) return hintUi.apply(this, arguments);
+  const prof = Game.profile();
+  if (!RW.secondReady(prof, m) || m.hintsUsed >= 3) return hintUi.apply(this, arguments);
+  const r = m.hint(undefined, { free: true });
+  if (r.denied) { UI.toast(r.why, 'warn'); return; } if (r.none) { UI.toast('Plus d’indice disponible.', 'warn'); return; }
+  RW.useSecond(prof); Game.saveProfile(prof);
+  UI.toast('Second avis : indice ' + r.n + ' offert, aucun point retiré. Le prochain sera payant.', 'ok', 5000);
+  if (this.drawHints) this.drawHints(); if (this.refreshBar) this.refreshBar();
+};
+
+/* ------------------------------------------------------------------ accueil : insigne, étoiles de prestige, prochaine récompense */
+UR.decorateHome = function (app) {
+  const root = app.root; if (!root) return; const card = root.querySelector('.pcard'); if (!card) return; const prof = Game.profile();
+  const fr = RW.cosOf(prof, 'frame'); if (fr !== 'default') card.setAttribute('data-frame', fr);
+  const pr = RW.prestige(prof); const title = card.querySelector('.ptitle'); if (pr && title) title.append(h('span.rwstar', { title: pr + ' prestige' + (pr > 1 ? 's' : '') }, ' ' + '★'.repeat(Math.min(pr, 5)) + (pr > 5 ? ' ×' + pr : '')));
+  const nx = RW.next(prof); const btns = card.querySelector('.hbtns');
+  if (btns) btns.append(h('button.btn.rwbtn', { on: { click: () => UI.prog.screen(app, 'rewards') } }, 'Récompenses'));
+  card.append(h('div.rwnext', nx ? ['Prochaine récompense au niveau ', h('b', String(nx.lv)), ' : ' + nx.label] : RW.canPrestige(prof) ? 'Niveau maximal : le prestige t’attend dans Récompenses.' : 'Toutes les récompenses de niveau sont acquises.'));
+};
+/* tampon de la fiche d'intervention : l'insigne le plus élevé mérité */
+UR.stamp = function () { if (legacy()) return null; const f = RW.bestFrame(Game.profile()); return f ? h('span.rwstamp', { 'data-frame': f.id, title: 'Tampon : ' + f.label }, f.label.replace('Insigne ', '').replace(/^d’|^de /, '').toUpperCase()) : null; };
+
+/* ------------------------------------------------------------------ onglet « Récompenses » de l'écran de carrière */
+UR.view = function (app, prof, save, redraw) {
+  const lvl = RW.level(prof), real = P.levelOf(prof.xp).level, pr = RW.prestige(prof);
+  const track = h('div.rwtrack', RW.TRACK.map(r => { const own = lvl >= r.lv; return h('div.rwrow' + (own ? '.on' : ''), { 'data-reward': r.id }, h('span.rwlv', own ? '✓' : String(r.lv)), h('span.rwic', icon(KIND_ICON[r.kind] || 'spark', 20)), h('div.grow', h('b', r.label), h('div.muted', r.desc)), h('span.muted.rwst', own ? 'Acquis' : 'Niveau ' + r.lv)); }));
+  const picker = slot => h('div.rwslot', h('h3', RW.COS_LABEL[slot]), h('div.rwopts', RW.COS[slot].map(c => { const own = RW.cosOwned(prof, slot, c.id); const cur = RW.cosOf(prof, slot) === c.id;
+    return h('button.rwopt' + (cur ? '.on' : '') + (own ? '' : '.lock'), { 'data-cos': slot + ':' + c.id, disabled: !own, title: own ? c.label : c.lv ? 'Niveau ' + c.lv : 'Termine le chapitre ' + c.ch + ' de la campagne', on: { click: () => { if (RW.setCos(prof, slot, c.id)) { save(); UR.applyCos(prof); redraw(); } } } },
+      h('i.rwsw', { 'data-slot': slot, 'data-v': c.id }), h('span', c.label), own ? null : h('small', c.lv ? 'niv. ' + c.lv : 'chap. ' + c.ch)); })));
+  const prestige = h('div.rwprest', h('h3', 'Prestige' + (pr ? ' — ' + '★'.repeat(Math.min(pr, 5)) + (pr > 5 ? ' ×' + pr : '') : '')),
+    h('p.muted', 'Au niveau ' + P.MAX_LEVEL + ', tu peux repartir du niveau 1. Tu gardes la campagne, les succès, les maîtrises et toutes les récompenses de niveau ; l’arbre de compétences est rendu et se regagne en remontant. Tu gagnes une étoile et le contrat « Tout ou rien ».'),
+    h('button.btn' + (RW.canPrestige(prof) ? '.primary' : ''), { 'data-act': 'prestige', disabled: !RW.canPrestige(prof), on: { click: () => UI.modal('Passer au prestige ?', h('p', 'Ton expérience repart de zéro (niveau 1). Rien d’autre n’est perdu. Ce choix ne s’annule pas.'), [{ label: 'Annuler' }, { label: 'Prestige', primary: true, fn: () => { if (RW.doPrestige(prof)) { save(); UI.toast('Prestige ' + RW.prestige(prof) + ' : une étoile de plus. Contrat « Tout ou rien » disponible.', 'ok', 7000); redraw(); } } }]) } }, RW.canPrestige(prof) ? 'Passer au prestige' : 'Disponible au niveau ' + P.MAX_LEVEL + ' (tu es niveau ' + real + ')'));
+  return h('div.rwview', h('p.muted', 'Chaque palier de niveau débloque quelque chose, sans rien acheter. Les outils et le second avis sont coupés en évaluation chronométrée et en examen de chapitre ; les contrats ne changent que l’XP. Les notes restent comparables d’un joueur à l’autre.'),
+    h('div.rwcols', h('div', h('h3', 'Piste des récompenses'), track), h('div', h('h3', 'Apparence'), h('p.muted', 'Les fonds d’écran, les couleurs de terminal et la carte ne changent rien au fonctionnement des consoles.'), ['wall', 'term', 'map', 'frame'].map(picker), prestige)));
+};
+/* débrief : ce que le ou les niveaux gagnés viennent de débloquer */
+UR.debriefUnlocks = function (prog) {
+  if (!prog || legacy() || !prog.from || !prog.to || prog.to.level <= prog.from.level) return null;
+  if (RW.prestige(Game.profile()) > 0) return null;
+  const list = RW.between(prog.from.level, prog.to.level); if (!list.length) return null;
+  return h('div.card.rwnew', h('h3', 'Débloqué par ton niveau ' + prog.to.level), list.map(r => h('div.rwrow.on', h('span.rwic', icon(KIND_ICON[r.kind] || 'spark', 20)), h('div.grow', h('b', r.label), h('div.muted', r.desc)))),
+    h('div.muted', { style: { marginTop: '6px' } }, 'À retrouver dans Carrière → Récompenses.'));
 };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 

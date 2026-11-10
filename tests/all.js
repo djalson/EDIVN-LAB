@@ -17,7 +17,7 @@ const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 /* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
 const FAST = process.argv.includes('--fast');
-const FASTSET = /^(assert-world|regress |game$|progress |campaign|report |lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
+const FASTSET = /^(assert-world|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -40,6 +40,7 @@ t('Moteur', 'faults', ['tests/faults.js'], { expect: /(\d+)\/\1 pannes valides, 
 t('Moteur', 'validate', ['tests/validate.js'], { expect: /double import refusé/ });
 t('Moteur', 'game', ['tests/game.js'], { expect: /OK/ });
 t('Moteur', 'campaign (chapitres, périmètre, tirage, examen, déblocage, révision espacée ; campagne jouée en entier)', ['tests/campaign.js'], { timeout: 600, expect: /, 0 échec/ });
+t('Moteur', 'rewards (récompenses de niveau : piste, contrats en XP seulement, outils coupés en évaluation et en examen, second avis, cosmétiques, prestige)', ['tests/rewards.js'], { timeout: 120, expect: /, 0 échec/ });
 t('Moteur', 'report (fiche d’intervention : une fiche bien formée par panne, barème, plancher au seuil, mode guidé)', ['tests/report.js'], { timeout: 600, expect: /, 0 échec/ });
 t('Moteur', 'scoring (note /100, seuil 75, étoiles, temps cible par panne, niveaux 1/1/2/3/4 pannes)', ['tests/scoring.js'], { timeout: 600, expect: /^OK$/m });
 t('Moteur', 'combo (pannes composées + niveaux Admin 2 / Cyber 3 / Chaos 4)', ['tests/combo.js', '16'], { timeout: 900, expect: /0 échec/ });
@@ -77,6 +78,7 @@ t('Réparation graphique', 'gui-sweep-neutral (neutralisation : recette non jou�
 t('Réparation graphique', 'gestion-app (D-103 : application de gestion de SRV-FIC, un parcours par cause + neutralisation)', ['tests/ui/gestion-app.js'], { timeout: 900, expect: /0 échec/ });
 t('Réparation graphique', 'gui-sweep-win (pannes Windows / AD / GPO / DHCP / DNS / IIS / partages × variantes réparées par clics dans les vraies consoles)', ['tests/ui/gui-sweep-win.js'], { timeout: 2400, expect: /, 0 à reprendre,/ });
 t('Interface', 'home-tour', ['tests/ui/home-tour.js']);
+t('Interface', 'rewards-ui (piste, apparence, contrats, voyants de liaison, ping rapide, historique, second avis, paliers d’astreinte, prestige, #legacy)', ['tests/ui/rewards.js'], { timeout: 300, expect: /^OK récompenses$/m });
 t('Interface', 'campaign-ui (accueil à trois entrées, chantier, carte du périmètre, fiche d’intervention, examen, déblocage, #legacy)', ['tests/ui/campaign.js'], { timeout: 300, expect: /^OK campagne$/m });
 t('Interface', 'themes-debrief (accueil, 8 thèmes, animations du 100, débrief, liens de cours)', ['tests/ui/themes-debrief.js'], { timeout: 300, expect: /^OK$/m });
 t('Interface', 'scenario-import', ['tests/ui/scenario-import.js']);

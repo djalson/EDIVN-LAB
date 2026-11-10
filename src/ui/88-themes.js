@@ -32,7 +32,14 @@ const THEMES = [
     scene: { leds: ['#5ff2a0', '#ff7ac6', '#b79bff'], cables: ['#b79bff', '#5ff2a0', '#ff7ac6'] } },
   { id: 'paper', name: 'Papier Clair', desc: 'Fond crème et encre sombre, lisible en salle lumineuse ou en projection.', anim: 'paper', perfect: { title: 'VALIDÉ', sub: '100 / 100 — dossier clos, tampon apposé.' },
     vars: { '--bg': '#f4f1ea', '--panel': '#ffffff', '--panel2': '#ece8de', '--line': '#c9c2b0', '--text': '#1f2430', '--muted': '#575d6e', '--accent': '#4f32c8', '--accent2': '#3d27a0', '--hc': '#0f766e', '--hv': '#b4235f', '--ink': '#1f2430', '--shadow': '#a79f8a', '--onaccent': '#ffffff', '--bubble': '#1f2430', '--bubbletxt': '#f4f1ea' },
-    scene: { leds: ['#0f766e', '#b4235f', '#4f32c8'], cables: ['#4f32c8', '#0f766e', '#b4235f'] } }
+    scene: { leds: ['#0f766e', '#b4235f', '#4f32c8'], cables: ['#4f32c8', '#0f766e', '#b4235f'] } },
+  /* thèmes de prestige : débloqués par le niveau (src/engine/85-rewards.js), pas par l'arbre */
+  { id: 'gold', name: 'Or noir', desc: 'Prestige, niveau 30. Noir profond et or, sobre et tranchant.', anim: 'neon', perfect: { title: 'MAGISTRAL', sub: '100 / 100 — du travail d’architecte.' },
+    vars: { '--bg': '#0b0a08', '--panel': '#15130e', '--panel2': '#1f1c14', '--line': '#4a4127', '--text': '#f6efdc', '--muted': '#b9ad8c', '--accent': '#d4a017', '--accent2': '#a87c0c', '--hc': '#ffd76a', '--hv': '#e0b040', '--ink': '#0b0a08', '--shadow': '#000000', '--onaccent': '#0b0a08', '--bubble': '#f6efdc', '--bubbletxt': '#0b0a08' },
+    scene: { leds: ['#ffd76a', '#e0b040', '#f6efdc'], cables: ['#a87c0c', '#ffd76a', '#4a4127'] } },
+  { id: 'boreal', name: 'Boréal', desc: 'Prestige, niveau 40. Nuit polaire, turquoise et violet.', anim: 'synth', perfect: { title: 'LÉGENDE', sub: '100 / 100 — le datacenter s’incline.' },
+    vars: { '--bg': '#06121a', '--panel': '#0b1d28', '--panel2': '#112a38', '--line': '#23505f', '--text': '#e6fbff', '--muted': '#8fb8c4', '--accent': '#2dd4bf', '--accent2': '#14a39a', '--hc': '#7cf7d4', '--hv': '#a78bfa', '--ink': '#04121a', '--shadow': '#01080c', '--onaccent': '#04121a', '--bubble': '#e6fbff', '--bubbletxt': '#04121a' },
+    scene: { leds: ['#7cf7d4', '#a78bfa', '#2dd4bf'], cables: ['#2dd4bf', '#a78bfa', '#23505f'] } }
 ];
 const T = UI.themes = { list: THEMES };
 T.get = id => THEMES.find(x => x.id === id) || THEMES[0];
