@@ -17,7 +17,7 @@ const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 /* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
 const FAST = process.argv.includes('--fast');
-const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|challenge|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
+const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|challenge|personas-text|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -37,6 +37,7 @@ t('Moteur', 'invariants (toutes pannes × variantes : pas d’auto-réparation, 
 t('Moteur', 'hints-commands (les commandes citées dans les indices et solutions existent dans le simulateur)', ['tests/hints-commands.js'], { expect: /^OK/m });
 t('Moteur', 'calendar (dates et heures du jeu : toutes les pannes se comportent pareil à une autre date)', ['tests/calendar.js'], { timeout: 900, expect: /^OK/m });
 t('Moteur', 'events (événements en partie : fréquence, panne ajoutée obligatoire et réparable, QCM du téléphone, échéance du responsable)', ['tests/events.js'], { timeout: 900, expect: /^OK/m });
+t('Moteur', 'personas-text (personnalités : le ton change, aucun élément technique du ticket n’est perdu)', ['tests/personas-text.js'], { expect: /^OK/m });
 t('Moteur', 'dns-cache-ttl (cache DNS client : TTL de l’enregistrement ; dns_cache ne se répare plus tout seul)', ['tests/dns-cache-ttl.js'], { expect: /^OK/m });
 t('Moteur', 'unproven-timed (panne irréparable retirée de tous les tirages ; pannes proxy revenues en chronométré ; liste vidée → revient)', ['tests/unproven-timed.js'], { expect: /^OK/m });
 t('Moteur', 'codes-audit (D-106 : registre des codes d’erreur, masquage, audit statique + exécution, neutralisation)', ['tests/codes-audit.js'], { expect: /^OK/m });

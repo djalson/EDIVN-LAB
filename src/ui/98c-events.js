@@ -15,10 +15,13 @@ UE.COLLEAGUE = 'Sacha (support, ton collègue)';
 
 const begin0 = P.begin;
 P.begin = function (opts) {
+  if (opts && !this.legacy && !opts.tour && opts.personas === undefined) { opts = Object.assign({}, opts, { personas: true }); arguments[0] = opts; }
   if (opts && !this.legacy && !opts.tour && opts.events === undefined && !g.SIM_NO_EVENTS && ((Game.profile().history || []).length >= 3 || opts.eventType)) { opts = Object.assign({}, opts, { events: true }); arguments[0] = opts; }
   const res = begin0.apply(this, arguments); const app = this, run = this.run;
   if (!run || this.legacy || (opts && opts.tour)) return res;
   const side = this.root.querySelector('.side'); if (!side) return res;
+  /* le caractère du demandeur, sous son nom */
+  { const tr = (run.m.fault.ticket || {}).trait; const fromEl = side.querySelector('.ticket .from'); if (tr && fromEl) fromEl.append(h('span.ptrait', ' · ' + tr)); }
   const list = h('div.msglist', h('div.muted.msgempty', 'Aucun message.')); const badge = h('span.msgn');
   side.append(h('div.card.msgs', h('h3', 'Messages', badge), list));
   let n = 0; const post = (icon, from, body, extra) => { const e = list.querySelector('.msgempty'); if (e) e.remove(); n++; badge.textContent = ' ' + n; const el = h('div.msg.new', h('div.msgh', UI.icon(icon, 15), h('b', from)), h('div.msgb', body), extra || null); list.prepend(el); setTimeout(() => el.classList.remove('new'), 4000); return el; };

@@ -155,3 +155,22 @@ Une ligne dans `RW.CONTRACTS`, `RW.COS`, `TOOLS` ou `DUTY` : la piste (`RW.TRACK
 
 - `tests/ui/proxy-sweep.js` répare les 17 pannes proxy, toutes variantes comprises (37), par clics et saisies dans l'interface web de pfSense (Squid, squidGuard, gestionnaire de paquets, services, résolveur DNS, règles LAN) et dans les Options Internet de PC-02. Elles ne sont donc plus écartées de l'évaluation chronométrée ni des examens.
 - La même vérification a établi que `multi_vitrine` n'est pas réparable par un joueur : une de ses trois causes est un certificat expiré et aucune commande de renouvellement n'est émulée. Elle est retirée de tous les tirages (`src/content/09-unproven.js`), campagne comprise. Un formateur peut encore la choisir explicitement.
+
+## Ajouts du 12-13/11/2026
+
+Tous ces ajouts sont **opt-in côté moteur** : une mission créée sans option se comporte comme avant (tests du moteur et mode `#legacy` inchangés). L'interface V3 les active.
+
+| Ajout | Fichiers | Option de `Game.create` | Tests |
+|---|---|---|---|
+| Clôture prouvée par le test qui échouait (un écran affiché ne prouve rien) | `src/engine/70-fault.js` (`F.VERIFY_BY_PROBE`) | — | `tests/invariants.js`, `tests/ui/verify-strict.js` |
+| Panne de connexion : l'utilisateur est devant l'écran de connexion | `src/engine/80-game.js` | — | `tests/invariants.js` |
+| Calendrier : un jour ouvré de plus par ticket, heure de bureau (nuit en astreinte lourde) | `src/engine/78-calendar.js` | `calendar` | `tests/calendar.js` |
+| Événements en partie (1 ticket sur 4) : rappel, deuxième ticket, collègue, panne bête au téléphone (QCM), échéance du responsable | `src/engine/87-events.js`, `src/ui/98c-events.js` | `events`, `eventType` | `tests/events.js`, `tests/ui/events.js` |
+| Personnalités : le ton du ticket dépend de son auteur, jamais le fond | `src/content/32-personas.js` | `personas` | `tests/personas-text.js` |
+| Défi entre élèves, panne mystère (1 essai par jour, XP ×2) | `src/ui/98d-challenge.js` | `shared`, `challenge`, `mystery` | `tests/ui/challenge.js` |
+| Ticket interrompu (F5) : reprise proposée, chronomètre conservé | `src/ui/99-resume.js` | — | `tests/ui/resume.js` |
+| Bouton « Bug ? » : rapport copiable, décodable par `node tests/bug-decode.js` | `src/ui/98-bugreport.js` | — | `tests/ui/bugreport.js` |
+
+Règles des événements : la panne ajoutée est **obligatoire** pour clôturer et rallonge le temps cible de 5 min ; elle est validée par simulation contre le ticket en cours avant d'être retenue. L'échéance du responsable manquée coûte 5 points. Jamais d'événement en évaluation chronométrée, en examen, pendant le tutoriel, ni pendant les trois premiers tickets d'un profil.
+
+Batterie : `node tests/all.js --jobs=2` lance deux tests à la fois et rejoue seul tout test qui échoue sous charge.

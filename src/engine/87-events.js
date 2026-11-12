@@ -84,6 +84,7 @@ const addPart = (m, inst) => { m.extras.push(inst); m.parts = m.parts.concat([in
 /* déclenche l'événement : injecte la panne ajoutée dans le monde en cours, ou arme l'échéance du responsable */
 M.fireEvent = function () {
   const e = this.eventDue(); if (!e) return null; e.fired = true; e.firedAt = Math.round(this.elapsedSec());
+  if (e.inst && this.personas) SIM.personas.apply(e.inst, this.seed);
   if (e.type === 'boss') { e.deadline = e.firedAt + Math.max(240, Math.round(0.4 * this.parSec)); this.trace.push({ t: e.firedAt, kind: 'event', text: 'Événement : le responsable fixe une échéance', cls: 'diagnostic' }); return e; }
   F.runSteps(this.W, e.inst.inject, { inst: e.inst }); this.W.touch('event');
   if (e.type === 'call_quiz') {

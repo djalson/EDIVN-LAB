@@ -177,6 +177,8 @@ function Mission(o) {
     this.fault = F.bundle(this.seed, spec);
   } else this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, pickProf, { skill: o.skill, timed: !!this.mode.timed }), this.seed);
   this.parts = this.fault.bundle ? this.fault.parts : [this.fault];
+  /* personnalités : chaque utilisateur écrit à sa façon (src/content/32-personas.js) ; le ticket d'un assemblage garde son texte commun */
+  this.personas = !!(o.personas && SIM.personas); if (this.personas && !this.fault.bundle) SIM.personas.apply(this.fault, this.seed);
   this.startMs = this.clock(); this.pausedMs = 0; this.pausedAt = null;
   this.trace = []; this.hintsUsed = 0; this.hintLog = []; this.dangers = []; this.wrongCloses = 0; this.falseRes = 0; this.impacts = []; this.refunded = []; this.aids = []; this.fx = []; this._blk = this._blockedNow();
   this.state = 'running'; this.result = null; this.resolvedAtSec = null; this.firstFixedAtSec = null; this.endSec = null;

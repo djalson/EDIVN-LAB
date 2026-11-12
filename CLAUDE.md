@@ -8,7 +8,7 @@ Simulateur de pannes d'infrastructure, jeu sérieux pour la formation TSSR. Livr
 npm run build        # src/ → dist/EDIVN-Lab.html (échoue si une ressource externe s'y glisse)
 npm run test:fast    # palier rapide, à lancer après chaque modification
 npm run test:quick   # batterie sans le « singe »
-npm test             # batterie complète (≈ 1 h) → docs/RAPPORT-TESTS.md
+npm test             # batterie complète (≈ 1 h ; `node tests/all.js --jobs=2` ≈ 35 min) → docs/RAPPORT-TESTS.md
 node tests/<nom>.js              # un test du moteur
 node tests/ui/<nom>.js           # un test d'interface (Playwright + Chromium)
 ```

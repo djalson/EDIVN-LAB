@@ -11,7 +11,7 @@ const SIM = g.SIM, U = SIM.U, UI = SIM.ui, E = SIM.emu, Game = SIM.game;
 const TICK_SEC = 5;
 function Run(opts) {
   this.opts = opts; this.listeners = {};
-  this.m = Game.create({ shared: opts.shared, challenge: opts.challenge, mystery: opts.mystery, calendar: opts.calendar, events: opts.events, eventType: opts.eventType, level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
+  this.m = Game.create({ personas: opts.personas, shared: opts.shared, challenge: opts.challenge, mystery: opts.mystery, calendar: opts.calendar, events: opts.events, eventType: opts.eventType, level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
   /* campagne : périmètre affiché (équipements et sites du chapitre) ; null = toute l'infrastructure (bac à sable) */
   this.scope = SIM.camp ? SIM.camp.missionScope(this.m) : null;
   this.W = this.m.W; this.surfaces = {}; this.ended = false; this.ticks = 0;

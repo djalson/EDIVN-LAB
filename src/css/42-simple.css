@@ -179,3 +179,5 @@
 .chcard { display: flex; gap: 12px; align-items: center; padding: 12px 14px; background: var(--panel2); border: 2px solid var(--line); } .chcard.mys { border-color: color-mix(in srgb, var(--track, #f5b942) 60%, var(--line)); } .chcard.done { opacity: .6; }
 .chic { width: 34px; height: 34px; display: grid; place-items: center; font: 700 20px var(--mono); border: 2px solid var(--line); flex-shrink: 0; } .chcard.mys .chic { color: var(--track, #f5b942); border-color: var(--track, #f5b942); }
 .chline { display: flex; gap: 6px; margin-top: 6px; align-items: center; } .chin { flex: 1; min-width: 0; } .cherr { color: var(--bad, #f66); font-size: 12px; }
+
+.ptrait { opacity: .75; font-style: italic; }

@@ -1256,6 +1256,8 @@ html[data-map=night] .node .nm, html[data-map=night] .node .sub { background: #0
 .chic { width: 34px; height: 34px; display: grid; place-items: center; font: 700 20px var(--mono); border: 2px solid var(--line); flex-shrink: 0; } .chcard.mys .chic { color: var(--track, #f5b942); border-color: var(--track, #f5b942); }
 .chline { display: flex; gap: 6px; margin-top: 6px; align-items: center; } .chin { flex: 1; min-width: 0; } .cherr { color: var(--bad, #f66); font-size: 12px; }
 
+.ptrait { opacity: .75; font-style: italic; }
+
 </style>
 </head>
 <body>
@@ -6728,6 +6730,8 @@ function Mission(o) {
     this.fault = F.bundle(this.seed, spec);
   } else this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, pickProf, { skill: o.skill, timed: !!this.mode.timed }), this.seed);
   this.parts = this.fault.bundle ? this.fault.parts : [this.fault];
+  /* personnalités : chaque utilisateur écrit à sa façon (src/content/32-personas.js) ; le ticket d'un assemblage garde son texte commun */
+  this.personas = !!(o.personas && SIM.personas); if (this.personas && !this.fault.bundle) SIM.personas.apply(this.fault, this.seed);
   this.startMs = this.clock(); this.pausedMs = 0; this.pausedAt = null;
   this.trace = []; this.hintsUsed = 0; this.hintLog = []; this.dangers = []; this.wrongCloses = 0; this.falseRes = 0; this.impacts = []; this.refunded = []; this.aids = []; this.fx = []; this._blk = this._blockedNow();
   this.state = 'running'; this.result = null; this.resolvedAtSec = null; this.firstFixedAtSec = null; this.endSec = null;
@@ -7770,6 +7774,7 @@ const addPart = (m, inst) => { m.extras.push(inst); m.parts = m.parts.concat([in
 /* déclenche l'événement : injecte la panne ajoutée dans le monde en cours, ou arme l'échéance du responsable */
 M.fireEvent = function () {
   const e = this.eventDue(); if (!e) return null; e.fired = true; e.firedAt = Math.round(this.elapsedSec());
+  if (e.inst && this.personas) SIM.personas.apply(e.inst, this.seed);
   if (e.type === 'boss') { e.deadline = e.firedAt + Math.max(240, Math.round(0.4 * this.parSec)); this.trace.push({ t: e.firedAt, kind: 'event', text: 'Événement : le responsable fixe une échéance', cls: 'diagnostic' }); return e; }
   F.runSteps(this.W, e.inst.inject, { inst: e.inst }); this.W.touch('event');
   if (e.type === 'call_quiz') {
@@ -12412,6 +12417,51 @@ SIM.CHAPTER_RULES = {
 (SIM.VAULT || []).forEach(c => { c.ch = /bordeaux/i.test(c.scope) ? 8 : /SRV-RV|Ramonville/i.test(c.scope) ? 9 : /Debian/i.test(c.scope) ? 5 : /Cisco/i.test(c.scope) ? 4 : /pfSense/i.test(c.scope) ? 6 : 1; });
 /* Pannes du catalogue livré (les scénarios importés par un formateur ne font pas partie de la campagne). */
 SIM.BASE_FAULT_IDS = SIM.faults.map(d => d.id);
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== content/32-personas.js ===== */
+/* ============================================================================
+   Personnalités des utilisateurs : chacun écrit ses tickets à sa façon.
+   Le fond technique d'un ticket ne change JAMAIS (symptôme, machines, adresses, heures) : seuls la formule d'ouverture, une remarque
+   sans contenu technique et la formule de fin portent le caractère. Aucune remarque ne suggère de cause : pas de fausse piste.
+   Appliqué quand la mission est créée avec l'option personas (interface V3) ; le moteur et le mode d'origine gardent les textes bruts.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, U = SIM.U;
+const PS = SIM.personas = {};
+PS.LIST = [
+  { key: 'Alice Martin', trait: 'précise et toujours pressée', open: ['Bonjour,', 'Bonjour, je fais court :'], aside: ['Je suis en pleine clôture mensuelle.', 'J’ai noté l’heure exacte si besoin.'], close: ['Merci de faire vite, j’ai des écritures à passer avant midi.', 'Je reste à mon poste, merci de me tenir au courant.'] },
+  { key: 'Bruno Durand', trait: 'bavard, s’excuse beaucoup', open: ['Bonjour, désolé de vous déranger encore…', 'Bonjour, c’est encore moi, pardon !'], aside: ['Je ne suis pas très doué avec ces machines.', 'J’espère que je n’ai rien fait de travers.'], close: ['Merci beaucoup pour votre patience, vraiment.', 'Encore pardon pour le dérangement, et merci !'] },
+  { key: 'Claire Lef', trait: 'directe, n’a jamais le temps', open: ['Bonjour.', 'Bonjour, c’est urgent.'], aside: ['J’ai une réunion dans dix minutes.'], close: ['J’ai besoin que ce soit réglé aujourd’hui.', 'Tenez-moi informée dès que c’est rétabli.'] },
+  { key: 'David Moreau', trait: 'méthodique, raconte tout dans l’ordre', open: ['Bonjour, voici ce que j’observe :', 'Bonjour, je vous décris les faits :'], aside: ['J’ai tout noté sur un papier au fur et à mesure.'], close: ['Je peux vous refaire la manipulation devant vous si besoin.', 'Dites-moi si vous voulez d’autres précisions.'] },
+  { key: 'Elena Garcia', trait: 'calme, écrit pour toute l’agence', open: ['Bonjour à l’équipe de Toulouse,', 'Bonjour, ici l’agence de Bordeaux,'], aside: ['Je vous écris pour l’agence.'], close: ['Merci d’avance, bonne journée à vous.', 'On patiente, merci pour votre aide.'] },
+  { key: 'Louison Berger', trait: 'enthousiaste, tutoie tout le monde', open: ['Coucou le support !', 'Hello l’équipe !'], aside: ['Promis, je n’ai touché à rien.'], close: ['Vous êtes les meilleurs, merci !', 'Merci d’avance, vous me sauvez la journée !'] },
+  { key: 'Jano Ribeiro', trait: 'écrit le strict minimum', open: ['Bjr.', 'Bonjour.'], aside: [], close: ['Merci.', 'Cdt.'], terse: true },
+  { key: 'Mathis Caron', trait: 'nouvel arrivant, pose des questions', open: ['Bonjour, je suis arrivé la semaine dernière, pardon si la question est bête :', 'Bonjour, je débute ici :'], aside: ['Je ne sais pas si c’est normal.'], close: ['Est-ce que je dois faire quelque chose de mon côté ?', 'Merci de m’expliquer, que je sache pour la prochaine fois.'] },
+  { key: 'Jenny Lambert', trait: 'organisée, va droit au but', open: ['Bonjour, constaté ce matin en arrivant :', 'Bonjour, un point à traiter :'], aside: ['C’est reproductible à chaque essai.'], close: ['Je reste disponible à mon poste.', 'Merci de me confirmer quand c’est réglé.'] },
+  { key: 'Liam Fontaine', trait: 'cordial mais impatient', open: ['Bonjour, je compte sur vous :', 'Bonjour,'], aside: ['Je dois repartir en rendez-vous juste après.'], close: ['Je compte sur vous pour régler ça rapidement.', 'Merci de traiter ça en priorité.'] },
+  { key: 'Sophie Lambert', trait: 'chaleureuse, donne des nouvelles de l’agence', open: ['Bonjour de Ramonville !', 'Bonjour à tous,'], aside: ['Tout le monde ici vous passe le bonjour.'], close: ['Merci pour votre aide, comme toujours.', 'Bonne journée à toute l’équipe !'] },
+  { key: 'Marc Delmas', trait: 'pragmatique, parle terrain', open: ['Bonjour,', 'Salut l’équipe,'], aside: ['Je suis sur place toute la journée.'], close: ['Appelez-moi si vous voulez que je regarde quelque chose sur place.', 'Merci, je reste joignable.'] }
+];
+PS.of = from => PS.LIST.find(p => String(from || '').indexOf(p.key) === 0) || null;
+const POLITE = /\s*(?:Pouvez-vous[^.?!]*\?|Merci[^.?!]*[.!]|Pourriez-vous[^.?!]*\?)\s*$/;
+const cap = s => /^\S*[\/\\.\d@]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1);   /* une adresse ou un chemin en tête de phrase garde sa casse */
+/* le texte d'un ticket, dit par son auteur. seed : pour tirer la même variante à chaque fois. */
+PS.say = function (from, body, seed) {
+  const p = PS.of(from); body = String(body || ''); if (!p || !body) return body;
+  const rng = U.rng('persona|' + seed + '|' + p.key);
+  /* seule une formule de politesse courte et sans élément technique est remplacée par celle du personnage */
+  let core = body.replace(/^(?:Bonjour|Salut)\s*[,.!]?\s*/i, ''); { const pm = POLITE.exec(core); if (pm && pm[0].length <= 70 && !/[\d\\\/@«]|[A-Z]{2,}/.test(pm[0])) core = core.slice(0, pm.index); } core = core.trim(); if (!core) core = body;
+  const open = rng.pick(p.open); const close = rng.pick(p.close);
+  /* la remarque vient après la première phrase, une fois sur deux ; jamais pour un ticket très court ni chez les laconiques */
+  let aside = p.aside.length && !p.terse && rng.chance(0.5) ? rng.pick(p.aside) : '';
+  if (aside) { const m = /^(.*?[.!?…])(\s+)(.*)$/s.exec(core); if (m && m[3]) core = m[1] + ' ' + aside + ' ' + m[3]; else core = core + ' ' + aside; }
+  const glue = /[,:]$/.test(open) ? core.charAt(0).toLowerCase() === core.charAt(0) || /^[A-ZÀ-Ý][a-zà-ÿ’']/.test(core) && !/^[A-Z]{2}|^(?:PC|SRV|SW|R-|IMP|Internet|Windows|Outlook|Teams|Excel|Word)/.test(core) ? core.charAt(0).toLowerCase() + core.slice(1) : core : cap(core);
+  return (open + ' ' + glue + ' ' + close).replace(/\s+/g, ' ').trim();
+};
+/* applique la personnalité au ticket d'une panne instanciée (une seule fois) */
+PS.apply = function (inst, seed) { const t = inst && inst.ticket; if (!t || t._persona) return inst; const p = PS.of(t.from); if (p) { t.body = PS.say(t.from, t.body, seed + '|' + inst.id); t.trait = p.trait; } t._persona = true; return inst; };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
 /* ===== emu/00-core.js ===== */
@@ -19214,7 +19264,7 @@ const SIM = g.SIM, U = SIM.U, UI = SIM.ui, E = SIM.emu, Game = SIM.game;
 const TICK_SEC = 5;
 function Run(opts) {
   this.opts = opts; this.listeners = {};
-  this.m = Game.create({ shared: opts.shared, challenge: opts.challenge, mystery: opts.mystery, calendar: opts.calendar, events: opts.events, eventType: opts.eventType, level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
+  this.m = Game.create({ personas: opts.personas, shared: opts.shared, challenge: opts.challenge, mystery: opts.mystery, calendar: opts.calendar, events: opts.events, eventType: opts.eventType, level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
   /* campagne : périmètre affiché (équipements et sites du chapitre) ; null = toute l'infrastructure (bac à sable) */
   this.scope = SIM.camp ? SIM.camp.missionScope(this.m) : null;
   this.W = this.m.W; this.surfaces = {}; this.ended = false; this.ticks = 0;
@@ -27225,10 +27275,13 @@ UE.COLLEAGUE = 'Sacha (support, ton collègue)';
 
 const begin0 = P.begin;
 P.begin = function (opts) {
+  if (opts && !this.legacy && !opts.tour && opts.personas === undefined) { opts = Object.assign({}, opts, { personas: true }); arguments[0] = opts; }
   if (opts && !this.legacy && !opts.tour && opts.events === undefined && !g.SIM_NO_EVENTS && ((Game.profile().history || []).length >= 3 || opts.eventType)) { opts = Object.assign({}, opts, { events: true }); arguments[0] = opts; }
   const res = begin0.apply(this, arguments); const app = this, run = this.run;
   if (!run || this.legacy || (opts && opts.tour)) return res;
   const side = this.root.querySelector('.side'); if (!side) return res;
+  /* le caractère du demandeur, sous son nom */
+  { const tr = (run.m.fault.ticket || {}).trait; const fromEl = side.querySelector('.ticket .from'); if (tr && fromEl) fromEl.append(h('span.ptrait', ' · ' + tr)); }
   const list = h('div.msglist', h('div.muted.msgempty', 'Aucun message.')); const badge = h('span.msgn');
   side.append(h('div.card.msgs', h('h3', 'Messages', badge), list));
   let n = 0; const post = (icon, from, body, extra) => { const e = list.querySelector('.msgempty'); if (e) e.remove(); n++; badge.textContent = ' ' + n; const el = h('div.msg.new', h('div.msgh', UI.icon(icon, 15), h('b', from)), h('div.msgb', body), extra || null); list.prepend(el); setTimeout(() => el.classList.remove('new'), 4000); return el; };
