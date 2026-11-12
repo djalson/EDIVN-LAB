@@ -107,7 +107,7 @@ UC.dutyPane = function (app, parts, prof) {
   const draw = () => {
     UI.clear(box);
     const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
-    box.append(parts.daily(),
+    box.append(parts.daily(), UI.challenge ? UI.challenge.cards(app, draw) : '',
       h('p.muted.cintro', 'Plusieurs pannes dans le même ticket, dans toute l’infrastructure.'),
       /* le choix du mode est au-dessus des incidents qu'il concerne, sous la même forme que « Accompagné / Autonome » de la campagne */
       h('div.cmode.cdutymode', { role: 'group', 'aria-label': 'Mode des incidents' }, [[false, 'Libre'], [true, 'Chronométré, sans indice']].map(x => h('button.cmodeb' + (timed === x[0] ? '.on' : ''), { 'data-timed': String(x[0]), 'aria-pressed': String(timed === x[0]), on: { click: () => { timed = x[0]; app._dutyTimed = timed; draw(); } } }, h('b', x[1])))),

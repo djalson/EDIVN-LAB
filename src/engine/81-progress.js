@@ -171,6 +171,7 @@ P.xpFor = function (m, r, p, prev) {
   const mul = (label, f) => { if (f !== 1) { mult.push({ label, f }); } };
   if (m.mode && m.mode.id === 'guided') mul('Mode guidé (non classé)', 0.6);
   if (m.daily && !P.dailyDone(p, P.today())) mul('Ticket du jour', 1.5);
+  if (m.mystery) mul('Panne mystère', 2);
   const st = P.streakInfo(p, P.today()); const nextStreak = st.state === 'today' ? st.n : (st.alive ? st.n + 1 : 1);
   const sb = P.streakBonus(nextStreak); if (sb) mul('Série de ' + nextStreak + ' jours', 1 + sb);
   /* contrats (85-rewards.js) : uniquement de l'XP, uniquement sur un ticket validé ; « Tout ou rien » annule l'XP sous 90 */

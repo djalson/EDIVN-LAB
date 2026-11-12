@@ -162,10 +162,12 @@ function Mission(o) {
   if (o.calendar && SIM.calendar) SIM.calendar.apply(this.W, o.calendar);
   this.base = this.W.sem();
   const prof = o.profile || Game.profile();
+  /* ticket partagé (ticket du jour, défi entre élèves, panne mystère) : le tirage ne dépend pas du profil, tout le monde a le même incident */
+  const pickProf = (o.daily || o.shared) ? null : prof; this.challenge = !!o.challenge; this.mystery = !!o.mystery;
   /* campagne : chapitre, examen, révision (src/engine/83-campaign.js) ; o.bundle : assemblage imposé (examen de chapitre) */
   this.camp = o.camp ? Object.assign({}, o.camp) : null;
   if (o.bundle) this.fault = F.bundle(o.bundle.seed || this.seed, o.bundle);
-  else if (o.faultId) this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, faultId: o.faultId }), this.seed);
+  else if (o.faultId) this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, pickProf, { skill: o.skill, faultId: o.faultId }), this.seed);
   else if (this.lv.faults > 1) {
     /* Admin = 2 pannes, Cyber = 3, Chaos = 4 (ou o.parts) : assemblage validé par simulation, natures différentes, rejet des paires incompatibles. */
     const spec = { count: o.parts || this.lv.faults, mode: o.chain === false ? 'indep' : 'auto' };
@@ -173,7 +175,7 @@ function Mission(o) {
     if (this.lv.pool) { spec.levels = this.lv.pool; spec.needLevel = this.lv.need; }
     if (o.skill) { const a = SIM.faults.filter(d => d.skills.indexOf(o.skill) >= 0 && (!spec.levels || spec.levels.indexOf(d.level) >= 0) && !(this.mode.timed && SIM.isUnproven(d.id)) && !SIM.isRetiredFault(d.id)).map(d => d.id); if (a.length) spec.anchor = a; }
     this.fault = F.bundle(this.seed, spec);
-  } else this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, timed: !!this.mode.timed }), this.seed);
+  } else this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, pickProf, { skill: o.skill, timed: !!this.mode.timed }), this.seed);
   this.parts = this.fault.bundle ? this.fault.parts : [this.fault];
   this.startMs = this.clock(); this.pausedMs = 0; this.pausedAt = null;
   this.trace = []; this.hintsUsed = 0; this.hintLog = []; this.dangers = []; this.wrongCloses = 0; this.falseRes = 0; this.impacts = []; this.refunded = []; this.aids = []; this.fx = []; this._blk = this._blockedNow();

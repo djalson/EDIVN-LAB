@@ -173,3 +173,9 @@
 .evcall p { margin: 0 0 10px; line-height: 1.5; } .evfrom { display: flex; gap: 8px; align-items: center; } .evquiz { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .evopt { text-align: left; padding: 12px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--panel2); color: var(--text); font: inherit; cursor: pointer; } .evopt:hover { border-color: var(--hc); }
 .evres { padding: 12px 14px; border-radius: 10px; font-weight: 600; } .evres.ok { background: color-mix(in srgb, var(--ok) 20%, transparent); } .evres.ko { background: color-mix(in srgb, var(--bad, #f66) 20%, transparent); }
+
+/* ---- défi entre élèves et panne mystère ---- */
+.chrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0 16px; } @media (max-width: 1000px) { .chrow { grid-template-columns: 1fr; } }
+.chcard { display: flex; gap: 12px; align-items: center; padding: 12px 14px; background: var(--panel2); border: 2px solid var(--line); } .chcard.mys { border-color: color-mix(in srgb, var(--track, #f5b942) 60%, var(--line)); } .chcard.done { opacity: .6; }
+.chic { width: 34px; height: 34px; display: grid; place-items: center; font: 700 20px var(--mono); border: 2px solid var(--line); flex-shrink: 0; } .chcard.mys .chic { color: var(--track, #f5b942); border-color: var(--track, #f5b942); }
+.chline { display: flex; gap: 6px; margin-top: 6px; align-items: center; } .chin { flex: 1; min-width: 0; } .cherr { color: var(--bad, #f66); font-size: 12px; }

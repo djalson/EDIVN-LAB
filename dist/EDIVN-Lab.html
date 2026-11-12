@@ -1250,6 +1250,12 @@ html[data-map=night] .node .nm, html[data-map=night] .node .sub { background: #0
 .evopt { text-align: left; padding: 12px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--panel2); color: var(--text); font: inherit; cursor: pointer; } .evopt:hover { border-color: var(--hc); }
 .evres { padding: 12px 14px; border-radius: 10px; font-weight: 600; } .evres.ok { background: color-mix(in srgb, var(--ok) 20%, transparent); } .evres.ko { background: color-mix(in srgb, var(--bad, #f66) 20%, transparent); }
 
+/* ---- défi entre élèves et panne mystère ---- */
+.chrow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0 16px; } @media (max-width: 1000px) { .chrow { grid-template-columns: 1fr; } }
+.chcard { display: flex; gap: 12px; align-items: center; padding: 12px 14px; background: var(--panel2); border: 2px solid var(--line); } .chcard.mys { border-color: color-mix(in srgb, var(--track, #f5b942) 60%, var(--line)); } .chcard.done { opacity: .6; }
+.chic { width: 34px; height: 34px; display: grid; place-items: center; font: 700 20px var(--mono); border: 2px solid var(--line); flex-shrink: 0; } .chcard.mys .chic { color: var(--track, #f5b942); border-color: var(--track, #f5b942); }
+.chline { display: flex; gap: 6px; margin-top: 6px; align-items: center; } .chin { flex: 1; min-width: 0; } .cherr { color: var(--bad, #f66); font-size: 12px; }
+
 </style>
 </head>
 <body>
@@ -6707,10 +6713,12 @@ function Mission(o) {
   if (o.calendar && SIM.calendar) SIM.calendar.apply(this.W, o.calendar);
   this.base = this.W.sem();
   const prof = o.profile || Game.profile();
+  /* ticket partagé (ticket du jour, défi entre élèves, panne mystère) : le tirage ne dépend pas du profil, tout le monde a le même incident */
+  const pickProf = (o.daily || o.shared) ? null : prof; this.challenge = !!o.challenge; this.mystery = !!o.mystery;
   /* campagne : chapitre, examen, révision (src/engine/83-campaign.js) ; o.bundle : assemblage imposé (examen de chapitre) */
   this.camp = o.camp ? Object.assign({}, o.camp) : null;
   if (o.bundle) this.fault = F.bundle(o.bundle.seed || this.seed, o.bundle);
-  else if (o.faultId) this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, faultId: o.faultId }), this.seed);
+  else if (o.faultId) this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, pickProf, { skill: o.skill, faultId: o.faultId }), this.seed);
   else if (this.lv.faults > 1) {
     /* Admin = 2 pannes, Cyber = 3, Chaos = 4 (ou o.parts) : assemblage validé par simulation, natures différentes, rejet des paires incompatibles. */
     const spec = { count: o.parts || this.lv.faults, mode: o.chain === false ? 'indep' : 'auto' };
@@ -6718,7 +6726,7 @@ function Mission(o) {
     if (this.lv.pool) { spec.levels = this.lv.pool; spec.needLevel = this.lv.need; }
     if (o.skill) { const a = SIM.faults.filter(d => d.skills.indexOf(o.skill) >= 0 && (!spec.levels || spec.levels.indexOf(d.level) >= 0) && !(this.mode.timed && SIM.isUnproven(d.id)) && !SIM.isRetiredFault(d.id)).map(d => d.id); if (a.length) spec.anchor = a; }
     this.fault = F.bundle(this.seed, spec);
-  } else this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, prof, { skill: o.skill, timed: !!this.mode.timed }), this.seed);
+  } else this.fault = F.instantiate(Game.pick(this.lv.level, this.seed, pickProf, { skill: o.skill, timed: !!this.mode.timed }), this.seed);
   this.parts = this.fault.bundle ? this.fault.parts : [this.fault];
   this.startMs = this.clock(); this.pausedMs = 0; this.pausedAt = null;
   this.trace = []; this.hintsUsed = 0; this.hintLog = []; this.dangers = []; this.wrongCloses = 0; this.falseRes = 0; this.impacts = []; this.refunded = []; this.aids = []; this.fx = []; this._blk = this._blockedNow();
@@ -7076,6 +7084,7 @@ P.xpFor = function (m, r, p, prev) {
   const mul = (label, f) => { if (f !== 1) { mult.push({ label, f }); } };
   if (m.mode && m.mode.id === 'guided') mul('Mode guidé (non classé)', 0.6);
   if (m.daily && !P.dailyDone(p, P.today())) mul('Ticket du jour', 1.5);
+  if (m.mystery) mul('Panne mystère', 2);
   const st = P.streakInfo(p, P.today()); const nextStreak = st.state === 'today' ? st.n : (st.alive ? st.n + 1 : 1);
   const sb = P.streakBonus(nextStreak); if (sb) mul('Série de ' + nextStreak + ' jours', 1 + sb);
   /* contrats (85-rewards.js) : uniquement de l'XP, uniquement sur un ticket validé ; « Tout ou rien » annule l'XP sous 90 */
@@ -19205,7 +19214,7 @@ const SIM = g.SIM, U = SIM.U, UI = SIM.ui, E = SIM.emu, Game = SIM.game;
 const TICK_SEC = 5;
 function Run(opts) {
   this.opts = opts; this.listeners = {};
-  this.m = Game.create({ calendar: opts.calendar, events: opts.events, eventType: opts.eventType, level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
+  this.m = Game.create({ shared: opts.shared, challenge: opts.challenge, mystery: opts.mystery, calendar: opts.calendar, events: opts.events, eventType: opts.eventType, level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
   /* campagne : périmètre affiché (équipements et sites du chapitre) ; null = toute l'infrastructure (bac à sable) */
   this.scope = SIM.camp ? SIM.camp.missionScope(this.m) : null;
   this.W = this.m.W; this.surfaces = {}; this.ended = false; this.ticks = 0;
@@ -26817,7 +26826,7 @@ UC.dutyPane = function (app, parts, prof) {
   const draw = () => {
     UI.clear(box);
     const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
-    box.append(parts.daily(),
+    box.append(parts.daily(), UI.challenge ? UI.challenge.cards(app, draw) : '',
       h('p.muted.cintro', 'Plusieurs pannes dans le même ticket, dans toute l’infrastructure.'),
       /* le choix du mode est au-dessus des incidents qu'il concerne, sous la même forme que « Accompagné / Autonome » de la campagne */
       h('div.cmode.cdutymode', { role: 'group', 'aria-label': 'Mode des incidents' }, [[false, 'Libre'], [true, 'Chronométré, sans indice']].map(x => h('button.cmodeb' + (timed === x[0] ? '.on' : ''), { 'data-timed': String(x[0]), 'aria-pressed': String(timed === x[0]), on: { click: () => { timed = x[0]; app._dutyTimed = timed; draw(); } } }, h('b', x[1])))),
@@ -27253,6 +27262,46 @@ P.begin = function (opts) {
   });
   return res;
 };
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== ui/98d-challenge.js ===== */
+/* ============================================================================
+   Défi entre élèves et panne mystère (onglet Astreinte).
+   - Défi : un code court (niveau + mode + graine) à envoyer à un collègue. Même code = même incident, même date, mêmes événements.
+     À la fin, le débrief propose de copier le résultat (note et temps) pour comparer.
+   - Panne mystère : une par jour, la même pour tout le monde, niveau caché, XP ×2, un seul essai.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, UI = SIM.ui, Game = SIM.game, PG = SIM.prog, h = UI.h; const P = UI.App.prototype;
+const CH = UI.challenge = {};
+const ML = { free: 'L', guided: 'G', timed: 'C' }; const LM = { L: 'free', G: 'guided', C: 'timed' };
+CH.codeOf = m => m.lv.level + ML[m.mode.id] + '-' + m.seed;
+CH.parse = function (txt) { const x = /([1-5])([LGC])-([A-Za-z0-9_.-]{3,40})/i.exec(String(txt || '').trim()); return x ? { level: +x[1], mode: LM[x[2].toUpperCase()], seed: x[3] } : null; };
+CH.play = function (app, code) { const c = CH.parse(code); if (!c) return false; app.begin({ level: c.level, mode: c.mode, seed: c.seed, challenge: true, shared: true, events: true }); return true; };
+CH.resultText = function (m) { const r = m.result || {}; const t = r.mttrSec || 0; return 'Défi EDIVN Lab — code ' + CH.codeOf(m) + ' — ' + (r.kind === 'resolved' ? 'ma note : ' + r.note + '/100 en ' + Math.floor(t / 60) + ' min ' + (t % 60 < 10 ? '0' : '') + (t % 60) + ' s' : 'pas résolu') + '. À toi ! (Accueil → Astreinte → Défi d’un collègue)'; };
+/* panne mystère du jour */
+CH.mystery = function () { const d = PG.today(); const seed = 'mystere-' + d; return { date: d, seed, level: 1 + parseInt(SIM.U.hash8('mys|' + d).slice(0, 4), 16) % 3, tried: Game.store.get('mystery') === d }; };
+CH.playMystery = function (app) { const my = CH.mystery(); if (my.tried) return false; Game.store.set('mystery', my.date); app.begin({ level: my.level, mode: 'free', seed: my.seed, mystery: true, shared: true, events: true }); return true; };
+
+/* cartes de l'onglet Astreinte */
+CH.cards = function (app, redraw) {
+  const my = CH.mystery(); const inp = h('input.txt.chin', { placeholder: 'Code reçu, ex. 2L-k3f9x2', 'aria-label': 'Code de défi reçu' }); const err = h('span.cherr');
+  const go = () => { if (!CH.play(app, inp.value)) { err.textContent = 'Code non reconnu.'; } };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  return h('div.chrow',
+    h('div.chcard.mys' + (my.tried ? '.done' : ''), h('div.chic', '?'), h('div.grow', h('b', 'Panne mystère'), h('div.muted', my.tried ? 'Déjà tentée aujourd’hui. Une nouvelle demain.' : 'Niveau caché · la même pour tous · XP ×2 · un seul essai par jour')),
+      h('button.btn' + (my.tried ? '' : '.primary'), { 'data-act': 'mystery', disabled: my.tried, on: { click: () => UI.modal('Panne mystère', h('p', 'Un seul essai aujourd’hui : si tu quittes ou abandonnes, c’est terminé jusqu’à demain. On y va ?'), [{ label: 'Plus tard' }, { label: 'J’y vais', primary: true, fn: () => CH.playMystery(app) }]) } }, my.tried ? 'Tentée' : 'Tenter')),
+    h('div.chcard', h('div.chic', '⚔'), h('div.grow', h('b', 'Défi d’un collègue'), h('div.muted', 'Même code, même incident : comparez vos notes.'), h('div.chline', inp, h('button.btn', { 'data-act': 'challenge', on: { click: go } }, 'Jouer'), err))));
+};
+/* la pastille de niveau ne trahit pas la panne mystère */
+const begin0 = P.begin;
+P.begin = function (opts) { const res = begin0.apply(this, arguments); if (opts && opts.mystery && this.run) this.root.querySelectorAll('.gbar .pill').forEach(el => { if (/^Niveau/.test(el.textContent)) el.textContent = 'Panne mystère'; }); return res; };
+/* débrief : bouton pour défier un collègue (ou renvoyer son résultat) */
+if (UI.simple && UI.simple.debrief) { const d0 = UI.simple.debrief; UI.simple.debrief = function (app, m) {
+  const el = d0.apply(this, arguments); const box = el.querySelector && el.querySelector('.dhact2');
+  if (box && !m.camp && !m.mystery && !m.daily) box.append(h('button.btn.dchal', { title: 'Copie un code : ton collègue jouera exactement le même incident', on: { click: () => UI.copyText(CH.resultText(m), 'Défi') } }, m.challenge ? 'Copier mon résultat' : 'Défier un collègue'));
+  return el; }; }
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
 /* ===== ui/99-main.js ===== */

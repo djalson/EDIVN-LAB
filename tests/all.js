@@ -17,7 +17,7 @@ const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 /* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
 const FAST = process.argv.includes('--fast');
-const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
+const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|challenge|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -83,6 +83,7 @@ t('Interface', 'mmc-nav (double-clic sur un dossier du volet central d’une con
 t('Interface', 'verify-strict (clôture prouvée par le test qui échouait : écran affiché ≠ preuve ; favoris Intranet / Google du navigateur)', ['tests/ui/verify-strict.js'], { expect: /tout passe/ });
 t('Interface', 'resume (ticket interrompu par un rechargement : reprise proposée, chronomètre conservé)', ['tests/ui/resume.js'], { expect: /tout passe/ });
 t('Interface', 'events-ui (panneau Messages, téléphone et QCM, deuxième ticket, collègue, responsable)', ['tests/ui/events.js'], { expect: /tout passe/ });
+t('Interface', 'challenge (défi entre élèves : même code = même incident ; panne mystère : un essai par jour)', ['tests/ui/challenge.js'], { expect: /tout passe/ });
 t('Interface', 'bugreport (bouton « Bug ? » : rapport copiable, cause non affichée, données décodables)', ['tests/ui/bugreport.js'], { expect: /tout passe/ });
 t('Interface', 'sweep (toutes les pannes × 2 graines, 3 modes)', ['tests/ui/sweep.js'], { timeout: 1200, expect: /pannes × 2 graines/ });
 t('Réparation graphique', 'gui-sweep-neutral (neutralisation : recette non jouée → le balayage graphique vire au rouge)', ['tests/ui/gui-sweep-neutral.js'], { timeout: 600, expect: /0 échec/ });
