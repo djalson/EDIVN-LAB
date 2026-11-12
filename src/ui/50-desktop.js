@@ -191,7 +191,9 @@ P.openStart = function (focusSearch) {
   const search = h('input.w10in', { placeholder: 'Taper ici pour rechercher', style: { margin: '0 14px 6px', width: 'calc(100% - 28px)' } });
   const draw = (q) => {
     UI.clear(list); const f = x => !q || x[2].toLowerCase().indexOf(q.toLowerCase()) >= 0;
-    const mk = x => h('div.si', { on: { click: () => { self.closeStart(); self.open(x[0]); } } }, UI.icon(x[1], 22), x[2]);
+    /* clic droit : « Exécuter en tant qu'administrateur » (UAC : consentement ou identifiants d'un administrateur) */
+    const runAdmin = x => { self.closeStart(); if (x[0] === 'cmd' || x[0] === 'powershell') { self.open(x[0], undefined, { runas: true }); return; } self.uac(x[2], el => { if (el) self.open(x[0], undefined, { elevated: true }); }); };
+    const mk = x => h('div.si', { on: { click: () => { self.closeStart(); self.open(x[0]); }, contextmenu: e => { e.preventDefault(); e.stopPropagation(); UI.w.contextMenu(e.clientX, e.clientY, [{ label: 'Ouvrir', fn: () => { self.closeStart(); self.open(x[0]); } }, { label: 'Exécuter en tant qu’administrateur', fn: () => runAdmin(x) }], self.el); } } }, UI.icon(x[1], 22), x[2]);
     const a = kept.filter(f), b = adm.filter(f); if (a.length) { list.append(h('div.sh', q ? 'Meilleurs résultats' : 'Applications')); a.forEach(x => list.append(mk(x))); }
     if (b.length) { list.append(h('div.sh', 'Outils d’administration Windows')); b.forEach(x => list.append(mk(x))); }
     if (!a.length && !b.length) list.append(h('div.sh', 'Aucun résultat'));

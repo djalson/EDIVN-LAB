@@ -2061,7 +2061,7 @@ N.resolve = function (W, hostId, name, opts) {
       if (r.state === 'ok') {
         if (r.rcode === 'NOERROR' && r.answers && r.answers.length) {
           const ips = r.answers.filter(a => a.type === 'A').map(a => a.data);
-          if (!opts.noCache) { d._rt.dnsCache = d._rt.dnsCache || {}; if (ips[0]) d._rt.dnsCache[c.toLowerCase()] = { ip: ips[0], t: W.clock.elapsed }; }
+          if (!opts.noCache) { d._rt.dnsCache = d._rt.dnsCache || {}; if (ips[0]) d._rt.dnsCache[c.toLowerCase()] = { ip: ips[0], t: W.clock.elapsed, ttl: (r.answers.find(a => a.type === 'A') || {}).ttl }; }   /* le client garde l'entrée pendant le TTL de l'enregistrement, comme Windows */
           return { ok: true, ip: ips[0], ips, fqdn: c, server: s, answers: r.answers, cname: r.cname };
         }
         if (r.rcode === 'NXDOMAIN') { lastNx = { server: s, fqdn: c }; answered = true; break; }
@@ -5199,6 +5199,8 @@ const DNS_CACHE_TTL = 300, DNS_NEG_TTL = 900;
 
 SIM.AVREG['sched-dhcp-retry'] = 'Intervalle de réessai DHCP du client Windows sans bail : 300 s utilisés dans la simulation ; valeur exacte à vérifier.';
 SIM.sched = {};
+/* durée de vie d'une entrée du cache DNS client : le TTL de l'enregistrement reçu ; à défaut 300 s (900 s pour une réponse négative) */
+SIM.sched.cacheTtl = e => e.neg ? DNS_NEG_TTL : (e.ttl > 0 ? e.ttl : DNS_CACHE_TTL);
 SIM.sched.advance = function (W, sec) {
   const before = W.clock.elapsed;
   W.tick(sec);
@@ -5209,7 +5211,7 @@ SIM.sched.advance = function (W, sec) {
     if (d.kind !== 'win' && d.kind !== 'linux') continue;
     if (d.kind === 'linux' && SIM.lx && SIM.lx.cronTick) SIM.lx.cronTick(W, d, W.now().getTime() - (now - before) * 1000, W.now().getTime());
     /* cache DNS client */
-    if (d._rt.dnsCache) for (const k of Object.keys(d._rt.dnsCache)) { const e = d._rt.dnsCache[k]; if (now - e.t >= (e.neg ? DNS_NEG_TTL : DNS_CACHE_TTL)) delete d._rt.dnsCache[k]; }
+    if (d._rt.dnsCache) for (const k of Object.keys(d._rt.dnsCache)) { const e = d._rt.dnsCache[k]; if (now - e.t >= SIM.sched.cacheTtl(e)) delete d._rt.dnsCache[k]; }
     /* réessai DHCP */
     for (const n of Object.keys(d.ifaces || {})) {
       const i = d.ifaces[n]; if (!i.dhcp) continue;
@@ -5433,7 +5435,7 @@ S.set = (W, s) => { W.setPath(s.path, F.token(W, s.value)); };
 S.del = (W, s) => { if (!W.delPath(s.path)) throw new Error('del: chemin introuvable ' + s.path); };
 S.push = (W, s) => { W.pushPath(s.path, F.token(W, s.item)); };
 S.wall = (W, s) => { W.walls[s.wall] = s.to; };
-S.dnscache = (W, s) => { const d = W.d(s.dev); d._rt.dnsCache = d._rt.dnsCache || {}; d._rt.dnsCache[s.name.toLowerCase()] = { ip: s.ip, t: W.clock.elapsed }; };
+S.dnscache = (W, s) => { const d = W.d(s.dev); d._rt.dnsCache = d._rt.dnsCache || {}; d._rt.dnsCache[s.name.toLowerCase()] = { ip: s.ip, t: W.clock.elapsed, ttl: s.ttl || 3600 }; };   /* entrée périmée gardée 1 h (TTL d'un enregistrement A statique) : la panne ne s'efface pas en cours de partie */
 S.unplug = (W, s) => { const [dv, pn] = s.port.split(':'); const p = N.portObj(W.d(dv), pn); if (!p || !p.cable) throw new Error('unplug: pas de câble ' + s.port); p.cable.plugged = false; };
 S.replug = (W, s) => { const [dv, pn] = s.port.split(':'); const p = N.portObj(W.d(dv), pn); if (!p || !p.cable) throw new Error('replug: pas de câble ' + s.port); p.cable.plugged = true; };
 S.tick = (W, s) => { SIM.sched.advance(W, s.sec); };
@@ -12664,7 +12666,12 @@ WinShell.prototype.runOne = function (text, input) {
   }
   /* exécutables / consoles MMC → application graphique */
   const gui = W_.apps[bare];
-  if (gui) return { out: [], ok: true, launch: [{ app: gui, arg: args.slice(1).join(' '), cmd: name }] };
+  if (gui) {
+    let arg = args.slice(1).join(' ');
+    /* « notepad hosts » ou « notepad C:\...\hosts » : chemin rendu absolu depuis le dossier courant, le Bloc-notes charge le fichier */
+    if (gui === 'notepad' && arg.trim()) arg = W_.normPath(this.cwd, arg.trim());
+    return { out: [], ok: true, launch: [{ app: gui, arg, cmd: name }] };
+  }
   /* « help » existe dans cmd.exe : le simulateur ne reproduit pas sa liste ; on renvoie vers l'aide-mémoire de la fenêtre */
   if (/^help$/i.test(name) && this.mode !== 'ps') return { out: [L(U.av('win-help-unsupported', 'Commande réelle non gérée par le simulateur : help. Utilise le bouton « Aide-mémoire » de la fenêtre pour la liste des commandes disponibles.'), 'w'), L('')], ok: false };
   /* D-99 : commandes dont l'existence sur Windows Server 2019 ET Windows 10 (Pro et au-dessus, donc tout poste joint à un domaine) ne fait pas de doute et que le simulateur n'émule pas :
@@ -12907,7 +12914,7 @@ C.ipconfig = (s, a, o, r) => {
     const c = d._rt.dnsCache || {};
     Object.keys(c).forEach(k => {
       o.l('    ' + k); o.l('    ----------------------------------------'); o.l('    Nom d’enregistrement . . . : ' + k); o.l('    Type d’enregistrement . . : 1');
-      o.l('    Durée de vie . . . . . . . : ' + Math.max(1, 300 - Math.round(W.clock.elapsed - c[k].t))); o.l('    Longueur de données . . . : 4'); o.l('    Section . . . . . . . . . : Réponse'); o.l('    Enregistrement hôte (A) . : ' + c[k].ip); o.blank();
+      o.l('    Durée de vie . . . . . . . : ' + Math.max(1, SIM.sched.cacheTtl(c[k]) - Math.round(W.clock.elapsed - c[k].t))); o.l('    Longueur de données . . . : 4'); o.l('    Section . . . . . . . . . : Réponse'); o.l('    Enregistrement hôte (A) . : ' + c[k].ip); o.blank();
     });
     return;
   }
@@ -14070,7 +14077,7 @@ def('set-netipinterface', { p: ['interfacealias', 'dhcp'], sw: [] }, (ctx, P) =>
   const on = /enabled/i.test(P.dhcp); ctx.d.ifaces[nm].dhcp = on; if (on) N.dhcpRenew(ctx.W, ctx.d.id, nm); ctx.s.env.touch('ipv4'); return { objs: [], mutated: true };
 });
 def('clear-dnsclientcache', {}, ctx => { ctx.d._rt.dnsCache = {}; ctx.s.env.touch('flushdns'); return { objs: [], mutated: true }; });
-def('get-dnsclientcache', {}, ctx => { const c = ctx.d._rt.dnsCache || {}; return { objs: Object.keys(c).map(k => ({ __t: 'dnscache', Entry: k, RecordName: k, RecordType: 1, Status: 0, Section: 1, TimeToLive: Math.max(1, 300 - Math.round(ctx.W.clock.elapsed - c[k].t)), DataLength: 4, Data: c[k].ip })) }; });
+def('get-dnsclientcache', {}, ctx => { const c = ctx.d._rt.dnsCache || {}; return { objs: Object.keys(c).map(k => ({ __t: 'dnscache', Entry: k, RecordName: k, RecordType: 1, Status: 0, Section: 1, TimeToLive: Math.max(1, SIM.sched.cacheTtl(c[k]) - Math.round(ctx.W.clock.elapsed - c[k].t)), DataLength: 4, Data: c[k].ip })) }; });
 def('register-dnsclient', {}, ctx => ({ objs: [] }));
 def('test-netconnection', { p: ['computername', 'port', 'informationlevel', 'commonTCPPort'.toLowerCase()], pos: ['computername', 'port'], sw: [] }, (ctx, P) => {
   const d = ctx.d, W = ctx.W; const target = P.computername || 'internetbeacon.msedge.net'; const port = P.port !== undefined ? +P.port : (P.commontcpport ? ({ smb: 445, http: 80, rdp: 3389, winrm: 5985 })[lc(P.commontcpport)] : null);
@@ -20327,7 +20334,9 @@ P.openStart = function (focusSearch) {
   const search = h('input.w10in', { placeholder: 'Taper ici pour rechercher', style: { margin: '0 14px 6px', width: 'calc(100% - 28px)' } });
   const draw = (q) => {
     UI.clear(list); const f = x => !q || x[2].toLowerCase().indexOf(q.toLowerCase()) >= 0;
-    const mk = x => h('div.si', { on: { click: () => { self.closeStart(); self.open(x[0]); } } }, UI.icon(x[1], 22), x[2]);
+    /* clic droit : « Exécuter en tant qu'administrateur » (UAC : consentement ou identifiants d'un administrateur) */
+    const runAdmin = x => { self.closeStart(); if (x[0] === 'cmd' || x[0] === 'powershell') { self.open(x[0], undefined, { runas: true }); return; } self.uac(x[2], el => { if (el) self.open(x[0], undefined, { elevated: true }); }); };
+    const mk = x => h('div.si', { on: { click: () => { self.closeStart(); self.open(x[0]); }, contextmenu: e => { e.preventDefault(); e.stopPropagation(); UI.w.contextMenu(e.clientX, e.clientY, [{ label: 'Ouvrir', fn: () => { self.closeStart(); self.open(x[0]); } }, { label: 'Exécuter en tant qu’administrateur', fn: () => runAdmin(x) }], self.el); } } }, UI.icon(x[1], 22), x[2]);
     const a = kept.filter(f), b = adm.filter(f); if (a.length) { list.append(h('div.sh', q ? 'Meilleurs résultats' : 'Applications')); a.forEach(x => list.append(mk(x))); }
     if (b.length) { list.append(h('div.sh', 'Outils d’administration Windows')); b.forEach(x => list.append(mk(x))); }
     if (!a.length && !b.length) list.append(h('div.sh', 'Aucun résultat'));
@@ -21047,6 +21056,8 @@ UI.app('explorer', {
     };
     const open = (r) => {
       if (r.kind === 'dir') { go(r.path); return; }
+      /* fichier texte sans extension dont la simulation connaît le contenu (hosts) : ouvert dans le Bloc-notes */
+      if (!/\.[^\\.]+$/.test(r.name) && fileText(r) !== null) { desk.open('notepad', { path: r.path, name: r.name, text: fileText(r), dev: loc.dev }); return; }
       if (/\.(txt|log|ini|cfg|conf|csv|xml|bat|ps1|html?)$/i.test(r.name)) { const content = fileText(r); if (content === null) { desk.msg({ title: 'Bloc-notes', icon: 'info', owner: win, text: 'Le contenu de ce fichier n’est pas disponible dans la simulation.' }); return; } desk.open('notepad', { path: r.path, name: r.name, text: content, dev: loc.dev }); return; }
       desk.msg({ title: 'Explorateur de fichiers', icon: 'info', owner: win, text: 'Le contenu de ce fichier n’est pas disponible dans la simulation.' });
     };
@@ -21091,6 +21102,8 @@ UI.app('notepad', {
     let win, ta; let file = arg.path ? { path: arg.path, name: arg.name || arg.path.split('\\').pop(), dev: arg.dev || d } : null; let dirty = false;
     const elevated = !!(o && o.elevated);
     ta = h('textarea', { spellcheck: false, wrap: 'off', on: { input: () => { dirty = true; setT(); } } });
+    /* fichier donné sans son contenu (« notepad <chemin> » en ligne de commande) : on le lit comme la boîte « Ouvrir » */
+    if (file && arg.text === undefined) { const fd = file.dev; if (lc(file.path) === lc(W_.HOSTS_PATH) && fd.id === d.id) arg.text = W_.hostsText(d); else if (fd._rt.userFiles && fd._rt.userFiles[file.path] !== undefined) arg.text = fd._rt.userFiles[file.path]; }
     if (arg.text !== undefined) ta.value = String(arg.text).replace(/\r\n/g, '\n');
     const setT = () => win && win.setTitle((dirty ? '*' : '') + (file ? file.name : 'Sans titre') + ' - Bloc-notes');
     const canWrite = (p) => {

@@ -505,7 +505,7 @@ N.resolve = function (W, hostId, name, opts) {
       if (r.state === 'ok') {
         if (r.rcode === 'NOERROR' && r.answers && r.answers.length) {
           const ips = r.answers.filter(a => a.type === 'A').map(a => a.data);
-          if (!opts.noCache) { d._rt.dnsCache = d._rt.dnsCache || {}; if (ips[0]) d._rt.dnsCache[c.toLowerCase()] = { ip: ips[0], t: W.clock.elapsed }; }
+          if (!opts.noCache) { d._rt.dnsCache = d._rt.dnsCache || {}; if (ips[0]) d._rt.dnsCache[c.toLowerCase()] = { ip: ips[0], t: W.clock.elapsed, ttl: (r.answers.find(a => a.type === 'A') || {}).ttl }; }   /* le client garde l'entrée pendant le TTL de l'enregistrement, comme Windows */
           return { ok: true, ip: ips[0], ips, fqdn: c, server: s, answers: r.answers, cname: r.cname };
         }
         if (r.rcode === 'NXDOMAIN') { lastNx = { server: s, fqdn: c }; answered = true; break; }

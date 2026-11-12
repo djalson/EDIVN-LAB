@@ -86,7 +86,7 @@ C.ipconfig = (s, a, o, r) => {
     const c = d._rt.dnsCache || {};
     Object.keys(c).forEach(k => {
       o.l('    ' + k); o.l('    ----------------------------------------'); o.l('    Nom d’enregistrement . . . : ' + k); o.l('    Type d’enregistrement . . : 1');
-      o.l('    Durée de vie . . . . . . . : ' + Math.max(1, 300 - Math.round(W.clock.elapsed - c[k].t))); o.l('    Longueur de données . . . : 4'); o.l('    Section . . . . . . . . . : Réponse'); o.l('    Enregistrement hôte (A) . : ' + c[k].ip); o.blank();
+      o.l('    Durée de vie . . . . . . . : ' + Math.max(1, SIM.sched.cacheTtl(c[k]) - Math.round(W.clock.elapsed - c[k].t))); o.l('    Longueur de données . . . : 4'); o.l('    Section . . . . . . . . . : Réponse'); o.l('    Enregistrement hôte (A) . : ' + c[k].ip); o.blank();
     });
     return;
   }

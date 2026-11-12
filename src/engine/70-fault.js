@@ -64,7 +64,7 @@ S.set = (W, s) => { W.setPath(s.path, F.token(W, s.value)); };
 S.del = (W, s) => { if (!W.delPath(s.path)) throw new Error('del: chemin introuvable ' + s.path); };
 S.push = (W, s) => { W.pushPath(s.path, F.token(W, s.item)); };
 S.wall = (W, s) => { W.walls[s.wall] = s.to; };
-S.dnscache = (W, s) => { const d = W.d(s.dev); d._rt.dnsCache = d._rt.dnsCache || {}; d._rt.dnsCache[s.name.toLowerCase()] = { ip: s.ip, t: W.clock.elapsed }; };
+S.dnscache = (W, s) => { const d = W.d(s.dev); d._rt.dnsCache = d._rt.dnsCache || {}; d._rt.dnsCache[s.name.toLowerCase()] = { ip: s.ip, t: W.clock.elapsed, ttl: s.ttl || 3600 }; };   /* entrée périmée gardée 1 h (TTL d'un enregistrement A statique) : la panne ne s'efface pas en cours de partie */
 S.unplug = (W, s) => { const [dv, pn] = s.port.split(':'); const p = N.portObj(W.d(dv), pn); if (!p || !p.cable) throw new Error('unplug: pas de câble ' + s.port); p.cable.plugged = false; };
 S.replug = (W, s) => { const [dv, pn] = s.port.split(':'); const p = N.portObj(W.d(dv), pn); if (!p || !p.cable) throw new Error('replug: pas de câble ' + s.port); p.cable.plugged = true; };
 S.tick = (W, s) => { SIM.sched.advance(W, s.sec); };

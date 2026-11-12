@@ -309,7 +309,7 @@ def('set-netipinterface', { p: ['interfacealias', 'dhcp'], sw: [] }, (ctx, P) =>
   const on = /enabled/i.test(P.dhcp); ctx.d.ifaces[nm].dhcp = on; if (on) N.dhcpRenew(ctx.W, ctx.d.id, nm); ctx.s.env.touch('ipv4'); return { objs: [], mutated: true };
 });
 def('clear-dnsclientcache', {}, ctx => { ctx.d._rt.dnsCache = {}; ctx.s.env.touch('flushdns'); return { objs: [], mutated: true }; });
-def('get-dnsclientcache', {}, ctx => { const c = ctx.d._rt.dnsCache || {}; return { objs: Object.keys(c).map(k => ({ __t: 'dnscache', Entry: k, RecordName: k, RecordType: 1, Status: 0, Section: 1, TimeToLive: Math.max(1, 300 - Math.round(ctx.W.clock.elapsed - c[k].t)), DataLength: 4, Data: c[k].ip })) }; });
+def('get-dnsclientcache', {}, ctx => { const c = ctx.d._rt.dnsCache || {}; return { objs: Object.keys(c).map(k => ({ __t: 'dnscache', Entry: k, RecordName: k, RecordType: 1, Status: 0, Section: 1, TimeToLive: Math.max(1, SIM.sched.cacheTtl(c[k]) - Math.round(ctx.W.clock.elapsed - c[k].t)), DataLength: 4, Data: c[k].ip })) }; });
 def('register-dnsclient', {}, ctx => ({ objs: [] }));
 def('test-netconnection', { p: ['computername', 'port', 'informationlevel', 'commonTCPPort'.toLowerCase()], pos: ['computername', 'port'], sw: [] }, (ctx, P) => {
   const d = ctx.d, W = ctx.W; const target = P.computername || 'internetbeacon.msedge.net'; const port = P.port !== undefined ? +P.port : (P.commontcpport ? ({ smb: 445, http: 80, rdp: 3389, winrm: 5985 })[lc(P.commontcpport)] : null);

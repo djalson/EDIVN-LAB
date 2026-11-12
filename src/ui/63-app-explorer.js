@@ -125,6 +125,8 @@ UI.app('explorer', {
     };
     const open = (r) => {
       if (r.kind === 'dir') { go(r.path); return; }
+      /* fichier texte sans extension dont la simulation connaît le contenu (hosts) : ouvert dans le Bloc-notes */
+      if (!/\.[^\\.]+$/.test(r.name) && fileText(r) !== null) { desk.open('notepad', { path: r.path, name: r.name, text: fileText(r), dev: loc.dev }); return; }
       if (/\.(txt|log|ini|cfg|conf|csv|xml|bat|ps1|html?)$/i.test(r.name)) { const content = fileText(r); if (content === null) { desk.msg({ title: 'Bloc-notes', icon: 'info', owner: win, text: 'Le contenu de ce fichier n’est pas disponible dans la simulation.' }); return; } desk.open('notepad', { path: r.path, name: r.name, text: content, dev: loc.dev }); return; }
       desk.msg({ title: 'Explorateur de fichiers', icon: 'info', owner: win, text: 'Le contenu de ce fichier n’est pas disponible dans la simulation.' });
     };
@@ -169,6 +171,8 @@ UI.app('notepad', {
     let win, ta; let file = arg.path ? { path: arg.path, name: arg.name || arg.path.split('\\').pop(), dev: arg.dev || d } : null; let dirty = false;
     const elevated = !!(o && o.elevated);
     ta = h('textarea', { spellcheck: false, wrap: 'off', on: { input: () => { dirty = true; setT(); } } });
+    /* fichier donné sans son contenu (« notepad <chemin> » en ligne de commande) : on le lit comme la boîte « Ouvrir » */
+    if (file && arg.text === undefined) { const fd = file.dev; if (lc(file.path) === lc(W_.HOSTS_PATH) && fd.id === d.id) arg.text = W_.hostsText(d); else if (fd._rt.userFiles && fd._rt.userFiles[file.path] !== undefined) arg.text = fd._rt.userFiles[file.path]; }
     if (arg.text !== undefined) ta.value = String(arg.text).replace(/\r\n/g, '\n');
     const setT = () => win && win.setTitle((dirty ? '*' : '') + (file ? file.name : 'Sans titre') + ' - Bloc-notes');
     const canWrite = (p) => {

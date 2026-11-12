@@ -13,6 +13,8 @@ const DNS_CACHE_TTL = 300, DNS_NEG_TTL = 900;
 
 SIM.AVREG['sched-dhcp-retry'] = 'Intervalle de réessai DHCP du client Windows sans bail : 300 s utilisés dans la simulation ; valeur exacte à vérifier.';
 SIM.sched = {};
+/* durée de vie d'une entrée du cache DNS client : le TTL de l'enregistrement reçu ; à défaut 300 s (900 s pour une réponse négative) */
+SIM.sched.cacheTtl = e => e.neg ? DNS_NEG_TTL : (e.ttl > 0 ? e.ttl : DNS_CACHE_TTL);
 SIM.sched.advance = function (W, sec) {
   const before = W.clock.elapsed;
   W.tick(sec);
@@ -23,7 +25,7 @@ SIM.sched.advance = function (W, sec) {
     if (d.kind !== 'win' && d.kind !== 'linux') continue;
     if (d.kind === 'linux' && SIM.lx && SIM.lx.cronTick) SIM.lx.cronTick(W, d, W.now().getTime() - (now - before) * 1000, W.now().getTime());
     /* cache DNS client */
-    if (d._rt.dnsCache) for (const k of Object.keys(d._rt.dnsCache)) { const e = d._rt.dnsCache[k]; if (now - e.t >= (e.neg ? DNS_NEG_TTL : DNS_CACHE_TTL)) delete d._rt.dnsCache[k]; }
+    if (d._rt.dnsCache) for (const k of Object.keys(d._rt.dnsCache)) { const e = d._rt.dnsCache[k]; if (now - e.t >= SIM.sched.cacheTtl(e)) delete d._rt.dnsCache[k]; }
     /* réessai DHCP */
     for (const n of Object.keys(d.ifaces || {})) {
       const i = d.ifaces[n]; if (!i.dhcp) continue;

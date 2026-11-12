@@ -292,7 +292,12 @@ WinShell.prototype.runOne = function (text, input) {
   }
   /* exécutables / consoles MMC → application graphique */
   const gui = W_.apps[bare];
-  if (gui) return { out: [], ok: true, launch: [{ app: gui, arg: args.slice(1).join(' '), cmd: name }] };
+  if (gui) {
+    let arg = args.slice(1).join(' ');
+    /* « notepad hosts » ou « notepad C:\...\hosts » : chemin rendu absolu depuis le dossier courant, le Bloc-notes charge le fichier */
+    if (gui === 'notepad' && arg.trim()) arg = W_.normPath(this.cwd, arg.trim());
+    return { out: [], ok: true, launch: [{ app: gui, arg, cmd: name }] };
+  }
   /* « help » existe dans cmd.exe : le simulateur ne reproduit pas sa liste ; on renvoie vers l'aide-mémoire de la fenêtre */
   if (/^help$/i.test(name) && this.mode !== 'ps') return { out: [L(U.av('win-help-unsupported', 'Commande réelle non gérée par le simulateur : help. Utilise le bouton « Aide-mémoire » de la fenêtre pour la liste des commandes disponibles.'), 'w'), L('')], ok: false };
   /* D-99 : commandes dont l'existence sur Windows Server 2019 ET Windows 10 (Pro et au-dessus, donc tout poste joint à un domaine) ne fait pas de doute et que le simulateur n'émule pas :
