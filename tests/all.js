@@ -17,7 +17,7 @@ const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 /* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
 const FAST = process.argv.includes('--fast');
-const FASTSET = /^(assert-world|invariants|hints-commands|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
+const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -35,6 +35,7 @@ t('Moteur', 'lx-impact (D-109 : le terminal Linux marque reboot / poweroff / arr
 t('Moteur', 'impact-net (règle par le résultat : stop puis start du même service = 0 ; reboot jamais remboursé ; Linux, cmd, PowerShell, interface)', ['tests/impact-net.js'], { expect: /^OK/m });
 t('Moteur', 'invariants (toutes pannes × variantes : pas d’auto-réparation, un écran affiché ne clôture rien, ticket signé par le bon utilisateur, session fermée sur une panne de connexion)', ['tests/invariants.js'], { timeout: 900, expect: /^OK/m });
 t('Moteur', 'hints-commands (les commandes citées dans les indices et solutions existent dans le simulateur)', ['tests/hints-commands.js'], { expect: /^OK/m });
+t('Moteur', 'calendar (dates et heures du jeu : toutes les pannes se comportent pareil à une autre date)', ['tests/calendar.js'], { timeout: 900, expect: /^OK/m });
 t('Moteur', 'dns-cache-ttl (cache DNS client : TTL de l’enregistrement ; dns_cache ne se répare plus tout seul)', ['tests/dns-cache-ttl.js'], { expect: /^OK/m });
 t('Moteur', 'unproven-timed (panne irréparable retirée de tous les tirages ; pannes proxy revenues en chronométré ; liste vidée → revient)', ['tests/unproven-timed.js'], { expect: /^OK/m });
 t('Moteur', 'codes-audit (D-106 : registre des codes d’erreur, masquage, audit statique + exécution, neutralisation)', ['tests/codes-audit.js'], { expect: /^OK/m });
@@ -79,6 +80,7 @@ t('Interface', 'regress-ui (modale au-dessus du bureau)', ['tests/ui/regress.js'
 t('Interface', 'hosts-edit (fichier hosts depuis une session standard : notepad <chemin> en console admin, explorateur, Exécuter en tant qu’administrateur)', ['tests/ui/hosts-edit.js'], { expect: /tout passe/ });
 t('Interface', 'mmc-nav (double-clic sur un dossier du volet central d’une console MMC ; pool DHCP et propriétés de l’étendue)', ['tests/ui/mmc-nav.js'], { expect: /tout passe/ });
 t('Interface', 'verify-strict (clôture prouvée par le test qui échouait : écran affiché ≠ preuve ; favoris Intranet / Google du navigateur)', ['tests/ui/verify-strict.js'], { expect: /tout passe/ });
+t('Interface', 'resume (ticket interrompu par un rechargement : reprise proposée, chronomètre conservé)', ['tests/ui/resume.js'], { expect: /tout passe/ });
 t('Interface', 'bugreport (bouton « Bug ? » : rapport copiable, cause non affichée, données décodables)', ['tests/ui/bugreport.js'], { expect: /tout passe/ });
 t('Interface', 'sweep (toutes les pannes × 2 graines, 3 modes)', ['tests/ui/sweep.js'], { timeout: 1200, expect: /pannes × 2 graines/ });
 t('Réparation graphique', 'gui-sweep-neutral (neutralisation : recette non jouée → le balayage graphique vire au rouge)', ['tests/ui/gui-sweep-neutral.js'], { timeout: 600, expect: /0 échec/ });

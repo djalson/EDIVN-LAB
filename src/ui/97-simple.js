@@ -94,7 +94,6 @@ US.side = function (app, prof, theme, o) {
     h('button.btn', { on: { click: () => app.planModal() } }, 'Plan d’adressage'),
     h('button.btn', { on: { click: () => app.scenarioModal() } }, 'Scénarios formateur'),
     h('button.btn', { on: { click: () => UI.prog.backupModal(app) } }, 'Sauvegarde du profil'),
-    h('button.btn.hthemebtn', { on: { click: () => app.themeModal() } }, 'Thème : ' + theme.name),
     h('button.btn', { on: { click: () => app.aboutModal() } }, 'À propos et limites')));
   const passed = o.passed;
   return h('aside.hside',

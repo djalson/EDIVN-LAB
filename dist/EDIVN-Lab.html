@@ -1225,6 +1225,22 @@ html[data-map=night] .node .nm, html[data-map=night] .node .sub { background: #0
 .gbug { opacity: .75; } .gbug:hover { opacity: 1; }
 .brbox p { margin: 0 0 10px; } .brta { width: 100%; box-sizing: border-box; min-height: 84px; resize: vertical; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line, #3a2a7a); background: rgba(0, 0, 0, .25); color: inherit; font: inherit; margin-bottom: 10px; }
 
+/* ---- retouches d'écrans (tour du 12/11) ---- */
+/* accueil : bandeau deux fois moins haut, le parcours remonte */
+.v3ui .hhero { height: 150px; } .v3ui .hheroin { padding-top: 16px; }
+/* bac à sable : la barre « Prendre le ticket » ne recouvre plus la description des modes */
+.v3ui .hcta { position: static; }
+.cdutymode { margin: 0 0 12px; }
+/* identifiants : deux onglets */
+.credtabs { display: flex; gap: 6px; margin-bottom: 10px; } .credtab { background: var(--panel2); color: var(--text); border: 2px solid var(--line); padding: 6px 14px; cursor: pointer; font: inherit; } .credtab.on { background: var(--accent2); border-color: var(--hc); color: var(--onaccent); } .credtab small { opacity: .7; }
+/* arbre : une ligne par description, le détail au survol */
+.pgdesc { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; } .pgnode:hover .pgdesc { -webkit-line-clamp: unset; }
+/* la piste des récompenses a sa couleur (ambre) pour ne pas la confondre avec l'arbre (violet) */
+:root { --track: #f5b942; }
+.pgtab.pgtab-rewards { border-color: color-mix(in srgb, var(--track) 55%, var(--line)); color: var(--track); } .pgtab.pgtab-rewards.on { background: var(--track); border-color: var(--track); color: #1b1300; }
+.rwbtn { border-color: color-mix(in srgb, var(--track) 60%, var(--line)) !important; color: var(--track) !important; } .rwnext b { color: var(--track); }
+.rwview .rwrow.on { border-color: color-mix(in srgb, var(--track) 55%, var(--line)); } .rwview .rwrow.on .rwlv { color: var(--track); border-color: var(--track); } .rwview .rwrow .rwic { color: var(--track); }
+
 </style>
 </head>
 <body>
@@ -6421,6 +6437,66 @@ SIM.probes.snort = (W, p) => {
 };
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
+/* ===== engine/78-calendar.js ===== */
+/* ============================================================================
+   Calendrier du jeu : la date et l'heure d'un ticket ne sont plus figées au mardi 27/10/2026 à 07:12.
+   - Chaque ticket joué fait avancer d'un jour ouvré (jamais le week-end) ; l'heure est tirée par la graine dans la journée de travail
+     (08:00 – 17:30), ou en pleine nuit pour un incident d'astreinte.
+   - Le monde est construit à sa date d'origine puis décalé d'un nombre entier de jours : toutes ses dates (journaux, fichiers, certificats,
+     sauvegardes, baux) suivent, et les dates écrites dans la panne (compte expiré le…, certificat expiré le…) aussi.
+   Sans calendrier (tests du moteur, mode d'origine), rien ne change : mardi 27/10/2026 07:12.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, U = SIM.U;
+const CAL = SIM.calendar = {}; const DAY = 86400000;
+CAL.BASE = Date.UTC(2026, 9, 27, 7, 12, 0); const BASE_DAY = Date.UTC(2026, 9, 27);
+/* n-ième jour ouvré après la date d'origine → décalage en jours calendaires */
+CAL.businessDays = function (n) { let d = 0, left = Math.max(0, n | 0); while (left > 0) { d++; const wd = new Date(BASE_DAY + d * DAY).getUTCDay(); if (wd !== 0 && wd !== 6) left--; } return d; };
+/* { days, sec } : jour (décalage calendaire) et heure (secondes depuis minuit). night : l'incident tombe la nuit suivante. */
+CAL.make = function (n, seed, o) {
+  o = o || {}; const rng = U.rng('calendar|' + seed); const days = CAL.businessDays(n);
+  const sec = o.night ? (1 * 3600 + rng.int(3 * 3600 + 1800)) : (8 * 3600 + rng.int(9 * 3600 + 1800));
+  return { days, sec: Math.floor(sec / 60) * 60, night: !!o.night };
+};
+const ISO = /\b(20\d\d)-(\d\d)-(\d\d)\b/g;
+const shiftIso = (s, days) => s.replace(ISO, (m, y, mo, d) => { const t = Date.UTC(+y, +mo - 1, +d) + days * DAY; if (isNaN(t)) return m; const x = new Date(t); return x.getUTCFullYear() + '-' + U.pad2(x.getUTCMonth() + 1) + '-' + U.pad2(x.getUTCDate()); });
+const isTs = v => typeof v === 'number' && v > 1.70e12 && v < 1.90e12;
+function walk(o, days, seen) {
+  if (!o || typeof o !== 'object' || seen.has(o)) return; seen.add(o);
+  if (o instanceof Date) { o.setTime(o.getTime() + days * DAY); return; }
+  if (o instanceof Map) { const ent = [...o.entries()]; o.clear(); ent.forEach(([k, v]) => { if (typeof v === 'string') v = shiftIso(v, days); else if (isTs(v)) v += days * DAY; else walk(v, days, seen); o.set(typeof k === 'string' ? shiftIso(k, days) : k, v); }); return; }
+  if (o instanceof Set) { o.forEach(v => walk(v, days, seen)); return; }
+  if (Array.isArray(o)) { for (let i = 0; i < o.length; i++) { const v = o[i]; if (typeof v === 'string') o[i] = shiftIso(v, days); else if (isTs(v)) o[i] = v + days * DAY; else walk(v, days, seen); } return; }
+  for (const k of Object.keys(o)) {
+    let v = o[k]; if (typeof v === 'function') continue;
+    if (typeof v === 'string') v = shiftIso(v, days); else if (isTs(v)) v = v + days * DAY; else walk(v, days, seen);
+    const nk = shiftIso(k, days); if (nk !== k) { delete o[k]; o[nk] = v; } else o[k] = v;
+  }
+}
+CAL.shift = function (obj, days) { if (days) walk(obj, days, new Set()); return obj; };
+/* applique le calendrier à un monde sain fraîchement construit */
+CAL.apply = function (W, cal) {
+  if (!cal) return W; const days = cal.days | 0;
+  if (days) { const clock = W.clock, listeners = W.listeners; W.clock = null; W.listeners = null; CAL.shift(W, days); W.clock = clock; W.listeners = listeners; }
+  W.clock.base = BASE_DAY + (days + (cal.night ? 1 : 0)) * DAY + (cal.sec | 0) * 1000;
+  W.calendar = { days, sec: cal.sec | 0, night: !!cal.night };
+  return W;
+};
+/* dates écrites dans une panne instanciée (injection, corrections, racines, textes) + jour de la semaine des restrictions d'horaires */
+CAL.shiftFault = function (inst, W) {
+  const days = (W.calendar && W.calendar.days) || 0; const wd = W.now().getUTCDay();
+  const parts = inst.bundle ? inst.parts : [inst];
+  parts.forEach(p => {
+    if (days) { const def = p.def, rt = p.rt, vars = p.vars; p.def = null; p.rt = null; p.vars = null; CAL.shift(p, days); p.def = def; p.rt = rt; p.vars = vars; }
+    /* « heures de connexion interdites aujourd'hui » : le jour interdit est le jour du ticket */
+    if (W.calendar) (p.inject || []).forEach(st => { const v = st && st.value; if (v && Array.isArray(v.deny)) v.deny.forEach(x => { if (typeof x.day === 'number') x.day = wd; }); });
+  });
+  if (inst.bundle && days) { ['cause', 'solution'].forEach(k => { if (typeof inst[k] === 'string') inst[k] = shiftIso(inst[k], days); }); }
+  return inst;
+};
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
 /* ===== engine/78-fault-l2.js ===== */
 /* ============================================================================
    Couche 2 — sondes de validation des pannes (EtherChannel, Spanning Tree).
@@ -6617,7 +6693,10 @@ Game.pick = function (level, seed, profile, opts) {
 function Mission(o) {
   this.clock = o.clock || (() => Date.now());
   this.seed = String(o.seed); this.lv = Game.levelOf(o.level); this.opts = { skill: o.skill, parts: o.parts, chain: o.chain }; this.mode = Game.modeOf(o.mode || 'free');
-  this.W = SIM.buildHealthyWorld({ seed: this.seed }); this.base = this.W.sem();
+  this.W = SIM.buildHealthyWorld({ seed: this.seed });
+  /* date et heure du ticket (src/engine/78-calendar.js) : sans calendrier, le monde reste au mardi 27/10/2026 07:12 */
+  if (o.calendar && SIM.calendar) SIM.calendar.apply(this.W, o.calendar);
+  this.base = this.W.sem();
   const prof = o.profile || Game.profile();
   /* campagne : chapitre, examen, révision (src/engine/83-campaign.js) ; o.bundle : assemblage imposé (examen de chapitre) */
   this.camp = o.camp ? Object.assign({}, o.camp) : null;
@@ -6635,6 +6714,7 @@ function Mission(o) {
   this.startMs = this.clock(); this.pausedMs = 0; this.pausedAt = null;
   this.trace = []; this.hintsUsed = 0; this.hintLog = []; this.dangers = []; this.wrongCloses = 0; this.falseRes = 0; this.impacts = []; this.refunded = []; this.aids = []; this.fx = []; this._blk = this._blockedNow();
   this.state = 'running'; this.result = null; this.resolvedAtSec = null; this.firstFixedAtSec = null; this.endSec = null;
+  if (o.calendar && SIM.calendar) SIM.calendar.shiftFault(this.fault, this.W);
   this.parts.forEach(p => F.runSteps(this.W, p.inject, { inst: p }));
   /* Panne « je ne peux plus ouvrir ma session » : l'utilisateur est devant l'écran de connexion, pas déjà connecté.
      Sans cela, le poste s'ouvrait sur sa session encore active et le message d'erreur n'apparaissait jamais. */
@@ -18985,7 +19065,7 @@ const SIM = g.SIM, U = SIM.U, UI = SIM.ui, E = SIM.emu, Game = SIM.game;
 const TICK_SEC = 5;
 function Run(opts) {
   this.opts = opts; this.listeners = {};
-  this.m = Game.create({ level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
+  this.m = Game.create({ calendar: opts.calendar, level: opts.level, mode: opts.mode, seed: opts.seed, skill: opts.skill, faultId: opts.faultId, parts: opts.parts, chain: opts.chain, daily: opts.daily, profile: opts.profile, camp: opts.camp, bundle: opts.bundle, contracts: opts.contracts, tour: opts.tour, clock: () => Date.now() });
   /* campagne : périmètre affiché (équipements et sites du chapitre) ; null = toute l'infrastructure (bac à sable) */
   this.scope = SIM.camp ? SIM.camp.missionScope(this.m) : null;
   this.W = this.m.W; this.surfaces = {}; this.ended = false; this.ticks = 0;
@@ -20343,6 +20423,9 @@ P.buildIcons = function () {
   const self = this;
   const ic = (label, icon, fn) => { const e = h('div.dicon', { on: { dblclick: fn, click: () => { self.icons.querySelectorAll('.sel').forEach(x => x.classList.remove('sel')); e.classList.add('sel'); } } }, UI.icon(icon, 36), h('div', label)); return e; };
   this.icons.append(ic('Ce PC', 'monitor', () => this.open('explorer', 'thispc')), ic('Corbeille', 'trash', () => this.open('explorer', 'recycle')));
+  /* raccourcis d'un poste d'entreprise : le navigateur et l'invite de commandes à portée de double-clic */
+  if (UI.apps.browser) this.icons.append(ic('Navigateur', 'globe', () => this.open('browser')));
+  if (UI.apps.cmd) this.icons.append(ic('Invite de commandes', 'terminal', () => this.open('cmd')));
 };
 
 /* ------------------------------------------------------------------ barre des tâches */
@@ -26185,7 +26268,7 @@ UP.screen = function (app, tab) {
     return h('div.pghead', UP.levelChip(lv.level), h('div.grow', h('div.ptitle', P.displayTitle(prof)), UP.xpBar(lv, { big: true })),
       h('div.pgpts' + (pts ? '.glow' : ''), h('b', String(pts)), h('span', 'point' + (pts > 1 ? 's' : '') + ' à dépenser')),
       h('button.btn', { on: { click: close } }, 'Fermer')); };
-  const tabsEl = () => h('div.pgtabs', [['tree', 'Arbre de compétences'], ['rewards', 'Récompenses'], ['mastery', 'Maîtrises'], ['ach', 'Succès']].map(t => h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
+  const tabsEl = () => h('div.pgtabs', [['tree', 'Arbre de compétences'], ['rewards', 'Récompenses'], ['mastery', 'Maîtrises'], ['ach', 'Succès']].map(t => h('button.pgtab.pgtab-' + t[0] + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
   /* --- arbre --- */
   const treeView = () => {
     const cols = P.BRANCHES.map(br => h('div.pgcol', h('h3', br.label), h('div.pgchain', P.TREE.filter(n => n.branch === br.id).map(n => {
@@ -26196,12 +26279,12 @@ UP.screen = function (app, tab) {
       if (n.theme && owned) extra.push(h('button.btn.small', { on: { click: () => { UI.themes.apply(n.theme, true); UI.toast('Thème appliqué.', 'ok', 2500); } } }, 'Appliquer'));
       if (n.id === 'titles' && owned) { const owns = P.titlesOwned(P.levelOf(prof.xp).level); extra.push(h('select.txt', { on: { change: e => { prof.title = e.target.value; save(); draw(); } } }, owns.map(t => h('option', { value: t, selected: P.displayTitle(prof) === t }, t)))); }
       return h('div.pgnode.' + state, h('div.pgni', I(n.icon, 26)),
-        h('div.grow', h('b', n.label), h('div.muted', n.desc),
+        h('div.grow', h('b', n.label), h('div.muted.pgdesc', { title: n.desc }, n.desc),
           owned ? h('div.pgown', auto ? 'Offert par un succès' : 'Débloqué') : h('div.pgcost', n.cost ? n.cost + ' point' + (n.cost > 1 ? 's' : '') : 'Gratuit'),
           why && !owned ? h('div.pgwhy', why) : null, extra.length ? h('div.row', { style: { gap: '6px', marginTop: '4px' } }, extra) : null),
         !owned && !why ? h('button.btn.primary', { on: { click: () => { const r = P.buy(prof, n.id); if (r.ok) { save(); UI.toast('« ' + n.label + ' » débloqué.', 'ok', 3500); draw(); } else UI.toast(r.why, 'warn'); } } }, 'Débloquer') : null);
     }))));
-    return h('div', h('p.muted', 'Les points se gagnent en montant de niveau. L’arbre n’apporte que du confort, du style et de l’XP : il ne change jamais ta note, et le coffre et le carnet sont coupés en évaluation chronométrée pour que les notes restent comparables.'),
+    return h('div', h('p.muted', 'Tu choisis : un point par niveau, à dépenser ici. Rien ne change ta note.'),
       h('div.pgcols', cols),
       h('div.row', { style: { marginTop: '10px' } }, h('button.btn', { on: { click: () => UI.modal('Réinitialiser l’arbre ?', h('p', 'Tous les nœuds achetés sont rendus et tes points te sont restitués. Les nœuds offerts par un succès restent à toi. Aucune XP n’est perdue.'), [{ label: 'Annuler' }, { label: 'Réinitialiser', danger: true, fn: () => { P.reset(prof); save(); draw(); } }]) } }, 'Réinitialiser l’arbre')));
   };
@@ -26374,11 +26457,16 @@ INF.cp = cp;
 
 /* ------------------------------------------------------------------ identifiants */
 INF.credsView = function (scope) {
-  /* campagne : seuls les comptes des équipements déjà au programme */
-  const rows = SIM.VAULT.filter(c => !scope || !c.ch || c.ch <= scope.n).map(c => h('tr', h('td', c.scope), h('td', cp(c.user, 'Identifiant')), h('td', cp(c.secret, 'Mot de passe', 'mono')),
-    h('td.nowrap', h('button.btn.small', { title: 'Copier l’identifiant', on: { click: () => UI.copyText(c.user, 'Identifiant') } }, 'Copier id'), ' ', h('button.btn.small', { title: 'Copier le mot de passe', on: { click: () => UI.copyText(c.secret, 'Mot de passe') } }, 'Copier mdp')), h('td.muted', c.note)));
-  return h('div', h('p.muted', 'Oui, ils sont tous dans un tableau : c’est un simulateur, pas une production. Dans la vraie vie, ça s’appelle un gestionnaire de mots de passe, et pas un post-it. Utilise le compte le moins privilégié qui suffit. Clique sur un identifiant ou un mot de passe pour le copier.'),
-    h('table.tbl.infotbl', h('thead', h('tr', ['Contexte', 'Identifiant', 'Mot de passe', '', 'Note'].map(x => h('th', x)))), h('tbody', rows)));
+  /* campagne : seuls les comptes des équipements déjà au programme. Deux onglets : les comptes pour administrer, et ceux des utilisateurs (pour reproduire leur problème). */
+  const all = SIM.VAULT.filter(c => !scope || !c.ch || c.ch <= scope.n); const isUser = c => /^Utilisat/.test(c.note || '');
+  const row = c => h('tr', h('td', c.scope), h('td', cp(c.user, 'Identifiant')), h('td', cp(c.secret, 'Mot de passe', 'mono')),
+    h('td.nowrap', h('button.btn.small', { title: 'Copier l’identifiant', on: { click: () => UI.copyText(c.user, 'Identifiant') } }, 'Copier id'), ' ', h('button.btn.small', { title: 'Copier le mot de passe', on: { click: () => UI.copyText(c.secret, 'Mot de passe') } }, 'Copier mdp')), h('td.muted', c.note));
+  let tab = 'adm'; const box = h('div');
+  const draw = () => { UI.clear(box); const list = all.filter(c => (tab === 'usr') === isUser(c));
+    box.append(h('div.credtabs', { role: 'tablist' }, [['adm', 'Administration', all.filter(c => !isUser(c)).length], ['usr', 'Utilisateurs', all.filter(isUser).length]].map(t => h('button.credtab' + (tab === t[0] ? '.on' : ''), { role: 'tab', 'data-tab': t[0], 'aria-selected': String(tab === t[0]), on: { click: () => { tab = t[0]; draw(); } } }, t[1], h('small', ' ' + t[2])))),
+      h('p.muted', tab === 'adm' ? 'Les comptes pour intervenir. Prends le moins privilégié qui suffit.' : 'Les comptes des utilisateurs, pour reproduire leur problème à leur place.'),
+      h('table.tbl.infotbl', h('thead', h('tr', ['Contexte', 'Identifiant', 'Mot de passe', '', 'Note'].map(x => h('th', x)))), h('tbody', list.map(row)))); };
+  draw(); return box;
 };
 
 /* ------------------------------------------------------------------ plan d'adressage */
@@ -26591,9 +26679,10 @@ UC.dutyPane = function (app, parts, prof) {
     const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
     box.append(parts.daily(),
       h('p.muted.cintro', 'Plusieurs pannes dans le même ticket, dans toute l’infrastructure.'),
+      /* le choix du mode est au-dessus des incidents qu'il concerne, sous la même forme que « Accompagné / Autonome » de la campagne */
+      h('div.cmode.cdutymode', { role: 'group', 'aria-label': 'Mode des incidents' }, [[false, 'Libre'], [true, 'Chronométré, sans indice']].map(x => h('button.cmodeb' + (timed === x[0] ? '.on' : ''), { 'data-timed': String(x[0]), 'aria-pressed': String(timed === x[0]), on: { click: () => { timed = x[0]; app._dutyTimed = timed; draw(); } } }, h('b', x[1])))),
       h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => { const open = SIM.rewards.dutyOpen(prof, x[0]); const need = (SIM.rewards.DUTY.find(d => d.level === x[0]) || {}).lv; return h('button.cdutyb' + (open ? '' : '.lock'), { 'data-level': x[0], disabled: !open, title: open ? '' : 'S’ouvre au niveau ' + need, on: { click: () => go(x[0]) } }, h('b', (open ? '' : '🔒 ') + x[1]), h('small', x[2]), h('span.muted', open ? 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min' : 'S’ouvre au niveau ' + need)); })),
-      UC.contractsFold(app, prof, '') || '',
-      h('label.cchk', h('input', { type: 'checkbox', checked: timed, on: { change: e => { timed = e.target.checked; app._dutyTimed = timed; } } }), ' Chronométré, sans indice'));
+      UC.contractsFold(app, prof, '') || '');
   };
   draw(); return box;
 };
@@ -26802,7 +26891,7 @@ UR.view = function (app, prof, save, redraw) {
   const prestige = h('div.rwprest', h('h3', 'Prestige' + (pr ? ' — ' + '★'.repeat(Math.min(pr, 5)) + (pr > 5 ? ' ×' + pr : '') : '')),
     h('p.muted', 'Au niveau ' + P.MAX_LEVEL + ', tu peux repartir du niveau 1. Tu gardes la campagne, les succès, les maîtrises et toutes les récompenses de niveau ; l’arbre de compétences est rendu et se regagne en remontant. Tu gagnes une étoile et le contrat « Tout ou rien ».'),
     h('button.btn' + (RW.canPrestige(prof) ? '.primary' : ''), { 'data-act': 'prestige', disabled: !RW.canPrestige(prof), on: { click: () => UI.modal('Passer au prestige ?', h('p', 'Ton expérience repart de zéro (niveau 1). Rien d’autre n’est perdu. Ce choix ne s’annule pas.'), [{ label: 'Annuler' }, { label: 'Prestige', primary: true, fn: () => { if (RW.doPrestige(prof)) { save(); UI.toast('Prestige ' + RW.prestige(prof) + ' : une étoile de plus. Contrat « Tout ou rien » disponible.', 'ok', 7000); redraw(); } } }]) } }, RW.canPrestige(prof) ? 'Passer au prestige' : 'Disponible au niveau ' + P.MAX_LEVEL + ' (tu es niveau ' + real + ')'));
-  return h('div.rwview', h('p.muted', 'Chaque palier de niveau débloque quelque chose, sans rien acheter. Les outils et le second avis sont coupés en évaluation chronométrée et en examen de chapitre ; les contrats ne changent que l’XP. Les notes restent comparables d’un joueur à l’autre.'),
+  return h('div.rwview', h('p.muted', 'Automatique : chaque palier de niveau débloque quelque chose, sans rien dépenser. Rien ne change ta note.'),
     h('div.rwcols', h('div', h('h3', 'Piste des récompenses'), track), h('div', h('h3', 'Apparence'), h('p.muted', 'Les fonds d’écran, les couleurs de terminal et la carte ne changent rien au fonctionnement des consoles.'), ['wall', 'term', 'map', 'frame'].map(picker), prestige)));
 };
 /* débrief : ce que le ou les niveaux gagnés viennent de débloquer */
@@ -26912,7 +27001,6 @@ US.side = function (app, prof, theme, o) {
     h('button.btn', { on: { click: () => app.planModal() } }, 'Plan d’adressage'),
     h('button.btn', { on: { click: () => app.scenarioModal() } }, 'Scénarios formateur'),
     h('button.btn', { on: { click: () => UI.prog.backupModal(app) } }, 'Sauvegarde du profil'),
-    h('button.btn.hthemebtn', { on: { click: () => app.themeModal() } }, 'Thème : ' + theme.name),
     h('button.btn', { on: { click: () => app.aboutModal() } }, 'À propos et limites')));
   const passed = o.passed;
   return h('aside.hside',
@@ -26982,6 +27070,57 @@ const boot = () => {
   try { g.SIM_APP = new g.SIM.ui.App(root); } catch (e) { root.textContent = 'Erreur de démarrage : ' + e.message; if (typeof console !== 'undefined') console.error(e); }
 };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== ui/99-resume.js ===== */
+/* ============================================================================
+   Ticket interrompu : un rechargement de page (F5, onglet fermé par erreur) ne fait plus perdre la partie en silence.
+   - Pendant une partie, le navigateur demande confirmation avant de quitter la page.
+   - Les paramètres du ticket (graine, panne, mode, chapitre) et le temps écoulé sont gardés ; au retour, l'accueil propose de le reprendre.
+   L'état des machines n'est pas sauvegardé (le monde simulé ne se sérialise pas) : le ticket repart de son état initial, avec le chronomètre
+   où il en était. C'est dit au joueur. Rien de cela en mode d'origine (#legacy) ni pendant le tutoriel.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, UI = SIM.ui, Game = SIM.game, h = UI.h; const P = UI.App.prototype;
+const KEY = 'pending'; const MAX_AGE = 24 * 3600 * 1000;
+const RS = UI.resume = {};
+RS.clear = () => { try { Game.store.set(KEY, null); } catch (e) { /* rien */ } };
+RS.get = () => { try { const p = Game.store.get(KEY); return p && p.opts && (Date.now() - p.at) < MAX_AGE ? p : null; } catch (e) { return null; } };
+const plain = o => { try { return JSON.parse(JSON.stringify(o, (k, v) => (typeof v === 'function' || k === 'profile') ? undefined : v)); } catch (e) { return null; } };
+const save = app => { const run = app.run; if (!run || run.ended || !app._pendingOpts) return; try { Game.store.set(KEY, { opts: app._pendingOpts, at: Date.now(), elapsed: Math.round(run.m.elapsedSec()), id: run.id, subject: (run.m.fault.ticket || {}).subject || '' }); } catch (e) { /* rien */ } };
+
+const begin0 = P.begin;
+P.begin = function (opts) {
+  /* date et heure du ticket : un jour ouvré de plus à chaque ticket joué, heure de bureau tirée par la graine ; la nuit pour un incident d'astreinte lourd.
+     Ticket du jour et code de défi : la date ne dépend que de la graine, pour que tous les joueurs aient le même monde. */
+  if (opts && !this.legacy && !opts.tour && !opts.calendar && opts.seed && SIM.calendar) {
+    const shared = opts.daily || opts.challenge; const n = shared ? parseInt(SIM.U.hash8('cal|' + opts.seed).slice(0, 4), 16) % 40 : ((Game.profile().history || []).length + 1);
+    opts = Object.assign({}, opts, { calendar: SIM.calendar.make(n, opts.seed, { night: !opts.camp && +opts.level >= 4 }) }); arguments[0] = opts;
+  }
+  const res = begin0.apply(this, arguments); const app = this; const run = this.run;
+  clearInterval(app._pendingTimer); app._pendingOpts = null;
+  if (!run || this.legacy || (opts && opts.tour)) return res;
+  if (opts && opts.resumeElapsed > 0) { run.m.startMs -= opts.resumeElapsed * 1000; }
+  const o = plain(opts || {}); if (!o) return res; delete o.resumeElapsed; app._pendingOpts = o;
+  save(app); app._pendingTimer = setInterval(() => { if (app.run !== run || run.ended) { clearInterval(app._pendingTimer); return; } save(app); }, 10000);
+  if (run.on) run.on('end', () => { clearInterval(app._pendingTimer); RS.clear(); });
+  return res;
+};
+const home0 = P.home;
+P.home = function () {
+  const leaving = !!this.run; if (leaving) { clearInterval(this._pendingTimer); this._pendingOpts = null; RS.clear(); }
+  const res = home0.apply(this, arguments);
+  if (!this._resumeAsked && !this.legacy) { this._resumeAsked = true; const p = RS.get(); if (p) RS.offer(this, p); }
+  return res;
+};
+RS.offer = function (app, p) {
+  const mm = Math.floor(p.elapsed / 60), ss = p.elapsed % 60;
+  UI.modal('Ticket interrompu', h('div.rsbox', h('p', h('b', p.id || 'Ticket'), p.subject ? ' — « ' + p.subject + ' »' : ''), h('p', 'La page a été fermée ou rechargée pendant ce ticket. Tu peux le reprendre : les machines repartent de leur état de départ, le chronomètre reprend à ' + (mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss + '.')),
+    [{ label: 'Laisser tomber', fn: () => RS.clear() }, { label: 'Reprendre le ticket', primary: true, fn: () => app.begin(Object.assign({}, p.opts, { resumeElapsed: p.elapsed })) }]);
+};
+/* quitter la page pendant une partie : confirmation du navigateur, et dernier enregistrement du temps */
+if (g.addEventListener) g.addEventListener('beforeunload', e => { const app = g.SIM_APP; if (!app || app.legacy || !app.run || app.run.ended || !app._pendingOpts) return; save(app); if (!g.SIM_NO_UNLOAD_PROMPT) { e.preventDefault(); e.returnValue = ''; } });
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
 </script>

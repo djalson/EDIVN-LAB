@@ -157,7 +157,10 @@ Game.pick = function (level, seed, profile, opts) {
 function Mission(o) {
   this.clock = o.clock || (() => Date.now());
   this.seed = String(o.seed); this.lv = Game.levelOf(o.level); this.opts = { skill: o.skill, parts: o.parts, chain: o.chain }; this.mode = Game.modeOf(o.mode || 'free');
-  this.W = SIM.buildHealthyWorld({ seed: this.seed }); this.base = this.W.sem();
+  this.W = SIM.buildHealthyWorld({ seed: this.seed });
+  /* date et heure du ticket (src/engine/78-calendar.js) : sans calendrier, le monde reste au mardi 27/10/2026 07:12 */
+  if (o.calendar && SIM.calendar) SIM.calendar.apply(this.W, o.calendar);
+  this.base = this.W.sem();
   const prof = o.profile || Game.profile();
   /* campagne : chapitre, examen, révision (src/engine/83-campaign.js) ; o.bundle : assemblage imposé (examen de chapitre) */
   this.camp = o.camp ? Object.assign({}, o.camp) : null;
@@ -175,6 +178,7 @@ function Mission(o) {
   this.startMs = this.clock(); this.pausedMs = 0; this.pausedAt = null;
   this.trace = []; this.hintsUsed = 0; this.hintLog = []; this.dangers = []; this.wrongCloses = 0; this.falseRes = 0; this.impacts = []; this.refunded = []; this.aids = []; this.fx = []; this._blk = this._blockedNow();
   this.state = 'running'; this.result = null; this.resolvedAtSec = null; this.firstFixedAtSec = null; this.endSec = null;
+  if (o.calendar && SIM.calendar) SIM.calendar.shiftFault(this.fault, this.W);
   this.parts.forEach(p => F.runSteps(this.W, p.inject, { inst: p }));
   /* Panne « je ne peux plus ouvrir ma session » : l'utilisateur est devant l'écran de connexion, pas déjà connecté.
      Sans cela, le poste s'ouvrait sur sa session encore active et le message d'erreur n'apparaissait jamais. */

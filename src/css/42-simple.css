@@ -148,3 +148,19 @@
 /* « Signaler un bug » : bouton discret de la barre de partie et zone de remarque */
 .gbug { opacity: .75; } .gbug:hover { opacity: 1; }
 .brbox p { margin: 0 0 10px; } .brta { width: 100%; box-sizing: border-box; min-height: 84px; resize: vertical; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line, #3a2a7a); background: rgba(0, 0, 0, .25); color: inherit; font: inherit; margin-bottom: 10px; }
+
+/* ---- retouches d'écrans (tour du 12/11) ---- */
+/* accueil : bandeau deux fois moins haut, le parcours remonte */
+.v3ui .hhero { height: 150px; } .v3ui .hheroin { padding-top: 16px; }
+/* bac à sable : la barre « Prendre le ticket » ne recouvre plus la description des modes */
+.v3ui .hcta { position: static; }
+.cdutymode { margin: 0 0 12px; }
+/* identifiants : deux onglets */
+.credtabs { display: flex; gap: 6px; margin-bottom: 10px; } .credtab { background: var(--panel2); color: var(--text); border: 2px solid var(--line); padding: 6px 14px; cursor: pointer; font: inherit; } .credtab.on { background: var(--accent2); border-color: var(--hc); color: var(--onaccent); } .credtab small { opacity: .7; }
+/* arbre : une ligne par description, le détail au survol */
+.pgdesc { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; } .pgnode:hover .pgdesc { -webkit-line-clamp: unset; }
+/* la piste des récompenses a sa couleur (ambre) pour ne pas la confondre avec l'arbre (violet) */
+:root { --track: #f5b942; }
+.pgtab.pgtab-rewards { border-color: color-mix(in srgb, var(--track) 55%, var(--line)); color: var(--track); } .pgtab.pgtab-rewards.on { background: var(--track); border-color: var(--track); color: #1b1300; }
+.rwbtn { border-color: color-mix(in srgb, var(--track) 60%, var(--line)) !important; color: var(--track) !important; } .rwnext b { color: var(--track); }
+.rwview .rwrow.on { border-color: color-mix(in srgb, var(--track) 55%, var(--line)); } .rwview .rwrow.on .rwlv { color: var(--track); border-color: var(--track); } .rwview .rwrow .rwic { color: var(--track); }

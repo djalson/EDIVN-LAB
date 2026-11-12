@@ -109,9 +109,10 @@ UC.dutyPane = function (app, parts, prof) {
     const go = lv => app.begin({ level: lv, mode: timed ? 'timed' : 'free', seed: randomSeed() });
     box.append(parts.daily(),
       h('p.muted.cintro', 'Plusieurs pannes dans le même ticket, dans toute l’infrastructure.'),
+      /* le choix du mode est au-dessus des incidents qu'il concerne, sous la même forme que « Accompagné / Autonome » de la campagne */
+      h('div.cmode.cdutymode', { role: 'group', 'aria-label': 'Mode des incidents' }, [[false, 'Libre'], [true, 'Chronométré, sans indice']].map(x => h('button.cmodeb' + (timed === x[0] ? '.on' : ''), { 'data-timed': String(x[0]), 'aria-pressed': String(timed === x[0]), on: { click: () => { timed = x[0]; app._dutyTimed = timed; draw(); } } }, h('b', x[1])))),
       h('div.cduty', [[3, 'Incident double', '2 pannes'], [4, 'Incident critique', '3 pannes, dont une subtile'], [5, 'Nuit noire', '4 pannes, parfois masquées entre elles']].map(x => { const open = SIM.rewards.dutyOpen(prof, x[0]); const need = (SIM.rewards.DUTY.find(d => d.level === x[0]) || {}).lv; return h('button.cdutyb' + (open ? '' : '.lock'), { 'data-level': x[0], disabled: !open, title: open ? '' : 'S’ouvre au niveau ' + need, on: { click: () => go(x[0]) } }, h('b', (open ? '' : '🔒 ') + x[1]), h('small', x[2]), h('span.muted', open ? 'Cible ≈ ' + Math.round(Game.levelPar(x[0]) / 60) + ' min' : 'S’ouvre au niveau ' + need)); })),
-      UC.contractsFold(app, prof, '') || '',
-      h('label.cchk', h('input', { type: 'checkbox', checked: timed, on: { change: e => { timed = e.target.checked; app._dutyTimed = timed; } } }), ' Chronométré, sans indice'));
+      UC.contractsFold(app, prof, '') || '');
   };
   draw(); return box;
 };

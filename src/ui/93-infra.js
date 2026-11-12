@@ -22,11 +22,16 @@ INF.cp = cp;
 
 /* ------------------------------------------------------------------ identifiants */
 INF.credsView = function (scope) {
-  /* campagne : seuls les comptes des équipements déjà au programme */
-  const rows = SIM.VAULT.filter(c => !scope || !c.ch || c.ch <= scope.n).map(c => h('tr', h('td', c.scope), h('td', cp(c.user, 'Identifiant')), h('td', cp(c.secret, 'Mot de passe', 'mono')),
-    h('td.nowrap', h('button.btn.small', { title: 'Copier l’identifiant', on: { click: () => UI.copyText(c.user, 'Identifiant') } }, 'Copier id'), ' ', h('button.btn.small', { title: 'Copier le mot de passe', on: { click: () => UI.copyText(c.secret, 'Mot de passe') } }, 'Copier mdp')), h('td.muted', c.note)));
-  return h('div', h('p.muted', 'Oui, ils sont tous dans un tableau : c’est un simulateur, pas une production. Dans la vraie vie, ça s’appelle un gestionnaire de mots de passe, et pas un post-it. Utilise le compte le moins privilégié qui suffit. Clique sur un identifiant ou un mot de passe pour le copier.'),
-    h('table.tbl.infotbl', h('thead', h('tr', ['Contexte', 'Identifiant', 'Mot de passe', '', 'Note'].map(x => h('th', x)))), h('tbody', rows)));
+  /* campagne : seuls les comptes des équipements déjà au programme. Deux onglets : les comptes pour administrer, et ceux des utilisateurs (pour reproduire leur problème). */
+  const all = SIM.VAULT.filter(c => !scope || !c.ch || c.ch <= scope.n); const isUser = c => /^Utilisat/.test(c.note || '');
+  const row = c => h('tr', h('td', c.scope), h('td', cp(c.user, 'Identifiant')), h('td', cp(c.secret, 'Mot de passe', 'mono')),
+    h('td.nowrap', h('button.btn.small', { title: 'Copier l’identifiant', on: { click: () => UI.copyText(c.user, 'Identifiant') } }, 'Copier id'), ' ', h('button.btn.small', { title: 'Copier le mot de passe', on: { click: () => UI.copyText(c.secret, 'Mot de passe') } }, 'Copier mdp')), h('td.muted', c.note));
+  let tab = 'adm'; const box = h('div');
+  const draw = () => { UI.clear(box); const list = all.filter(c => (tab === 'usr') === isUser(c));
+    box.append(h('div.credtabs', { role: 'tablist' }, [['adm', 'Administration', all.filter(c => !isUser(c)).length], ['usr', 'Utilisateurs', all.filter(isUser).length]].map(t => h('button.credtab' + (tab === t[0] ? '.on' : ''), { role: 'tab', 'data-tab': t[0], 'aria-selected': String(tab === t[0]), on: { click: () => { tab = t[0]; draw(); } } }, t[1], h('small', ' ' + t[2])))),
+      h('p.muted', tab === 'adm' ? 'Les comptes pour intervenir. Prends le moins privilégié qui suffit.' : 'Les comptes des utilisateurs, pour reproduire leur problème à leur place.'),
+      h('table.tbl.infotbl', h('thead', h('tr', ['Contexte', 'Identifiant', 'Mot de passe', '', 'Note'].map(x => h('th', x)))), h('tbody', list.map(row)))); };
+  draw(); return box;
 };
 
 /* ------------------------------------------------------------------ plan d'adressage */

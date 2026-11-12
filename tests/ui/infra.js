@@ -9,7 +9,11 @@ const { chromium } = require('playwright');
 
   console.log('== identifiants');
   await p.click('button:has-text("Mots de passe de l’infra")'); await p.waitForSelector('.modal .infotbl');
-  const nCred = await p.evaluate(() => SIM.VAULT.length);
+  /* deux onglets : Administration (ouvert) et Utilisateurs ; à eux deux, une ligne par compte */
+  const nAll = await p.evaluate(() => SIM.VAULT.length); const nUsr = await p.evaluate(() => SIM.VAULT.filter(c => /^Utilisat/.test(c.note || '')).length);
+  await p.click('.modal .credtab[data-tab=usr]'); await p.waitForTimeout(120); chk('onglet Utilisateurs : une ligne par compte utilisateur', (await p.$$('.modal tbody tr')).length === nUsr && nUsr >= 9);
+  await p.click('.modal .credtab[data-tab=adm]'); await p.waitForTimeout(120);
+  const nCred = nAll - nUsr;
   chk('une ligne par compte, avec « Copier id » et « Copier mdp »', (await p.$$('.modal tbody tr')).length === nCred && (await p.$$('.modal button:has-text("Copier id")')).length === nCred && (await p.$$('.modal button:has-text("Copier mdp")')).length === nCred);
   const c0 = await p.evaluate(() => SIM.VAULT[0]);
   await p.click('.modal tbody tr:first-child button:has-text("Copier id")'); await p.waitForTimeout(150);

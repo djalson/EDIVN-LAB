@@ -131,6 +131,9 @@ P.buildIcons = function () {
   const self = this;
   const ic = (label, icon, fn) => { const e = h('div.dicon', { on: { dblclick: fn, click: () => { self.icons.querySelectorAll('.sel').forEach(x => x.classList.remove('sel')); e.classList.add('sel'); } } }, UI.icon(icon, 36), h('div', label)); return e; };
   this.icons.append(ic('Ce PC', 'monitor', () => this.open('explorer', 'thispc')), ic('Corbeille', 'trash', () => this.open('explorer', 'recycle')));
+  /* raccourcis d'un poste d'entreprise : le navigateur et l'invite de commandes à portée de double-clic */
+  if (UI.apps.browser) this.icons.append(ic('Navigateur', 'globe', () => this.open('browser')));
+  if (UI.apps.cmd) this.icons.append(ic('Invite de commandes', 'terminal', () => this.open('cmd')));
 };
 
 /* ------------------------------------------------------------------ barre des tâches */

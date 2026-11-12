@@ -82,7 +82,7 @@ UP.screen = function (app, tab) {
     return h('div.pghead', UP.levelChip(lv.level), h('div.grow', h('div.ptitle', P.displayTitle(prof)), UP.xpBar(lv, { big: true })),
       h('div.pgpts' + (pts ? '.glow' : ''), h('b', String(pts)), h('span', 'point' + (pts > 1 ? 's' : '') + ' à dépenser')),
       h('button.btn', { on: { click: close } }, 'Fermer')); };
-  const tabsEl = () => h('div.pgtabs', [['tree', 'Arbre de compétences'], ['rewards', 'Récompenses'], ['mastery', 'Maîtrises'], ['ach', 'Succès']].map(t => h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
+  const tabsEl = () => h('div.pgtabs', [['tree', 'Arbre de compétences'], ['rewards', 'Récompenses'], ['mastery', 'Maîtrises'], ['ach', 'Succès']].map(t => h('button.pgtab.pgtab-' + t[0] + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
   /* --- arbre --- */
   const treeView = () => {
     const cols = P.BRANCHES.map(br => h('div.pgcol', h('h3', br.label), h('div.pgchain', P.TREE.filter(n => n.branch === br.id).map(n => {
@@ -93,12 +93,12 @@ UP.screen = function (app, tab) {
       if (n.theme && owned) extra.push(h('button.btn.small', { on: { click: () => { UI.themes.apply(n.theme, true); UI.toast('Thème appliqué.', 'ok', 2500); } } }, 'Appliquer'));
       if (n.id === 'titles' && owned) { const owns = P.titlesOwned(P.levelOf(prof.xp).level); extra.push(h('select.txt', { on: { change: e => { prof.title = e.target.value; save(); draw(); } } }, owns.map(t => h('option', { value: t, selected: P.displayTitle(prof) === t }, t)))); }
       return h('div.pgnode.' + state, h('div.pgni', I(n.icon, 26)),
-        h('div.grow', h('b', n.label), h('div.muted', n.desc),
+        h('div.grow', h('b', n.label), h('div.muted.pgdesc', { title: n.desc }, n.desc),
           owned ? h('div.pgown', auto ? 'Offert par un succès' : 'Débloqué') : h('div.pgcost', n.cost ? n.cost + ' point' + (n.cost > 1 ? 's' : '') : 'Gratuit'),
           why && !owned ? h('div.pgwhy', why) : null, extra.length ? h('div.row', { style: { gap: '6px', marginTop: '4px' } }, extra) : null),
         !owned && !why ? h('button.btn.primary', { on: { click: () => { const r = P.buy(prof, n.id); if (r.ok) { save(); UI.toast('« ' + n.label + ' » débloqué.', 'ok', 3500); draw(); } else UI.toast(r.why, 'warn'); } } }, 'Débloquer') : null);
     }))));
-    return h('div', h('p.muted', 'Les points se gagnent en montant de niveau. L’arbre n’apporte que du confort, du style et de l’XP : il ne change jamais ta note, et le coffre et le carnet sont coupés en évaluation chronométrée pour que les notes restent comparables.'),
+    return h('div', h('p.muted', 'Tu choisis : un point par niveau, à dépenser ici. Rien ne change ta note.'),
       h('div.pgcols', cols),
       h('div.row', { style: { marginTop: '10px' } }, h('button.btn', { on: { click: () => UI.modal('Réinitialiser l’arbre ?', h('p', 'Tous les nœuds achetés sont rendus et tes points te sont restitués. Les nœuds offerts par un succès restent à toi. Aucune XP n’est perdue.'), [{ label: 'Annuler' }, { label: 'Réinitialiser', danger: true, fn: () => { P.reset(prof); save(); draw(); } }]) } }, 'Réinitialiser l’arbre')));
   };
