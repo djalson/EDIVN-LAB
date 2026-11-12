@@ -102,7 +102,7 @@ add({ id: 'ad_time', level: 2, title: 'Horloge du poste décalée (Kerberos)', s
   ticket: tk('{{u.name}} ({{u.svc}})', 'Connexion impossible après changement de pile de l’horloge', 'Bonjour, hier soir il y a eu une coupure de courant dans le bureau et ce matin l’heure affichée par mon poste est fausse de presque un quart d’heure. Maintenant je n’arrive plus à ouvrir ma session, l’ordinateur parle d’une différence de date et d’heure.'),
   cause: 'L’horloge du poste dérive de plus de 5 minutes par rapport au contrôleur de domaine : Kerberos refuse l’authentification.',
   solution: 'Resynchroniser l’heure du poste avec le domaine (w32tm /resync, ou régler la date/l’heure et le fuseau) puis retester.',
-  hints: ['L’erreur évoque une différence de temps : comparez l’heure du poste à celle du contrôleur de domaine.', 'Kerberos tolère 5 minutes d’écart par défaut. Ici l’écart est supérieur.', 'Resynchronisez l’heure avec le domaine (w32tm /resync) puis retestez l’ouverture de session.'],
+  hints: ['L’erreur évoque une différence de temps : comparez l’heure du poste à celle du contrôleur de domaine.', 'Kerberos tolère 5 minutes d’écart par défaut. Ici l’écart est supérieur. Aucun compte du domaine ne peut ouvrir de session sur ce poste : passe par le compte local d’intervention (.\\tech).', 'Resynchronisez l’heure avec le domaine (w32tm /resync) puis retestez l’ouverture de session.'],
   inject: [{ do: 'set', path: '{{u.host}}.clockSkewMin', value: 17 }],
   probes: loginProbe,
   roots: [{ path: '{{u.host}}.clockSkewMin', lte: 4 }],
