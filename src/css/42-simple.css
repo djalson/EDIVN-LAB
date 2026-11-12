@@ -164,3 +164,12 @@
 .pgtab.pgtab-rewards { border-color: color-mix(in srgb, var(--track) 55%, var(--line)); color: var(--track); } .pgtab.pgtab-rewards.on { background: var(--track); border-color: var(--track); color: #1b1300; }
 .rwbtn { border-color: color-mix(in srgb, var(--track) 60%, var(--line)) !important; color: var(--track) !important; } .rwnext b { color: var(--track); }
 .rwview .rwrow.on { border-color: color-mix(in srgb, var(--track) 55%, var(--line)); } .rwview .rwrow.on .rwlv { color: var(--track); border-color: var(--track); } .rwview .rwrow .rwic { color: var(--track); }
+
+/* ---- messages et événements en cours de partie ---- */
+.msgs h3 .msgn { color: var(--hc); } .msglist { display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow: auto; }
+.msg { border-left: 3px solid var(--accent2); background: rgba(0, 0, 0, .22); padding: 8px 10px; border-radius: 6px; font-size: 13px; line-height: 1.4; } .msg.new { animation: msgin .5s ease 0s 3 alternate; } .msg.late { border-left-color: var(--bad, #f66); }
+@keyframes msgin { from { background: rgba(0, 0, 0, .22); } to { background: color-mix(in srgb, var(--accent2) 30%, transparent); } }
+.msgh { display: flex; gap: 6px; align-items: center; margin-bottom: 3px; } .msgsub { font-weight: 700; margin-bottom: 2px; } .msgmust { margin-top: 6px; font-size: 12.5px; color: var(--warn, #f5b942); } .msgok { margin-top: 6px; color: var(--ok); font-weight: 700; } .msgcd { font-family: var(--mono); }
+.evcall p { margin: 0 0 10px; line-height: 1.5; } .evfrom { display: flex; gap: 8px; align-items: center; } .evquiz { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.evopt { text-align: left; padding: 12px 14px; border-radius: 10px; border: 2px solid var(--line); background: var(--panel2); color: var(--text); font: inherit; cursor: pointer; } .evopt:hover { border-color: var(--hc); }
+.evres { padding: 12px 14px; border-radius: 10px; font-weight: 600; } .evres.ok { background: color-mix(in srgb, var(--ok) 20%, transparent); } .evres.ko { background: color-mix(in srgb, var(--bad, #f66) 20%, transparent); }

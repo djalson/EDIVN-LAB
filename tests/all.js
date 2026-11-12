@@ -17,7 +17,7 @@ const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 /* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
 const FAST = process.argv.includes('--fast');
-const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
+const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -36,6 +36,7 @@ t('Moteur', 'impact-net (règle par le résultat : stop puis start du même serv
 t('Moteur', 'invariants (toutes pannes × variantes : pas d’auto-réparation, un écran affiché ne clôture rien, ticket signé par le bon utilisateur, session fermée sur une panne de connexion)', ['tests/invariants.js'], { timeout: 900, expect: /^OK/m });
 t('Moteur', 'hints-commands (les commandes citées dans les indices et solutions existent dans le simulateur)', ['tests/hints-commands.js'], { expect: /^OK/m });
 t('Moteur', 'calendar (dates et heures du jeu : toutes les pannes se comportent pareil à une autre date)', ['tests/calendar.js'], { timeout: 900, expect: /^OK/m });
+t('Moteur', 'events (événements en partie : fréquence, panne ajoutée obligatoire et réparable, QCM du téléphone, échéance du responsable)', ['tests/events.js'], { timeout: 900, expect: /^OK/m });
 t('Moteur', 'dns-cache-ttl (cache DNS client : TTL de l’enregistrement ; dns_cache ne se répare plus tout seul)', ['tests/dns-cache-ttl.js'], { expect: /^OK/m });
 t('Moteur', 'unproven-timed (panne irréparable retirée de tous les tirages ; pannes proxy revenues en chronométré ; liste vidée → revient)', ['tests/unproven-timed.js'], { expect: /^OK/m });
 t('Moteur', 'codes-audit (D-106 : registre des codes d’erreur, masquage, audit statique + exécution, neutralisation)', ['tests/codes-audit.js'], { expect: /^OK/m });
@@ -81,6 +82,7 @@ t('Interface', 'hosts-edit (fichier hosts depuis une session standard : notepad 
 t('Interface', 'mmc-nav (double-clic sur un dossier du volet central d’une console MMC ; pool DHCP et propriétés de l’étendue)', ['tests/ui/mmc-nav.js'], { expect: /tout passe/ });
 t('Interface', 'verify-strict (clôture prouvée par le test qui échouait : écran affiché ≠ preuve ; favoris Intranet / Google du navigateur)', ['tests/ui/verify-strict.js'], { expect: /tout passe/ });
 t('Interface', 'resume (ticket interrompu par un rechargement : reprise proposée, chronomètre conservé)', ['tests/ui/resume.js'], { expect: /tout passe/ });
+t('Interface', 'events-ui (panneau Messages, téléphone et QCM, deuxième ticket, collègue, responsable)', ['tests/ui/events.js'], { expect: /tout passe/ });
 t('Interface', 'bugreport (bouton « Bug ? » : rapport copiable, cause non affichée, données décodables)', ['tests/ui/bugreport.js'], { expect: /tout passe/ });
 t('Interface', 'sweep (toutes les pannes × 2 graines, 3 modes)', ['tests/ui/sweep.js'], { timeout: 1200, expect: /pannes × 2 graines/ });
 t('Réparation graphique', 'gui-sweep-neutral (neutralisation : recette non jouée → le balayage graphique vire au rouge)', ['tests/ui/gui-sweep-neutral.js'], { timeout: 600, expect: /0 échec/ });
@@ -125,22 +127,32 @@ const b = spawnSync('node', ['build.js'], { cwd: ROOT, encoding: 'utf8' });
 if (b.status !== 0) { console.error(b.stdout + b.stderr); process.exit(2); }
 console.log((b.stdout || '').trim().split('\n').pop());
 const res = []; const t0 = Date.now();
-sel.forEach((x, i) => {
-  const s0 = Date.now();
-  const r = spawnSync('node', x.args, { cwd: ROOT, encoding: 'utf8', timeout: x.timeout * 1000, maxBuffer: 64 << 20 });
-  const out = (r.stdout || '') + (r.stderr || '');
+/* --jobs=N : N tests à la fois (défaut 1). Un test qui échoue pendant un passage en parallèle est rejoué seul à la fin :
+   la charge de la machine ne doit pas faire échouer un test d'interface sensible au temps. */
+const JOBS = Math.max(1, +((process.argv.find(a => a.startsWith('--jobs=')) || '').slice(7)) || 1);
+const judge = (x, r, out, sec) => {
   const why = [];
-  if (r.error && r.error.code === 'ETIMEDOUT') why.push('délai dépassé (' + x.timeout + ' s)');
+  if (r.timedOut) why.push('délai dépassé (' + x.timeout + ' s)');
   else if (r.status !== 0) why.push('code retour ' + r.status);
   const lines = out.split('\n').filter(l => BAD.test(l) || (!x.allowBad && /^CONSOLE /.test(l)));
   const real = lines.filter(l => !(x.allowBad && x.allowBad.test(l)));
   if (real.length) why.push('marqueur d’erreur : ' + real[0].trim().slice(0, 140));
   if (x.expect && !x.expect.test(out)) why.push('sortie attendue absente : ' + x.expect);
-  const ok = why.length === 0; const sec = ((Date.now() - s0) / 1000).toFixed(1);
-  res.push({ x, ok, why, sec });
-  console.log(((i + 1) + '/' + sel.length).padStart(7) + '  ' + (ok ? 'OK  ' : 'ÉCHEC') + '  ' + x.group + ' · ' + x.name + '  (' + sec + ' s)' + (ok ? '' : '\n         → ' + why.join(' ; ')));
-  if (!ok) fs.writeFileSync(path.join(ROOT, 'tests', '.echec-' + x.name.replace(/[^a-z0-9]+/gi, '_') + '.log'), out);
+  return { x, ok: why.length === 0, why, sec, out };
+};
+const runOne = (x, slow) => new Promise(resolve => {
+  const s0 = Date.now(); let out = ''; let timedOut = false; const c = require('child_process').spawn('node', x.args, { cwd: ROOT });
+  const to = setTimeout(() => { timedOut = true; c.kill('SIGKILL'); }, x.timeout * 1000 * (slow ? 2 : 1));
+  c.stdout.on('data', d => { out += d; }); c.stderr.on('data', d => { out += d; });
+  c.on('close', code => { clearTimeout(to); resolve(judge(x, { status: code, timedOut }, out, ((Date.now() - s0) / 1000).toFixed(1))); });
 });
+const report = (r, i, note) => { console.log(((i + 1) + '/' + sel.length).padStart(7) + '  ' + (r.ok ? 'OK  ' : 'ÉCHEC') + '  ' + r.x.group + ' · ' + r.x.name + '  (' + r.sec + ' s)' + (note || '') + (r.ok ? '' : '\n         → ' + r.why.join(' ; '))); };
+(async () => {
+  const slots = new Array(sel.length); let next = 0, done = 0;
+  const worker = async () => { while (next < sel.length) { const i = next++; const r = await runOne(sel[i], JOBS > 1); slots[i] = r; done++; if (r.ok || JOBS === 1) report(r, i); else console.log(((i + 1) + '/' + sel.length).padStart(7) + '  à rejouer seul  ' + r.x.group + ' · ' + r.x.name); } };
+  await Promise.all(Array.from({ length: JOBS }, worker));
+  if (JOBS > 1) for (let i = 0; i < slots.length; i++) if (!slots[i].ok) { slots[i] = await runOne(sel[i], false); report(slots[i], i, '  [rejoué seul]'); }
+  slots.forEach(r => { res.push(r); if (!r.ok) fs.writeFileSync(path.join(ROOT, 'tests', '.echec-' + r.x.name.replace(/[^a-z0-9]+/gi, '_') + '.log'), r.out); });
 
 /* --- rapport --- */
 const nOK = res.filter(r => r.ok).length, nKO = res.length - nOK, dur = ((Date.now() - t0) / 1000).toFixed(0);
@@ -156,3 +168,4 @@ md += '\n## Ce que la batterie ne couvre pas\n\n- Le test « singe » est aléat
 if (!FAST && !ONLY) fs.writeFileSync(path.join(ROOT, 'docs', 'RAPPORT-TESTS.md'), md);   /* un passage partiel n'écrase pas le rapport de référence */
 console.log('\n' + nOK + '/' + res.length + ' OK' + (nKO ? ' — ' + nKO + ' ÉCHEC(S)' : '') + ' en ' + dur + ' s' + (FAST || ONLY ? '' : ' → docs/RAPPORT-TESTS.md'));
 process.exit(nKO ? 1 : 0);
+})();
