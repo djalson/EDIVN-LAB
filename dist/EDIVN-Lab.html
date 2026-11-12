@@ -251,6 +251,7 @@ code { font-family: var(--mono); background: #0c131d; padding: 1px 5px; border-r
 .lvempty { padding: 14px; color: #666; text-align: center; } .lvr.dim { color: #888; } .lvr.err .lvd { color: #b00020; }
 .tv { background: #fff; overflow: auto; height: 100%; outline: 0; }
 .tvr { display: flex; align-items: center; gap: 4px; padding: 2px 4px; white-space: nowrap; border: 1px solid transparent; } .tvr:hover { background: #e5f3ff; } .tvr.sel { background: #cce8ff; border-color: #99d1ff; }
+.tvr > * { flex-shrink: 0; } /* un libellé trop long ne doit pas tasser la flèche ni l'icône (décalage d'alignement dans l'arbre) */
 .tvx { width: 12px; color: #555; font-size: 10px; text-align: center; } .tvx.none { visibility: hidden; }
 .tabs10 { display: flex; flex-direction: column; flex: 1; min-height: 0; } .tstrip { display: flex; padding-left: 2px; } .ttab { padding: 4px 10px; border: 1px solid #d9d9d9; border-bottom: 0; background: #f0f0f0; margin-right: -1px; cursor: default; position: relative; top: 1px; } .ttab.on { background: #fff; top: 1px; z-index: 2; padding-top: 5px; margin-top: -2px; }
 .tpane { flex: 1; background: #fff; border: 1px solid #d9d9d9; padding: 10px; overflow: auto; min-height: 0; }
@@ -6706,7 +6707,7 @@ Mission.prototype.hint = function (partIdx) {
 Mission.prototype.close = function () {
   if (this.state !== 'running') return { already: true };
   const st = this.check(); if (this.state !== 'running') return { ok: true, result: this.result };
-  if (st.status === 'workaround') { this.falseRes++; this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture sur un contournement', cls: 'false-close' }); return { ok: false, why: 'workaround', message: 'Le service remarche pour l’utilisateur mais la cause racine n’est pas corrigée : la panne reviendra. Le ticket est rouvert.' }; }
+  if (st.status === 'workaround') { this.falseRes++; this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture sur un contournement', cls: 'false-close' }); const wn = this.parts.filter(p => p.rt && p.rt.status === 'workaround' && p.workaroundNote).map(p => p.workaroundNote); return { ok: false, why: 'workaround', message: 'Le service remarche pour l’utilisateur mais la cause racine n’est pas corrigée' + (wn.length ? '. ' + wn.join(' ') + ' Le ticket est rouvert.' : ' : la panne reviendra. Le ticket est rouvert.') }; }
   /* panne « silencieuse » (D-93) : la clôture sur un test qui réussit est refusée ; la panne dit POURQUOI (champ closeNote), sans nommer la cause ni la commande */
   const notes = this.parts.filter(p => p.rt && p.rt.status !== 'resolved' && p.closeNote).map(p => p.closeNote);
   this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture prématurée', cls: 'wrong-close', note: notes.length ? notes.join(' ') : undefined });
@@ -9072,11 +9073,12 @@ add({ id: 'dhcp_gw_bad', v1: 'dhcp_gw_bad', level: 2, title: 'Passerelle distrib
   roots: [{ path: SCOPE + '.options.3', eq: '10.10.20.1' }],
   fix: [{ do: 'set', path: SCOPE + '.options.3', value: '10.10.20.1' }, { do: 'renew', dev: '{{c.host}}' }],
   workarounds: { ip_statique: staticWA('{{c.host}}') },
+  workaroundNote: 'La passerelle dépend du sous-réseau : elle se règle dans les options de l’étendue. Une option de serveur s’appliquerait à toutes les étendues (une étendue d’un autre réseau recevrait une passerelle fausse) et une adresse fixe sur le poste ne règle rien pour les autres postes.',
   traps: ['Corriger la passerelle dans la carte réseau du poste est écrasé au prochain renouvellement du bail.'],
   optimal: ['ipconfig /all : passerelle étrange', 'Console DHCP : options d’étendue', 'Corriger 003', 'ipconfig /renew'] });
 
 add({ id: 'dhcp_gw_empty', v1: 'dhcp_gw_empty', level: 2, title: 'Option routeur (003) absente de l’étendue', skills: ['dhcp', 'diag'],
-  ticket: tk('Bruno Durand (les RH)', 'Plus d’accès aux serveurs depuis mon poste', 'Bonjour, mon poste a bien une adresse mais n’atteint plus les serveurs ni Internet, alors que mon voisin (qui n’a pas redémarré) y arrive encore.'),
+  ticket: tk('Alice Martin (la comptabilité)', 'Plus d’accès aux serveurs depuis mon poste', 'Bonjour, mon poste a bien une adresse mais n’atteint plus les serveurs ni Internet, alors que mon voisin (qui n’a pas redémarré) y arrive encore.'),
   cause: 'L’option 003 Routeur a été supprimée de l’étendue : les nouveaux baux n’ont plus de passerelle.',
   solution: 'Recréer l’option 003 = 10.10.20.1 dans l’étendue puis renouveler le bail.',
   hints: ['Le poste qui n’a pas redémarré marche encore : seul le renouvellement du bail pose problème.', 'Comparez ipconfig /all de deux postes : que manque-t-il au poste en panne ?', 'L’option 003 n’existe plus dans l’étendue : recréez-la.'],
@@ -9084,7 +9086,8 @@ add({ id: 'dhcp_gw_empty', v1: 'dhcp_gw_empty', level: 2, title: 'Option routeur
   probes: [{ t: 'ping', from: 'PC-01', to: '10.10.10.10' }, { t: 'ping', from: 'PC-01', to: '8.8.8.8' }],
   roots: [{ path: SCOPE + '.options.3', eq: '10.10.20.1' }],
   fix: [{ do: 'set', path: SCOPE + '.options.3', value: '10.10.20.1' }, { do: 'renew', dev: 'PC-01' }],
-  workarounds: { ip_statique: staticWA('PC-01') },
+  workarounds: { ip_statique: staticWA('PC-01'), option_serveur: [{ do: 'set', path: 'SRV-DC1.win.dhcp.serverOptions.3', value: '10.10.20.1' }, { do: 'renew', dev: 'PC-01' }] },
+  workaroundNote: 'La passerelle dépend du sous-réseau : elle se règle dans les options de l’étendue. Une option de serveur s’appliquerait à toutes les étendues (une étendue d’un autre réseau recevrait une passerelle fausse) et une adresse fixe sur le poste ne règle rien pour les autres postes.',
   traps: [], optimal: ['ipconfig /all : pas de passerelle', 'Console DHCP : options d’étendue', 'Recréer 003', 'ipconfig /renew'] });
 
 add({ id: 'dhcp_dns_opt', level: 2, title: 'Option DNS (006) distribuée erronée', skills: ['dhcp', 'dns', 'diag'],
@@ -20127,6 +20130,12 @@ w.mmc = function (spec) {
     status(t) { info.status.textContent = t || ''; }, refresh() { if (spec.onRefresh) spec.onRefresh(api); else if (spec.onSelect && tree.selected()) spec.onSelect(tree.selected(), api); }, setMid(el) { UI.clear(info.listHost); info.listHost.append(el); }
   };
   win = wm.open({ title: spec.title, icon: spec.icon, w: spec.w || 860, h: spec.h || 520, menu: spec.menu, className: 'mmc', minW: 520, minH: 300, onClose: spec.onClose, body: () => h('div.mmcwrap', tools, main, h('div.mmcstw', info.status)) });
+  /* double-clic dans le volet central sur un élément qui est aussi un dossier de l'arbre (« Pool d'adresses », une OU, une zone…) : on l'ouvre, comme la vraie MMC */
+  info.listHost.addEventListener('dblclick', e => {
+    const row = e.target.closest && e.target.closest('.lvr'); const cur = tree.selected(); if (!row || !cur) return;
+    const txt = ((row.querySelector('.lvd') || row).textContent || '').trim(); const kids = (typeof cur.children === 'function' ? cur.children() : cur.children) || [];
+    const k = kids.find(c => String(c.label).trim() === txt); if (k) { tree.expand(cur.key); tree.select(k.key, true); }
+  });
   api.win = win; win.mmc = api;
   if (spec.select) tree.select(spec.select, true); else if (spec.roots && spec.roots[0]) tree.select(spec.roots[0].key, true);
   return win;

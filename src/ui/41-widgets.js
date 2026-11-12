@@ -191,6 +191,12 @@ w.mmc = function (spec) {
     status(t) { info.status.textContent = t || ''; }, refresh() { if (spec.onRefresh) spec.onRefresh(api); else if (spec.onSelect && tree.selected()) spec.onSelect(tree.selected(), api); }, setMid(el) { UI.clear(info.listHost); info.listHost.append(el); }
   };
   win = wm.open({ title: spec.title, icon: spec.icon, w: spec.w || 860, h: spec.h || 520, menu: spec.menu, className: 'mmc', minW: 520, minH: 300, onClose: spec.onClose, body: () => h('div.mmcwrap', tools, main, h('div.mmcstw', info.status)) });
+  /* double-clic dans le volet central sur un élément qui est aussi un dossier de l'arbre (« Pool d'adresses », une OU, une zone…) : on l'ouvre, comme la vraie MMC */
+  info.listHost.addEventListener('dblclick', e => {
+    const row = e.target.closest && e.target.closest('.lvr'); const cur = tree.selected(); if (!row || !cur) return;
+    const txt = ((row.querySelector('.lvd') || row).textContent || '').trim(); const kids = (typeof cur.children === 'function' ? cur.children() : cur.children) || [];
+    const k = kids.find(c => String(c.label).trim() === txt); if (k) { tree.expand(cur.key); tree.select(k.key, true); }
+  });
   api.win = win; win.mmc = api;
   if (spec.select) tree.select(spec.select, true); else if (spec.roots && spec.roots[0]) tree.select(spec.roots[0].key, true);
   return win;

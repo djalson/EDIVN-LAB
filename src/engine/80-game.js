@@ -260,7 +260,7 @@ Mission.prototype.hint = function (partIdx) {
 Mission.prototype.close = function () {
   if (this.state !== 'running') return { already: true };
   const st = this.check(); if (this.state !== 'running') return { ok: true, result: this.result };
-  if (st.status === 'workaround') { this.falseRes++; this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture sur un contournement', cls: 'false-close' }); return { ok: false, why: 'workaround', message: 'Le service remarche pour l’utilisateur mais la cause racine n’est pas corrigée : la panne reviendra. Le ticket est rouvert.' }; }
+  if (st.status === 'workaround') { this.falseRes++; this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture sur un contournement', cls: 'false-close' }); const wn = this.parts.filter(p => p.rt && p.rt.status === 'workaround' && p.workaroundNote).map(p => p.workaroundNote); return { ok: false, why: 'workaround', message: 'Le service remarche pour l’utilisateur mais la cause racine n’est pas corrigée' + (wn.length ? '. ' + wn.join(' ') + ' Le ticket est rouvert.' : ' : la panne reviendra. Le ticket est rouvert.') }; }
   /* panne « silencieuse » (D-93) : la clôture sur un test qui réussit est refusée ; la panne dit POURQUOI (champ closeNote), sans nommer la cause ni la commande */
   const notes = this.parts.filter(p => p.rt && p.rt.status !== 'resolved' && p.closeNote).map(p => p.closeNote);
   this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture prématurée', cls: 'wrong-close', note: notes.length ? notes.join(' ') : undefined });

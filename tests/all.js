@@ -17,7 +17,7 @@ const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 /* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
 const FAST = process.argv.includes('--fast');
-const FASTSET = /^(assert-world|dns-cache-ttl|hosts-edit|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
+const FASTSET = /^(assert-world|dns-cache-ttl|hosts-edit|mmc-nav|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -75,6 +75,7 @@ t('Émulateurs', 'sql-cli (console MariaDB : comptes, GRANT, réparation de lx_d
 t('Interface', 'smoke-all', ['tests/ui/smoke-all.js'], { timeout: 600 });
 t('Interface', 'regress-ui (modale au-dessus du bureau)', ['tests/ui/regress.js']);
 t('Interface', 'hosts-edit (fichier hosts depuis une session standard : notepad <chemin> en console admin, explorateur, Exécuter en tant qu’administrateur)', ['tests/ui/hosts-edit.js'], { expect: /tout passe/ });
+t('Interface', 'mmc-nav (double-clic sur un dossier du volet central d’une console MMC ; pool DHCP et propriétés de l’étendue)', ['tests/ui/mmc-nav.js'], { expect: /tout passe/ });
 t('Interface', 'sweep (toutes les pannes × 2 graines, 3 modes)', ['tests/ui/sweep.js'], { timeout: 1200, expect: /pannes × 2 graines/ });
 t('Réparation graphique', 'gui-sweep-neutral (neutralisation : recette non jouée → le balayage graphique vire au rouge)', ['tests/ui/gui-sweep-neutral.js'], { timeout: 600, expect: /0 échec/ });
 t('Réparation graphique', 'gestion-app (D-103 : application de gestion de SRV-FIC, un parcours par cause + neutralisation)', ['tests/ui/gestion-app.js'], { timeout: 900, expect: /0 échec/ });

@@ -274,11 +274,12 @@ add({ id: 'dhcp_gw_bad', v1: 'dhcp_gw_bad', level: 2, title: 'Passerelle distrib
   roots: [{ path: SCOPE + '.options.3', eq: '10.10.20.1' }],
   fix: [{ do: 'set', path: SCOPE + '.options.3', value: '10.10.20.1' }, { do: 'renew', dev: '{{c.host}}' }],
   workarounds: { ip_statique: staticWA('{{c.host}}') },
+  workaroundNote: 'La passerelle dépend du sous-réseau : elle se règle dans les options de l’étendue. Une option de serveur s’appliquerait à toutes les étendues (une étendue d’un autre réseau recevrait une passerelle fausse) et une adresse fixe sur le poste ne règle rien pour les autres postes.',
   traps: ['Corriger la passerelle dans la carte réseau du poste est écrasé au prochain renouvellement du bail.'],
   optimal: ['ipconfig /all : passerelle étrange', 'Console DHCP : options d’étendue', 'Corriger 003', 'ipconfig /renew'] });
 
 add({ id: 'dhcp_gw_empty', v1: 'dhcp_gw_empty', level: 2, title: 'Option routeur (003) absente de l’étendue', skills: ['dhcp', 'diag'],
-  ticket: tk('Bruno Durand (les RH)', 'Plus d’accès aux serveurs depuis mon poste', 'Bonjour, mon poste a bien une adresse mais n’atteint plus les serveurs ni Internet, alors que mon voisin (qui n’a pas redémarré) y arrive encore.'),
+  ticket: tk('Alice Martin (la comptabilité)', 'Plus d’accès aux serveurs depuis mon poste', 'Bonjour, mon poste a bien une adresse mais n’atteint plus les serveurs ni Internet, alors que mon voisin (qui n’a pas redémarré) y arrive encore.'),
   cause: 'L’option 003 Routeur a été supprimée de l’étendue : les nouveaux baux n’ont plus de passerelle.',
   solution: 'Recréer l’option 003 = 10.10.20.1 dans l’étendue puis renouveler le bail.',
   hints: ['Le poste qui n’a pas redémarré marche encore : seul le renouvellement du bail pose problème.', 'Comparez ipconfig /all de deux postes : que manque-t-il au poste en panne ?', 'L’option 003 n’existe plus dans l’étendue : recréez-la.'],
@@ -286,7 +287,8 @@ add({ id: 'dhcp_gw_empty', v1: 'dhcp_gw_empty', level: 2, title: 'Option routeur
   probes: [{ t: 'ping', from: 'PC-01', to: '10.10.10.10' }, { t: 'ping', from: 'PC-01', to: '8.8.8.8' }],
   roots: [{ path: SCOPE + '.options.3', eq: '10.10.20.1' }],
   fix: [{ do: 'set', path: SCOPE + '.options.3', value: '10.10.20.1' }, { do: 'renew', dev: 'PC-01' }],
-  workarounds: { ip_statique: staticWA('PC-01') },
+  workarounds: { ip_statique: staticWA('PC-01'), option_serveur: [{ do: 'set', path: 'SRV-DC1.win.dhcp.serverOptions.3', value: '10.10.20.1' }, { do: 'renew', dev: 'PC-01' }] },
+  workaroundNote: 'La passerelle dépend du sous-réseau : elle se règle dans les options de l’étendue. Une option de serveur s’appliquerait à toutes les étendues (une étendue d’un autre réseau recevrait une passerelle fausse) et une adresse fixe sur le poste ne règle rien pour les autres postes.',
   traps: [], optimal: ['ipconfig /all : pas de passerelle', 'Console DHCP : options d’étendue', 'Recréer 003', 'ipconfig /renew'] });
 
 add({ id: 'dhcp_dns_opt', level: 2, title: 'Option DNS (006) distribuée erronée', skills: ['dhcp', 'dns', 'diag'],
