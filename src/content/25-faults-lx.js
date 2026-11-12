@@ -322,13 +322,13 @@ add({ id: 'lx_web_perm', level: 3, title: 'Apache : 403 Forbidden à cause des d
   ticket: tk('Alice Martin (la comptabilité)', 'L’intranet affiche « Forbidden »', 'Bonjour, depuis ce matin l’intranet affiche « Forbidden — You don’t have permission to access this resource ». Rien n’a changé côté Apache selon Admin TSSR, mais quelqu’un a travaillé dans les fichiers du site.'),
   cause: 'Apache fonctionne et sa configuration est bonne, mais {{m.label}}.',
   solution: 'Rétablir les droits (755 sur les dossiers, 644 sur les fichiers, lisibles par www-data) ou restaurer le fichier d’index, sans passer en 777.',
-  hints: ['Un 403 avec une configuration saine pointe vers les droits du système de fichiers.', 'Lisez l’erreur dans intranet_error.log, puis ls -l et namei -l /var/www/intranet/index.html (ou testez en tant que www-data).', 'Corrigez le mode ou restaurez le fichier. Évitez chmod -R 777.'],
+  hints: ['Un 403 avec une configuration saine pointe vers les droits du système de fichiers.', 'Lisez l’erreur dans intranet_error.log, puis ls -l /var/www/intranet/index.html et ls -ld sur chaque dossier du chemin (ou testez en tant que www-data).', 'Corrigez le mode ou restaurez le fichier. Évitez chmod -R 777.'],
   inject: '{{m.inj}}',
   probes: [HTTP_INTRA],
   roots: [{ probe: { t: 'lxaccess', dev: LNX, user: 'www-data', path: '/var/www/intranet/index.html', mode: 'r' } }],
   fix: '{{m.fix}}',
   traps: ['chmod -R 777 /var/www règle le symptôme en rendant le site modifiable par tous : fausse résolution dangereuse.'],
-  optimal: ['Noter le 403', 'Lire le journal d’erreurs', 'namei -l / ls -l', 'Corriger les droits', 'Retester'] });
+  optimal: ['Noter le 403', 'Lire le journal d’erreurs', 'ls -l du fichier, ls -ld des dossiers du chemin', 'Corriger les droits', 'Retester'] });
 
 add({ id: 'lx_nginx', level: 3, title: 'nginx : site vitrine HTTPS en panne', skills: ['nginx', 'lx-services', 'diag'],
   vary: { m: [

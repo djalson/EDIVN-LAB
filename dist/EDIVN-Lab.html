@@ -340,6 +340,8 @@ code { font-family: var(--mono); background: #0c131d; padding: 1px 5px; border-r
 .desk .btab{display:flex;align-items:center;gap:6px;background:#fff;padding:6px 14px;border-radius:8px 8px 0 0;font-size:12px;max-width:240px;overflow:hidden;white-space:nowrap}
 .desk .bbar{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid #dadce0;background:#fff}
 .desk .bbar .tb{border:none;background:transparent;width:28px;height:28px;border-radius:50%;cursor:default;font-size:14px}
+.desk .bfavs{display:flex;gap:2px;padding:3px 8px;border-bottom:1px solid #dadce0;background:#fff}
+.desk .bfav{display:flex;align-items:center;gap:5px;border:none;background:transparent;padding:3px 8px;border-radius:4px;font-size:12px;color:#202124;cursor:default}.desk .bfav:hover{background:#e8eaed}
 .desk .bbar .tb:hover:not(:disabled){background:#e8eaed}.desk .bbar .tb:disabled{opacity:.35}
 .desk .baddr{flex:1;border-radius:16px;padding:5px 14px;background:#f1f3f4;border:1px solid transparent}
 .desk .bcontent{flex:1;overflow:auto;background:#fff}
@@ -1218,6 +1220,10 @@ html[data-map=night] .node .nm, html[data-map=night] .node .sub { background: #0
 .gfold .pgoalbox { border: none; margin: 0; padding: 0 10px 8px; }
 .gfold .pgoalh { display: none; }
 .v3ui .hintscard.empty { display: none; }
+
+/* « Signaler un bug » : bouton discret de la barre de partie et zone de remarque */
+.gbug { opacity: .75; } .gbug:hover { opacity: 1; }
+.brbox p { margin: 0 0 10px; } .brta { width: 100%; box-sizing: border-box; min-height: 84px; resize: vertical; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line, #3a2a7a); background: rgba(0, 0, 0, .25); color: inherit; font: inherit; margin-bottom: 10px; }
 
 </style>
 </head>
@@ -5555,12 +5561,19 @@ F.rootsCount = function (W, inst, base) { const rs = inst.roots || []; return { 
 /* États : active → fixed (sondes OK, racine réparée, vérification manquante) → resolved ;
    workaround = sondes OK mais racine non réparée (contournement). */
 F.OBS_TYPES = ['ping', 'connect', 'resolve', 'http', 'ipconfig', 'share', 'login', 'ssh', 'vpn', 'use'];
+F.VERIFY_BY_PROBE = {
+  http: ['http', 'connect'], share: ['share'], login: ['login'],
+  ping: ['ping', 'connect', 'http', 'share', 'ssh'], connect: ['connect', 'http', 'share', 'ssh'], resolve: ['resolve', 'ping', 'connect', 'http', 'share']
+};
 F.defaultVerify = function (inst) {
   const pats = new Set();
   for (const p of inst.probes) {
     const h = p.from || p.host || p.client;
-    if (h) F.OBS_TYPES.forEach(t => pats.add(t + ':' + h + ':*'));
-    if (!h && p.dev) F.OBS_TYPES.forEach(t => pats.add(t + ':*:' + p.dev + '*'));
+    /* le test qui prouve la réparation doit ressembler à celui qui échouait : un site se vérifie dans le navigateur (ou en se connectant au port),
+       un partage en l'ouvrant, une session en l'ouvrant. Allumer l'écran du poste (« use ») ne prouve rien, sauf pour une panne d'écran (verify explicite). */
+    const types = F.VERIFY_BY_PROBE[p.t] || F.OBS_TYPES.filter(t => t !== 'use');
+    if (h) types.forEach(t => pats.add(t + ':' + h + ':*'));
+    if (!h && p.dev) types.forEach(t => pats.add(t + ':*:' + p.dev + '*'));
   }
   return [...pats];
 };
@@ -6242,8 +6255,8 @@ F.assembleBundle = function (seed, insts, mode) {
   const uniq = a => a.filter((x, i) => a.indexOf(x) === i);
   const sites = uniq(insts.map(i => i.ticket.site));
   /* Chaque message d'origine commence par sa propre formule de politesse : on la retire pour que le ticket composé se lise comme un seul message. */
-  const clean = t => { const x = t.replace(/\n+/g, ' ').replace(/^\s*(bonjour|bonsoir|salut)\s*[,!.]?\s*/i, '').trim(); return x.charAt(0).toUpperCase() + x.slice(1); };
-  const body = 'Bonjour, plusieurs problèmes en même temps, je ne sais pas s’ils sont liés :\n' + insts.map((i, k) => (k + 1) + ') ' + clean(i.ticket.body)).join('\n') + '\nMerci de regarder dès que possible.';
+  const clean = t => { const x = t.replace(/\n+/g, ' ').replace(/^\s*(bonjour|bonsoir|salut)\s*[,!.]?\s*/i, '').trim(); return /^(https?:|\\\\|\/)/i.test(x) ? x : x.charAt(0).toUpperCase() + x.slice(1); };   /* une adresse (http://, \\\\srv, /srv) garde sa casse */
+  const body = 'Bonjour, plusieurs problèmes en même temps, je ne sais pas s’ils sont liés :\n' + insts.map((i, k) => (k + 1) + ') ' + (i.ticket.from && i.ticket.from !== insts[0].ticket.from ? 'Signalé par ' + i.ticket.from + ' : ' : '') + clean(i.ticket.body)).join('\n') + '\nMerci de regarder dès que possible.';
   return {
     id: 'combo-' + seed, level: 5, bundle: true, mode, parts: insts, partIds: insts.map(i => i.id),
     title: insts.length + ' pannes dans un seul ticket',
@@ -6623,6 +6636,14 @@ function Mission(o) {
   this.trace = []; this.hintsUsed = 0; this.hintLog = []; this.dangers = []; this.wrongCloses = 0; this.falseRes = 0; this.impacts = []; this.refunded = []; this.aids = []; this.fx = []; this._blk = this._blockedNow();
   this.state = 'running'; this.result = null; this.resolvedAtSec = null; this.firstFixedAtSec = null; this.endSec = null;
   this.parts.forEach(p => F.runSteps(this.W, p.inject, { inst: p }));
+  /* Panne « je ne peux plus ouvrir ma session » : l'utilisateur est devant l'écran de connexion, pas déjà connecté.
+     Sans cela, le poste s'ouvrait sur sa session encore active et le message d'erreur n'apparaissait jamais. */
+  this.parts.forEach(p => (p.probes || []).forEach(pr => {
+    if (pr.t !== 'login' || !pr.host || !pr.user) return; const host = this.W.dev[pr.host]; const ss = host && host._rt && host._rt.session;
+    if (!ss || String(ss.user).toLowerCase() !== String(pr.user).toLowerCase()) return;
+    let r; try { r = SIM.probes.login(this.W, pr, p); } catch (e) { r = { ok: true }; }
+    if (!r.ok) SIM.ad.sessionEnd(this.W, pr.host);
+  }));
   this.prevSem = this.W.sem(); this.simStart = this.W.clock.elapsed;
   this.prog = this._progress(); this.counters = { diagnostic: 0, change: 0, progress: 0, regress: 0, detour: 0 };
   this.okDanger = [].concat.apply([], this.parts.map(p => p.okDanger || []));
@@ -6707,7 +6728,8 @@ Mission.prototype.hint = function (partIdx) {
 Mission.prototype.close = function () {
   if (this.state !== 'running') return { already: true };
   const st = this.check(); if (this.state !== 'running') return { ok: true, result: this.result };
-  if (st.status === 'workaround') { this.falseRes++; this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture sur un contournement', cls: 'false-close' }); const wn = this.parts.filter(p => p.rt && p.rt.status === 'workaround' && p.workaroundNote).map(p => p.workaroundNote); return { ok: false, why: 'workaround', message: 'Le service remarche pour l’utilisateur mais la cause racine n’est pas corrigée' + (wn.length ? '. ' + wn.join(' ') + ' Le ticket est rouvert.' : ' : la panne reviendra. Le ticket est rouvert.') }; }
+  if (st.status === 'workaround') { this.falseRes++; this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture sur un contournement', cls: 'false-close' }); /* explication : la note propre à la panne, sinon ses pièges déclarés (ils décrivent justement les fausses bonnes idées) */
+    const wn = this.parts.filter(p => p.rt && p.rt.status === 'workaround').map(p => p.workaroundNote || (p.traps || []).slice(0, 2).join(' ')).filter(Boolean); return { ok: false, why: 'workaround', message: 'Le service remarche pour l’utilisateur, mais tu as contourné la cause au lieu de la corriger' + (wn.length ? '. ' + wn.join(' ') + ' Le ticket est rouvert.' : ' : la panne reviendra. Le ticket est rouvert.') }; }
   /* panne « silencieuse » (D-93) : la clôture sur un test qui réussit est refusée ; la panne dit POURQUOI (champ closeNote), sans nommer la cause ni la commande */
   const notes = this.parts.filter(p => p.rt && p.rt.status !== 'resolved' && p.closeNote).map(p => p.closeNote);
   this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture prématurée', cls: 'wrong-close', note: notes.length ? notes.join(' ') : undefined });
@@ -7838,6 +7860,8 @@ WB.buildNet = function (W) {
     },
     pub: {
       '8.8.8.8': { name: 'dns.google', svc: ['udp/53', 'tcp/53'] },
+      /* autres résolveurs publics qu'un technicien met spontanément en redirecteur ou pour tester */
+      '1.1.1.1': { name: 'one.one.one.one', svc: ['udp/53', 'tcp/53'] }, '9.9.9.9': { name: 'dns.quad9.net', svc: ['udp/53', 'tcp/53'] },
       '93.184.216.34': { name: 'www.exemple.fr', svc: ['tcp/80', 'tcp/443'] },
       '142.250.74.227': { name: 'www.google.fr', svc: ['tcp/80', 'tcp/443'] },
       '185.15.59.224': { name: 'wikipedia.org', svc: ['tcp/80', 'tcp/443'], pages: { '*': { title: 'Encyclopédie', html: '<h1>Encyclopédie libre</h1><p>Page d’accueil fictive.</p>' } } },
@@ -8204,14 +8228,19 @@ WB.adToulouse = function () {
       { sam: 'b.durand', name: 'Bruno Durand', ou: 'OU=RH,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Ress0urces!', pwdSetDays: 10 },
       { sam: 'c.lefevre', name: 'Claire Lefèvre', ou: 'OU=Direction,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Direct1on#', pwdSetDays: 50 },
       { sam: 'd.moreau', name: 'David Moreau', ou: 'OU=Compta,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Moreau@2026', pwdSetDays: 5 },
+      { sam: 'l.berger', name: 'Louison Berger', ou: 'OU=RH,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Berger#2026', pwdSetDays: 22 },
+      { sam: 'j.ribeiro', name: 'Jano Ribeiro', ou: 'OU=Compta,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Ribeiro#2026', pwdSetDays: 31 },
+      { sam: 'm.caron', name: 'Mathis Caron', ou: 'OU=RH,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Caron#2026', pwdSetDays: 14 },
+      { sam: 'j.lambert', name: 'Jenny Lambert', ou: 'OU=Compta,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Lambert#2026', pwdSetDays: 44 },
+      { sam: 'l.fontaine', name: 'Liam Fontaine', ou: 'OU=Direction,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Fontaine#2026', pwdSetDays: 8 },
       { sam: 'svc-backup', name: 'Compte de service sauvegarde', ou: 'CN=Users,' + dn(), enabled: true, pwd: 'Svc-B@ckup1', pwdNeverExpires: true, pwdSetDays: 300 }
     ],
     groups: [
       { name: 'Admins du domaine', scope: 'Global', ou: 'CN=Users,' + dn(), members: ['Administrateur', 'tssr'] },
       { name: 'Administrateurs', scope: 'DomainLocal', builtin: true, ou: 'CN=Builtin,' + dn(), members: ['Admins du domaine', 'Administrateur'] },
-      { name: 'GG_Compta', scope: 'Global', ou: dn('Groupes'), members: ['a.martin', 'd.moreau'] },
-      { name: 'GG_RH', scope: 'Global', ou: dn('Groupes'), members: ['b.durand'] },
-      { name: 'GG_Direction', scope: 'Global', ou: dn('Groupes'), members: ['c.lefevre'] },
+      { name: 'GG_Compta', scope: 'Global', ou: dn('Groupes'), members: ['a.martin', 'd.moreau', 'j.ribeiro', 'j.lambert'] },
+      { name: 'GG_RH', scope: 'Global', ou: dn('Groupes'), members: ['b.durand', 'l.berger', 'm.caron'] },
+      { name: 'GG_Direction', scope: 'Global', ou: dn('Groupes'), members: ['c.lefevre', 'l.fontaine'] },
       { name: 'GG_IT', scope: 'Global', ou: dn('Groupes'), members: ['tssr'] },
       { name: 'DL_Compta_RW', scope: 'DomainLocal', ou: dn('Groupes'), members: ['GG_Compta'] },
       { name: 'DL_RH_RW', scope: 'DomainLocal', ou: dn('Groupes'), members: ['GG_RH'] },
@@ -8340,7 +8369,7 @@ WB.buildWin = function (W) {
 
   /* ===== SRV-FIC : fichiers + IIS (Toulouse) ===== */
   const fic = WB.winServer('SRV-FIC', { ip: '10.10.10.20', gw: '10.10.10.1', dns: ['10.10.10.10'], domain: 'toulouse.local', suffix: 'toulouse.local', roles: ['web', 'rdp'], rdp: true,
-    svc: { W3SVC: [R, 'auto'], WAS: [R, 'manual'], TermService: [R, 'auto'], LanmanServer: [R, 'auto'], Dhcp: [S, 'manual'] } });
+    svc: { W3SVC: [R, 'auto'], WAS: [R, 'manual'], TermService: [R, 'auto'], LanmanServer: [R, 'auto'], Dhcp: [R, 'auto'] } });
   const fd = WB.fileServerData();
   fic.win.certs = [{ cn: 'srv-fic.toulouse.local', san: ['srv-fic.toulouse.local', 'srv-fic'], issuer: 'CA-FormaTech', notBefore: '2026-03-01', notAfter: '2028-03-01' }, { cn: 'portail.toulouse.local', san: ['portail.toulouse.local'], issuer: 'CA-FormaTech', notBefore: '2026-03-01', notAfter: '2028-03-01' }];
   fic.win.fw.rules.push(rule('Portail intranet (TCP 8080)', { id: 'http-8080', proto: 'TCP', lport: '8080', group: '' }));
@@ -8663,7 +8692,7 @@ ps('Réseau (client)', {
   'Register-DnsClient': ['Réenregistre les adresses du poste dans le DNS', 'Register-DnsClient'], 'Test-NetConnection': ['Teste un hôte et un port TCP (-Port) : ping + connexion', 'Test-NetConnection 10.10.10.20 -Port 445'], 'Test-Connection': ['Envoie des requêtes ICMP (équivalent ping)', 'Test-Connection 10.10.10.10'],
   'Resolve-DnsName': ['Résout un nom DNS (-Type : A, PTR, SRV…)', 'Resolve-DnsName srv-fic.toulouse.local'], 'Invoke-WebRequest': ['Télécharge une page web', 'Invoke-WebRequest http://10.10.10.20'],
 });
-ps('Pare-feu', { 'Get-NetFirewallRule': ['Règles du pare-feu Windows', 'Get-NetFirewallRule'], 'Enable-NetFirewallRule': ['Active une règle', 'Enable-NetFirewallRule -DisplayName "*"'], 'Disable-NetFirewallRule': ['Désactive une règle', 'Disable-NetFirewallRule'], 'New-NetFirewallRule': ['Crée une règle', 'New-NetFirewallRule'], 'Get-NetFirewallProfile': ['État des profils (Domaine, Privé, Public)', 'Get-NetFirewallProfile'], 'Set-NetFirewallProfile': ['Active ou désactive un profil', 'Set-NetFirewallProfile -Profile Domain -Enabled True'] });
+ps('Pare-feu', { 'Get-NetConnectionProfile': ['Profil réseau de chaque carte (Domaine, Privé, Public) : il décide du profil de pare-feu appliqué', 'Get-NetConnectionProfile'], 'Get-NetFirewallRule': ['Règles du pare-feu Windows', 'Get-NetFirewallRule'], 'Enable-NetFirewallRule': ['Active une règle', 'Enable-NetFirewallRule -DisplayName "*"'], 'Disable-NetFirewallRule': ['Désactive une règle', 'Disable-NetFirewallRule'], 'New-NetFirewallRule': ['Crée une règle', 'New-NetFirewallRule'], 'Get-NetFirewallProfile': ['État des profils (Domaine, Privé, Public)', 'Get-NetFirewallProfile'], 'Set-NetFirewallProfile': ['Active ou désactive un profil', 'Set-NetFirewallProfile -Profile Domain -Enabled True'] });
 ps('Services et système', { 'Get-Service': ['Liste les services et leur état', 'Get-Service'], 'Start-Service': ['Démarre un service', 'Start-Service -Name DHCPServer'], 'Stop-Service': ['Arrête un service', 'Stop-Service -Name Spooler'], 'Restart-Service': ['Redémarre un service', 'Restart-Service -Name DNS'], 'Set-Service': ['Modifie le type de démarrage d’un service', 'Set-Service -Name DHCPServer -StartupType Automatic'],
   'Get-Process': ['Liste les processus', 'Get-Process'], 'Get-WinEvent': ['Lit les journaux d’événements (-LogName, -MaxEvents)', 'Get-WinEvent -LogName System -MaxEvents 10'], 'Get-EventLog': ['Lit un journal classique (System, Application…)', 'Get-EventLog -LogName System -Newest 10'], 'Restart-Computer': ['Redémarre la machine', 'Restart-Computer'], 'Get-Date': ['Date et heure', 'Get-Date'] });
 ps('Active Directory', { 'Get-ADUser': ['Affiche un compte utilisateur (-Properties * : tout)', 'Get-ADUser -Identity tssr -Properties *'], 'Unlock-ADAccount': ['Déverrouille un compte', 'Unlock-ADAccount -Identity tssr'], 'Enable-ADAccount': ['Active un compte désactivé', 'Enable-ADAccount -Identity tssr'], 'Disable-ADAccount': ['Désactive un compte', 'Disable-ADAccount -Identity tssr'],
@@ -8717,7 +8746,18 @@ const KEY_TSSR = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJd4s5mUlA0xT8n1Qw7kYb2GfH
 SIM.CREDS = [
   { scope: 'Domaine toulouse.local', who: 'TOULOUSE\\Administrateur', secret: 'Adm!n2026', note: 'Administrateur du domaine' },
   { scope: 'Domaine toulouse.local', who: 'TOULOUSE\\tssr', secret: 'Tssr-2026!', note: 'Compte d’administration (Admins du domaine)' },
+  /* comptes des utilisateurs : pour reproduire un problème de connexion à la place de l'utilisateur (dans la vraie vie, c'est lui qui tape son mot de passe devant toi) */
+  { scope: 'Domaine toulouse.local', who: 'a.martin', secret: 'Compta#2026', note: 'Utilisatrice : Alice Martin, comptabilité (PC-01)' },
+  { scope: 'Domaine toulouse.local', who: 'b.durand', secret: 'Ress0urces!', note: 'Utilisateur : Bruno Durand, RH (PC-02)' },
+  { scope: 'Domaine toulouse.local', who: 'c.lefevre', secret: 'Direct1on#', note: 'Utilisatrice : Claire Lefèvre, direction' },
+  { scope: 'Domaine toulouse.local', who: 'd.moreau', secret: 'Moreau@2026', note: 'Utilisateur : David Moreau, comptabilité' },
   { scope: 'Domaine bordeaux.local', who: 'BORDEAUX\\Administrateur', secret: 'Adm!n-Bdx26', note: 'Administrateur du domaine de Bordeaux' },
+  { scope: 'Domaine toulouse.local', who: 'l.berger', secret: 'Berger#2026', note: 'Utilisatrice : Louison Berger, RH (poste partagé PC-02)' },
+  { scope: 'Domaine toulouse.local', who: 'j.ribeiro', secret: 'Ribeiro#2026', note: 'Utilisateur : Jano Ribeiro, comptabilité (poste partagé PC-01)' },
+  { scope: 'Domaine toulouse.local', who: 'm.caron', secret: 'Caron#2026', note: 'Utilisateur : Mathis Caron, RH (poste partagé PC-02)' },
+  { scope: 'Domaine toulouse.local', who: 'j.lambert', secret: 'Lambert#2026', note: 'Utilisatrice : Jenny Lambert, comptabilité (poste partagé PC-01)' },
+  { scope: 'Domaine toulouse.local', who: 'l.fontaine', secret: 'Fontaine#2026', note: 'Utilisateur : Liam Fontaine, direction (passe sur PC-01)' },
+  { scope: 'Domaine bordeaux.local', who: 'e.garcia', secret: 'Bordeaux#26', note: 'Utilisatrice : Elena Garcia, Bordeaux' },
   { scope: 'Postes et serveurs Windows (local)', who: 'tech', secret: 'T3ch#2026', note: 'Compte local d’intervention' },
   { scope: 'Postes et serveurs Windows (local)', who: 'Administrateur', secret: 'Loc@l-2026', note: 'Administrateur local' },
   { scope: 'Serveurs Debian', who: 'tssr', secret: 'Tssr-2026!', note: 'Clé SSH installée sur PC-ADM ; sudo' },
@@ -8999,7 +9039,7 @@ add({ id: 'dhcp_svc_disabled', level: 2, title: 'Service DHCP désactivé (type 
   optimal: ['Constater l’APIPA', 'services.msc sur SRV-DC1', 'Type de démarrage → Automatique', 'Démarrer le service', 'ipconfig /renew'] });
 
 add({ id: 'dhcp_unauth', level: 3, title: 'Serveur DHCP non autorisé dans Active Directory', skills: ['dhcp-auth', 'dhcp', 'diag'],
-  ticket: tk('Bruno Durand (les RH)', 'Plus d’adresses depuis la migration de ce week-end', 'Bonjour, depuis la reprise de lundi les postes n’obtiennent plus d’adresse réseau. Le service informatique m’a dit que le serveur avait été remis à jour pendant le week-end et que « tout tournait ».'),
+  ticket: tk('Alice Martin (la comptabilité)', 'Plus d’adresses depuis la migration de ce week-end', 'Bonjour, depuis la reprise de lundi les postes n’obtiennent plus d’adresse réseau. Le service informatique m’a dit que le serveur avait été remis à jour pendant le week-end et que « tout tournait ».'),
   cause: 'Après la restauration du serveur, SRV-DC1 n’est plus autorisé comme serveur DHCP dans Active Directory : le service est démarré mais il cesse de répondre aux clients (une erreur du journal DHCP-Server le dit).',
   solution: 'Dans la console DHCP, clic droit sur le serveur → Autoriser, puis renouveler le bail du poste.',
   hints: ['Le service DHCP est démarré et l’étendue est active, pourtant les postes sont en APIPA : cherchez ce qui empêche le serveur de répondre.', 'Consultez les journaux de SRV-DC1 dans l’Observateur d’événements (journaux des applications et des services, DHCP-Server) autour du démarrage du service.', 'Un serveur DHCP membre d’un domaine doit être autorisé dans Active Directory : regardez la flèche à côté du nom du serveur dans la console DHCP.'],
@@ -9025,7 +9065,7 @@ add({ id: 'dhcp_pool', v1: 'dhcp_pool', level: 2, title: 'Étendue DHCP sans adr
   optimal: ['ipconfig : 169.254.x.x', 'Console DHCP : pool d’adresses', 'Corriger l’exclusion', 'ipconfig /renew'] });
 
 add({ id: 'dhcp_scope_off', level: 2, title: 'Étendue DHCP désactivée', skills: ['dhcp', 'diag'],
-  ticket: tk('Bruno Durand (les RH)', 'Réseau coupé pour tout l’étage', 'Bonjour, depuis ce matin on n’a plus de réseau dans le bureau des RH. Le service informatique a peut-être touché quelque chose hier.'),
+  ticket: tk('Alice Martin (la comptabilité)', 'Réseau coupé pour tout l’étage', 'Bonjour, depuis ce matin on n’a plus de réseau dans le bureau de la comptabilité. Le service informatique a peut-être touché quelque chose hier.'),
   cause: 'L’étendue 10.10.20.0 de SRV-DC1 est désactivée : le serveur DHCP ne distribue plus rien pour le VLAN 20.',
   solution: 'Activer l’étendue dans la console DHCP puis renouveler le bail.',
   hints: ['Le service DHCP est démarré mais les postes sont en APIPA : cherchez au niveau de l’étendue.', 'Dans la console DHCP, la flèche à côté de l’étendue indique son état.', 'Faites un clic droit sur l’étendue et choisissez Activer.'],
@@ -9145,7 +9185,7 @@ add({ id: 'dns_rec_missing', v1: 'dns_rec_missing', level: 2, title: 'Enregistre
   optimal: ['ping par IP OK, par nom KO', 'nslookup srv-fic', 'Gestionnaire DNS : recréer l’enregistrement A', 'ipconfig /flushdns'] });
 
 add({ id: 'dns_rec_wrong', v1: 'dns_rec_wrong', level: 2, title: 'Enregistrement A pointant vers une mauvaise adresse', skills: ['dns', 'diag'],
-  ticket: tk('Bruno Durand (les RH)', 'Le partage « RH » ne s’ouvre plus', 'Bonjour, mon lecteur réseau RH affiche une erreur de délai d’attente alors qu’il marchait hier. Les autres collègues ont le même souci.'),
+  ticket: tk('Alice Martin (la comptabilité)', 'Le partage « Compta » ne s’ouvre plus', 'Bonjour, mon lecteur réseau Compta affiche une erreur de délai d’attente alors qu’il marchait hier. Les autres collègues ont le même souci.'),
   cause: 'L’enregistrement A de srv-fic pointe vers 10.10.10.21 (ancienne adresse) au lieu de 10.10.10.20.',
   solution: 'Corriger l’enregistrement A (10.10.10.20) et vider le cache DNS des clients.',
   hints: ['Le nom se résout mais la connexion expire : vérifiez que l’adresse obtenue est la bonne.', 'nslookup srv-fic donne une adresse : est-ce l’adresse réelle du serveur (ipconfig sur srv-fic) ?', 'Modifiez l’enregistrement dans la zone DNS puis ipconfig /flushdns sur le client.'],
@@ -9189,7 +9229,8 @@ add({ id: 'dns_fwd', v1: 'dns_fwd', level: 2, title: 'Redirecteur DNS erroné : 
   hints: ['Les noms internes passent, les noms externes non : qui relaie les requêtes externes ?', 'Propriétés du serveur DNS → onglet Redirecteurs.', 'Le redirecteur 10.10.10.250 ne répond pas : mettez 8.8.8.8.'],
   inject: [{ do: 'set', path: 'SRV-DC1.win.dns.forwarders', value: ['10.10.10.250'] }],
   probes: [{ t: 'resolve', from: 'PC-01', name: 'srv-fic', expect: '10.10.10.20' }, { t: 'resolve', from: 'PC-01', name: 'www.exemple.fr', expect: '93.184.216.34' }],
-  roots: [{ path: 'SRV-DC1.win.dns.forwarders', has: '8.8.8.8' }],
+  /* tout redirecteur qui répond convient (8.8.8.8, 1.1.1.1, le pare-feu…) : la cause est corrigée dès que le redirecteur mort a disparu et que les noms externes sont résolus (sondes) */
+  roots: [{ path: 'SRV-DC1.win.dns.forwarders', hasNot: '10.10.10.250' }],
   fix: [{ do: 'set', path: 'SRV-DC1.win.dns.forwarders', value: ['8.8.8.8'] }, { do: 'flushdns', dev: 'PC-01' }],
   traps: ['Mettre 8.8.8.8 en DNS secondaire sur les postes contourne l’AD et le contrôle DNS.'],
   optimal: ['nslookup www.exemple.fr : échec', 'nslookup srv-fic : OK', 'Propriétés DNS → Redirecteurs', 'Corriger puis flushdns'] });
@@ -9347,13 +9388,22 @@ const USERS = [
   { sam: 'a.martin', host: 'PC-01', name: 'Alice Martin', svc: 'la comptabilité', gg: 'GG_Compta', share: 'Compta', drive: 'drive.S', dl: 'DL_Compta_RW' },
   { sam: 'b.durand', host: 'PC-02', name: 'Bruno Durand', svc: 'les RH', gg: 'GG_RH', share: 'RH', drive: 'drive.R', dl: 'DL_RH_RW' }
 ];
+/* pannes de compte pur (verrouillé, désactivé, expiré) : n'importe quel compte de l'annuaire peut être touché, y compris sur un poste partagé.
+   Le ticket nomme le poste, puisque ce n'est pas celui du titulaire. */
+const ACCT_USERS = USERS.concat([
+  { sam: 'l.berger', host: 'PC-02', name: 'Louison Berger', svc: 'les RH, sur le poste PC-02' },
+  { sam: 'j.ribeiro', host: 'PC-01', name: 'Jano Ribeiro', svc: 'la comptabilité, sur le poste PC-01' },
+  { sam: 'm.caron', host: 'PC-02', name: 'Mathis Caron', svc: 'les RH, sur le poste PC-02' },
+  { sam: 'j.lambert', host: 'PC-01', name: 'Jenny Lambert', svc: 'la comptabilité, sur le poste PC-01' },
+  { sam: 'l.fontaine', host: 'PC-01', name: 'Liam Fontaine', svc: 'la direction, sur le poste PC-01' }
+]);
 const uSel = sam => 'SRV-DC1.win.ad.users[sam=' + sam + ']';
 const gpo = id => 'SRV-DC1.win.ad.gpos[id=' + id + ']';
 const loginProbe = [{ t: 'login', host: '{{u.host}}', user: '{{u.sam}}' }];
 
 /* ======================= COMPTES ======================= */
 add({ id: 'ad_locked', level: 1, title: 'Compte utilisateur verrouillé', skills: ['ad-compte', 'diag'],
-  vary: { u: USERS },
+  vary: { u: ACCT_USERS },
   ticket: tk('{{u.name}} ({{u.svc}})', 'Impossible d’ouvrir ma session', 'Bonjour, ce matin mon mot de passe est refusé alors que je suis sûr(e) de le connaître. J’ai essayé plusieurs fois avec la touche majuscule enfoncée par erreur et maintenant l’ordinateur me dit que mon compte est bloqué. Pouvez-vous me débloquer ?'),
   cause: 'Plusieurs saisies erronées ont atteint le seuil de verrouillage : le compte est verrouillé dans Active Directory (le mot de passe est correct).',
   solution: 'Dans « Utilisateurs et ordinateurs Active Directory », ouvrir le compte → onglet Compte → cocher « Débloquer le compte ». (Il se débloquerait aussi seul à l’issue de la durée de verrouillage.)',
@@ -9367,7 +9417,7 @@ add({ id: 'ad_locked', level: 1, title: 'Compte utilisateur verrouillé', skills
   optimal: ['Lire le message exact affiché au poste', 'Ouvrir Utilisateurs et ordinateurs Active Directory sur le contrôleur', 'Rechercher le compte → onglet Compte', 'Débloquer le compte', 'Faire retester l’ouverture de session'] });
 
 add({ id: 'ad_disabled', level: 1, title: 'Compte utilisateur désactivé par erreur', skills: ['ad-compte', 'ad-ou', 'diag'],
-  vary: { u: USERS },
+  vary: { u: ACCT_USERS },
   ticket: tk('{{u.name}} ({{u.svc}})', 'Mon compte ne marche plus ce matin', 'Bonjour, je reviens de congés et mon identifiant ne fonctionne plus : l’écran me dit que mon compte a été désactivé. Je n’ai rien fait de particulier. Merci de regarder rapidement, j’ai du travail en retard.'),
   cause: 'Le compte a été désactivé dans Active Directory (nettoyage des comptes des personnes absentes) alors que la personne est de retour.',
   solution: 'Dans Utilisateurs et ordinateurs Active Directory : clic droit sur le compte → « Activer le compte ».',
@@ -9380,7 +9430,7 @@ add({ id: 'ad_disabled', level: 1, title: 'Compte utilisateur désactivé par er
   optimal: ['Lire le message d’erreur', 'Ouvrir Utilisateurs et ordinateurs Active Directory', 'Activer le compte', 'Faire retester l’ouverture de session'] });
 
 add({ id: 'ad_pwd_expired', level: 2, title: 'Mot de passe expiré', skills: ['ad-compte', 'gpo-compte', 'diag'],
-  vary: { u: USERS },
+  vary: { u: ACCT_USERS },
   ticket: tk('{{u.name}} ({{u.svc}})', 'Mot de passe refusé depuis ce matin', 'Bonjour, mon mot de passe ne passe plus. Je n’ai pourtant pas fait de faute de frappe. Mon collègue m’a dit qu’il fallait peut-être le changer mais je n’ai reçu aucun message. Pouvez-vous m’aider ?'),
   cause: 'L’âge maximal du mot de passe (stratégie de domaine) est dépassé : le mot de passe a expiré et l’utilisateur doit en définir un nouveau.',
   solution: 'Réinitialiser le mot de passe en imposant le changement à la prochaine ouverture de session (ou laisser l’utilisateur le changer à l’écran de connexion). Ne pas cocher « Le mot de passe n’expire jamais » pour un compte nominatif.',
@@ -9394,7 +9444,7 @@ add({ id: 'ad_pwd_expired', level: 2, title: 'Mot de passe expiré', skills: ['a
   optimal: ['Lire le message', 'Vérifier l’âge du mot de passe et la stratégie de domaine', 'Réinitialiser le mot de passe avec changement obligatoire', 'Faire retester'] });
 
 add({ id: 'ad_acct_expired', level: 2, title: 'Compte utilisateur expiré (contrat prolongé)', skills: ['ad-compte', 'diag'],
-  vary: { u: USERS },
+  vary: { u: ACCT_USERS },
   ticket: tk('{{u.name}} ({{u.svc}})', 'Message « compte expiré » à la connexion', 'Bonjour, mon contrat vient d’être prolongé jusqu’au printemps mais ce matin l’ordinateur affiche que mon compte a expiré. Mon responsable dit avoir prévenu l’informatique. Je ne peux plus travailler.'),
   cause: 'La date d’expiration du compte (onglet Compte) est dépassée alors que le contrat a été prolongé.',
   solution: 'Modifier « Le compte expire » : choisir une nouvelle date ou « Jamais » (selon la politique de l’entreprise).',
@@ -9454,8 +9504,8 @@ add({ id: 'ad_secure_channel', level: 3, title: 'Relation d’approbation poste 
         { key: 'compte', path: 'SRV-DC1.win.ad.computers[name={{c.host}}].enabled', bad: false, good: true, why: 'le compte ordinateur a été désactivé dans l’annuaire' }] },
   ticket: tk('{{c.name}} ({{c.svc}})', 'Message sur la relation d’approbation à la connexion', 'Bonjour, à l’ouverture de session je reçois « La relation d’approbation entre cette station de travail et le domaine principal a échoué ». Le poste revient d’une restauration d’image faite par un technicien la semaine dernière. Mon mot de passe est bon, j’ai vérifié avec un collègue.'),
   cause: 'Le poste n’est plus reconnu par le domaine : {{m.why}}. Les identifiants de l’utilisateur n’y sont pour rien.',
-  solution: 'Réparer le canal sécurisé : (Test-ComputerSecureChannel -Repair / Reset-ComputerMachinePassword), ou réactiver le compte ordinateur, ou sortir et rejoindre le domaine avec un compte autorisé.',
-  hints: ['Le message ne concerne pas le mot de passe de l’utilisateur mais le compte de l’ordinateur dans le domaine.', 'Dans l’annuaire, regardez le compte ordinateur du poste (activé ? existant ?). Côté poste, testez le canal sécurisé.', 'Réactivez le compte ordinateur ou réparez le canal (Test-ComputerSecureChannel -Repair ; ou sortir/rejoindre le domaine).'],
+  solution: 'Compte ordinateur désactivé : le réactiver dans Utilisateurs et ordinateurs Active Directory. Canal sécurisé rompu : sortir le poste du domaine puis le rejoindre avec un compte autorisé.',
+  hints: ['Le message ne concerne pas le mot de passe de l’utilisateur mais le compte de l’ordinateur dans le domaine.', 'Dans l’annuaire, regardez le compte ordinateur du poste (activé ? existant ?). Côté poste, testez le canal sécurisé (nltest /sc_query:toulouse.local).', 'Compte ordinateur désactivé : réactivez-le dans l’annuaire. Canal rompu : sortez le poste du domaine puis rejoignez-le.'],
   inject: [{ do: 'set', path: '{{m.path}}', value: '{{m.bad}}' }],
   probes: [{ t: 'login', host: '{{c.host}}', user: '{{c.user}}' }],
   roots: [{ path: '{{m.path}}', ne: '{{m.bad}}' }],
@@ -9908,10 +9958,10 @@ add({ id: 'c_portsec', level: 3, title: 'Port en err-disabled (port-security) ap
 /* ======================= TRUNKS ======================= */
 add({ id: 'c_trunk_allowed', level: 3, title: 'VLAN absent de la liste autorisée du trunk', skills: ['trunk', 'vlan', 'diag'],
   vary: { c: [
-    { sw: 'SW-T2', host: 'PC-01', bad: [10, 30], good: [10, 20, 30], who: 'SW-T2', label: 'les postes des commutateurs SW-T2 et SW-T3' },
-    { sw: 'SW-T3', host: 'PC-02', bad: [30], good: [20, 30], who: 'SW-T3', label: 'les postes branchés sur SW-T3' }
+    { sw: 'SW-T2', host: 'PC-01', user: 'Alice Martin (la comptabilité)', bad: [10, 30], good: [10, 20, 30], who: 'SW-T2', label: 'les postes des commutateurs SW-T2 et SW-T3' },
+    { sw: 'SW-T3', host: 'PC-02', user: 'Bruno Durand (les RH)', bad: [30], good: [20, 30], who: 'SW-T3', label: 'les postes branchés sur SW-T3' }
   ] },
-  ticket: tk('Bruno Durand (les RH)', 'Plus d’adresse réseau pour plusieurs postes', 'Bonjour, depuis la maintenance de la nuit plusieurs postes n’ont plus de réseau : « réseau non identifié ». Le technicien dit avoir seulement « ajouté le VLAN 30 sur la liaison entre les commutateurs ». Les serveurs fonctionnent.'),
+  ticket: tk('{{c.user}}', 'Plus d’adresse réseau pour plusieurs postes', 'Bonjour, depuis la maintenance de la nuit plusieurs postes n’ont plus de réseau : « réseau non identifié ». Le technicien dit avoir seulement « ajouté le VLAN 30 sur la liaison entre les commutateurs ». Les serveurs fonctionnent.'),
   cause: 'Sur le trunk Gi0/1 de {{c.who}}, la liste des VLAN autorisés a été remplacée (switchport trunk allowed vlan …) au lieu d’être complétée (add) : le VLAN 20 ne traverse plus la liaison, {{c.label}} perdent le réseau.',
   solution: 'Réintroduire le VLAN 20 : switchport trunk allowed vlan add 20 (des deux côtés du trunk), puis renouveler les baux.',
   hints: ['Les serveurs (VLAN 10) fonctionnent, les postes (VLAN 20) non : un VLAN précis ne passe plus entre deux commutateurs.', 'show interfaces trunk sur les deux commutateurs : comparez « VLANs allowed » de la liaison.', 'switchport trunk allowed vlan add 20 sur la liaison concernée, puis ipconfig /renew.'],
@@ -10707,13 +10757,13 @@ add({ id: 'lx_web_perm', level: 3, title: 'Apache : 403 Forbidden à cause des d
   ticket: tk('Alice Martin (la comptabilité)', 'L’intranet affiche « Forbidden »', 'Bonjour, depuis ce matin l’intranet affiche « Forbidden — You don’t have permission to access this resource ». Rien n’a changé côté Apache selon Admin TSSR, mais quelqu’un a travaillé dans les fichiers du site.'),
   cause: 'Apache fonctionne et sa configuration est bonne, mais {{m.label}}.',
   solution: 'Rétablir les droits (755 sur les dossiers, 644 sur les fichiers, lisibles par www-data) ou restaurer le fichier d’index, sans passer en 777.',
-  hints: ['Un 403 avec une configuration saine pointe vers les droits du système de fichiers.', 'Lisez l’erreur dans intranet_error.log, puis ls -l et namei -l /var/www/intranet/index.html (ou testez en tant que www-data).', 'Corrigez le mode ou restaurez le fichier. Évitez chmod -R 777.'],
+  hints: ['Un 403 avec une configuration saine pointe vers les droits du système de fichiers.', 'Lisez l’erreur dans intranet_error.log, puis ls -l /var/www/intranet/index.html et ls -ld sur chaque dossier du chemin (ou testez en tant que www-data).', 'Corrigez le mode ou restaurez le fichier. Évitez chmod -R 777.'],
   inject: '{{m.inj}}',
   probes: [HTTP_INTRA],
   roots: [{ probe: { t: 'lxaccess', dev: LNX, user: 'www-data', path: '/var/www/intranet/index.html', mode: 'r' } }],
   fix: '{{m.fix}}',
   traps: ['chmod -R 777 /var/www règle le symptôme en rendant le site modifiable par tous : fausse résolution dangereuse.'],
-  optimal: ['Noter le 403', 'Lire le journal d’erreurs', 'namei -l / ls -l', 'Corriger les droits', 'Retester'] });
+  optimal: ['Noter le 403', 'Lire le journal d’erreurs', 'ls -l du fichier, ls -ld des dossiers du chemin', 'Corriger les droits', 'Retester'] });
 
 add({ id: 'lx_nginx', level: 3, title: 'nginx : site vitrine HTTPS en panne', skills: ['nginx', 'lx-services', 'diag'],
   vary: { m: [
@@ -13905,7 +13955,7 @@ const TABLES = {
   ou: ['DistinguishedName', 'Name']
 };
 const RIGHT = { ifIndex: 1, Id: 1, 'Bytes': 1, 'Time(ms)': 1, TTL: 1, Handles: 1, 'NPM(K)': 1, 'PM(K)': 1, 'WS(K)': 1, 'CPU(s)': 1, SI: 1 };
-const LISTS = new Set(['netipconfig', 'netip', 'aduser', 'adcomputer', 'fwrule', 'fwprof', 'tnc', 'tncp', 'date', 'adgroup', 'gpo', 'dhcpopt', 'cim']);
+const LISTS = new Set(['netconnprof', 'netipconfig', 'netip', 'aduser', 'adcomputer', 'fwrule', 'fwprof', 'tnc', 'tncp', 'date', 'adgroup', 'gpo', 'dhcpopt', 'cim']);
 function fmtVal(v) { if (v === null || v === undefined) return ''; if (v === true) return 'True'; if (v === false) return 'False'; if (Array.isArray(v)) return v.map(x => (x && x.Name !== undefined && typeof x === 'object' ? x.Name : String(x))).join(', '); if (v instanceof Date) return E.frDate(v) + ' ' + E.frTime(v); if (typeof v === 'object') return '{' + Object.keys(v).map(k => k + '=' + v[k]).join(', ') + '}'; return String(v); }
 function formatTable(objs, cols) {
   const rows = objs.map(o => cols.map(c => fmtVal(propOf(o, c))));
@@ -14153,6 +14203,15 @@ function fwToggle(on) { return (ctx, P) => {
 }; }
 def('enable-netfirewallrule', { p: ['displayname', 'name', 'displaygroup'], pos: ['name'], sw: [] }, fwToggle(true));
 def('disable-netfirewallrule', { p: ['displayname', 'name', 'displaygroup'], pos: ['name'], sw: [] }, fwToggle(false));
+/* Get-NetConnectionProfile : profil réseau (catégorie) que Windows a attribué à chaque carte connectée — c'est lui qui décide du profil de pare-feu appliqué. Lecture seule. */
+U.av('ps-netconnectionprofile', 'Get-NetConnectionProfile : nom du réseau affiché quand le domaine n’est pas détecté (« Réseau ») et valeurs IPv4Connectivity / IPv6Connectivity reconstitués ; à vérifier par capture.');
+def('get-netconnectionprofile', { p: ['interfacealias', 'name'], sw: [] }, (ctx, P) => {
+  const d = ctx.d; const out = [];
+  W_.ifaceNames(d).forEach((n, i) => { if (!N.linkUp(ctx.W, d, n)) return; const prof = (d.ifaces[n].fwProfile || (d.win.domain ? 'domain' : 'private'));
+    const o = { __t: 'netconnprof', Name: prof === 'domain' && d.win.domain ? d.win.domain : 'Réseau', InterfaceAlias: n, InterfaceIndex: 6 + i, NetworkCategory: prof === 'domain' ? 'DomainAuthenticated' : prof === 'private' ? 'Private' : 'Public', IPv4Connectivity: N.effCfg(d, n) && N.effCfg(d, n).gw ? 'Internet' : 'LocalNetwork', IPv6Connectivity: 'NoTraffic' };
+    if (!P.interfacealias || String(P.interfacealias).toLowerCase() === n.toLowerCase()) out.push(o); });
+  return { objs: out };
+});
 def('get-netfirewallprofile', { p: ['name'], pos: ['name'], sw: [] }, ctx => ({ objs: ['domain', 'private', 'public'].map(p => ({ __t: 'fwprof', Name: p[0].toUpperCase() + p.slice(1), Enabled: ctx.d.win.fw.profiles[p].enabled ? 'True' : 'False', DefaultInboundAction: ctx.d.win.fw.profiles[p].defIn === 'block' ? 'Block' : 'Allow', DefaultOutboundAction: ctx.d.win.fw.profiles[p].defOut === 'allow' ? 'Allow' : 'Block' })).filter(o => !ctx.P || true) }));
 def('set-netfirewallprofile', { p: ['name', 'enabled', 'profile'], pos: ['name'], sw: [] }, (ctx, P) => {
   if (!ctx.s.elevated) return { err: psError(ctx.name, 'Accès refusé', 'PermissionDenied: (:) [Set-NetFirewallProfile], CimException', 'Windows System Error 5,Set-NetFirewallProfile', ctx.text) };
@@ -14443,7 +14502,7 @@ function runStatement(text, ctx, input) {
   }
   return null;
 }
-function nameCase(cn) { const special = { 'get-childitem': 'Get-ChildItem', 'get-eventlog': 'Get-EventLog', 'get-aduser': 'Get-ADUser', 'unlock-adaccount': 'Unlock-ADAccount', 'enable-adaccount': 'Enable-ADAccount', 'disable-adaccount': 'Disable-ADAccount', 'set-adaccountpassword': 'Set-ADAccountPassword', 'set-aduser': 'Set-ADUser', 'add-adgroupmember': 'Add-ADGroupMember', 'get-adgroupmember': 'Get-ADGroupMember', 'get-adgroup': 'Get-ADGroup', 'get-adcomputer': 'Get-ADComputer', 'move-adobject': 'Move-ADObject', 'get-adorganizationalunit': 'Get-ADOrganizationalUnit', 'get-addomaincontroller': 'Get-ADDomainController', 'get-dhcpserverv4scope': 'Get-DhcpServerv4Scope', 'set-dhcpserverv4scope': 'Set-DhcpServerv4Scope', 'get-dhcpserverv4exclusionrange': 'Get-DhcpServerv4ExclusionRange', 'remove-dhcpserverv4exclusionrange': 'Remove-DhcpServerv4ExclusionRange', 'add-dhcpserverv4exclusionrange': 'Add-DhcpServerv4ExclusionRange', 'get-dhcpserverv4optionvalue': 'Get-DhcpServerv4OptionValue', 'set-dhcpserverv4optionvalue': 'Set-DhcpServerv4OptionValue', 'get-dhcpserverv4lease': 'Get-DhcpServerv4Lease', 'get-dhcpserverv4reservation': 'Get-DhcpServerv4Reservation', 'set-dhcpserverv4reservation': 'Set-DhcpServerv4Reservation', 'get-dnsserverzone': 'Get-DnsServerZone', 'get-dnsserverresourcerecord': 'Get-DnsServerResourceRecord', 'add-dnsserverresourcerecorda': 'Add-DnsServerResourceRecordA', 'remove-dnsserverresourcerecord': 'Remove-DnsServerResourceRecord', 'get-dnsserverforwarder': 'Get-DnsServerForwarder', 'set-dnsserverforwarder': 'Set-DnsServerForwarder', 'clear-dnsservercache': 'Clear-DnsServerCache', 'get-netipconfiguration': 'Get-NetIPConfiguration', 'get-netipaddress': 'Get-NetIPAddress', 'new-netipaddress': 'New-NetIPAddress', 'set-netipinterface': 'Set-NetIPInterface', 'get-dnsclientserveraddress': 'Get-DnsClientServerAddress', 'set-dnsclientserveraddress': 'Set-DnsClientServerAddress', 'clear-dnsclientcache': 'Clear-DnsClientCache', 'get-dnsclientcache': 'Get-DnsClientCache', 'register-dnsclient': 'Register-DnsClient', 'test-netconnection': 'Test-NetConnection', 'resolve-dnsname': 'Resolve-DnsName', 'get-netfirewallrule': 'Get-NetFirewallRule', 'enable-netfirewallrule': 'Enable-NetFirewallRule', 'disable-netfirewallrule': 'Disable-NetFirewallRule', 'get-netfirewallprofile': 'Get-NetFirewallProfile', 'set-netfirewallprofile': 'Set-NetFirewallProfile', 'new-netfirewallrule': 'New-NetFirewallRule', 'get-winevent': 'Get-WinEvent', 'get-eventlog': 'Get-EventLog', 'get-smbshare': 'Get-SmbShare', 'get-smbshareaccess': 'Get-SmbShareAccess', 'new-smbshare': 'New-SmbShare', 'remove-smbshare': 'Remove-SmbShare', 'grant-smbshareaccess': 'Grant-SmbShareAccess', 'revoke-smbshareaccess': 'Revoke-SmbShareAccess', 'enable-netadapter': 'Enable-NetAdapter', 'disable-netadapter': 'Disable-NetAdapter', 'get-netadapter': 'Get-NetAdapter', 'get-website': 'Get-Website', 'start-website': 'Start-Website', 'stop-website': 'Stop-Website', 'get-iissite': 'Get-IISSite', 'start-iissite': 'Start-IISSite', 'stop-iissite': 'Stop-IISSite', 'get-webbinding': 'Get-WebBinding', 'set-webbinding': 'Set-WebBinding', 'invoke-webrequest': 'Invoke-WebRequest', 'convertto-securestring': 'ConvertTo-SecureString' }; return special[cn] || cn.split('-').map(x => x[0].toUpperCase() + x.slice(1)).join('-'); }
+function nameCase(cn) { const special = { 'get-netconnectionprofile': 'Get-NetConnectionProfile', 'get-childitem': 'Get-ChildItem', 'get-eventlog': 'Get-EventLog', 'get-aduser': 'Get-ADUser', 'unlock-adaccount': 'Unlock-ADAccount', 'enable-adaccount': 'Enable-ADAccount', 'disable-adaccount': 'Disable-ADAccount', 'set-adaccountpassword': 'Set-ADAccountPassword', 'set-aduser': 'Set-ADUser', 'add-adgroupmember': 'Add-ADGroupMember', 'get-adgroupmember': 'Get-ADGroupMember', 'get-adgroup': 'Get-ADGroup', 'get-adcomputer': 'Get-ADComputer', 'move-adobject': 'Move-ADObject', 'get-adorganizationalunit': 'Get-ADOrganizationalUnit', 'get-addomaincontroller': 'Get-ADDomainController', 'get-dhcpserverv4scope': 'Get-DhcpServerv4Scope', 'set-dhcpserverv4scope': 'Set-DhcpServerv4Scope', 'get-dhcpserverv4exclusionrange': 'Get-DhcpServerv4ExclusionRange', 'remove-dhcpserverv4exclusionrange': 'Remove-DhcpServerv4ExclusionRange', 'add-dhcpserverv4exclusionrange': 'Add-DhcpServerv4ExclusionRange', 'get-dhcpserverv4optionvalue': 'Get-DhcpServerv4OptionValue', 'set-dhcpserverv4optionvalue': 'Set-DhcpServerv4OptionValue', 'get-dhcpserverv4lease': 'Get-DhcpServerv4Lease', 'get-dhcpserverv4reservation': 'Get-DhcpServerv4Reservation', 'set-dhcpserverv4reservation': 'Set-DhcpServerv4Reservation', 'get-dnsserverzone': 'Get-DnsServerZone', 'get-dnsserverresourcerecord': 'Get-DnsServerResourceRecord', 'add-dnsserverresourcerecorda': 'Add-DnsServerResourceRecordA', 'remove-dnsserverresourcerecord': 'Remove-DnsServerResourceRecord', 'get-dnsserverforwarder': 'Get-DnsServerForwarder', 'set-dnsserverforwarder': 'Set-DnsServerForwarder', 'clear-dnsservercache': 'Clear-DnsServerCache', 'get-netipconfiguration': 'Get-NetIPConfiguration', 'get-netipaddress': 'Get-NetIPAddress', 'new-netipaddress': 'New-NetIPAddress', 'set-netipinterface': 'Set-NetIPInterface', 'get-dnsclientserveraddress': 'Get-DnsClientServerAddress', 'set-dnsclientserveraddress': 'Set-DnsClientServerAddress', 'clear-dnsclientcache': 'Clear-DnsClientCache', 'get-dnsclientcache': 'Get-DnsClientCache', 'register-dnsclient': 'Register-DnsClient', 'test-netconnection': 'Test-NetConnection', 'resolve-dnsname': 'Resolve-DnsName', 'get-netfirewallrule': 'Get-NetFirewallRule', 'enable-netfirewallrule': 'Enable-NetFirewallRule', 'disable-netfirewallrule': 'Disable-NetFirewallRule', 'get-netfirewallprofile': 'Get-NetFirewallProfile', 'set-netfirewallprofile': 'Set-NetFirewallProfile', 'new-netfirewallrule': 'New-NetFirewallRule', 'get-winevent': 'Get-WinEvent', 'get-eventlog': 'Get-EventLog', 'get-smbshare': 'Get-SmbShare', 'get-smbshareaccess': 'Get-SmbShareAccess', 'new-smbshare': 'New-SmbShare', 'remove-smbshare': 'Remove-SmbShare', 'grant-smbshareaccess': 'Grant-SmbShareAccess', 'revoke-smbshareaccess': 'Revoke-SmbShareAccess', 'enable-netadapter': 'Enable-NetAdapter', 'disable-netadapter': 'Disable-NetAdapter', 'get-netadapter': 'Get-NetAdapter', 'get-website': 'Get-Website', 'start-website': 'Start-Website', 'stop-website': 'Stop-Website', 'get-iissite': 'Get-IISSite', 'start-iissite': 'Start-IISSite', 'stop-iissite': 'Stop-IISSite', 'get-webbinding': 'Get-WebBinding', 'set-webbinding': 'Set-WebBinding', 'invoke-webrequest': 'Invoke-WebRequest', 'convertto-securestring': 'ConvertTo-SecureString' }; return special[cn] || cn.split('-').map(x => x[0].toUpperCase() + x.slice(1)).join('-'); }
 
 /* Affichage d'un résultat de cmdlet */
 function render(res, fmt) {
@@ -20316,7 +20375,10 @@ P.drawTray = function () {
   this.tray.append(h('div.ti', '︿'), net, h('div.ti', '🔊'), h('div.ti', { style: { fontSize: '11px' } }, 'FRA'), this.clockEl, h('div.ti', '🗨'));
   this.drawClock();
 };
-P.drawClock = function () { if (!this.clockEl) return; const dt = this.W.nowOf(this.devId); UI.clear(this.clockEl); this.clockEl.append(h('div', E.frTime(dt).slice(0, 5)), h('div', E.frDate(dt))); };
+P.drawClock = function () { if (!this.clockEl) return; const dt = this.W.nowOf(this.devId); UI.clear(this.clockEl); this.clockEl.append(h('div', E.frTime(dt).slice(0, 5)), h('div', E.frDate(dt)));
+  /* survol : la date complète avec le jour de la semaine, comme Windows (« mardi 27 octobre 2026 ») */
+  const J = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], M = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  this.clockEl.title = J[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + M[dt.getUTCMonth()] + ' ' + dt.getUTCFullYear(); };
 P.closeFlyout = function () { if (this.flyout) { this.flyout.remove(); this.flyout = null; } };
 P.netFlyout = function () {
   this.closeFlyout(); const ns = UI.netState(this.W, this.d); const self = this;
@@ -20346,7 +20408,10 @@ P.openStart = function (focusSearch) {
     /* clic droit : « Exécuter en tant qu'administrateur » (UAC : consentement ou identifiants d'un administrateur) */
     const runAdmin = x => { self.closeStart(); if (x[0] === 'cmd' || x[0] === 'powershell') { self.open(x[0], undefined, { runas: true }); return; } self.uac(x[2], el => { if (el) self.open(x[0], undefined, { elevated: true }); }); };
     const mk = x => h('div.si', { on: { click: () => { self.closeStart(); self.open(x[0]); }, contextmenu: e => { e.preventDefault(); e.stopPropagation(); UI.w.contextMenu(e.clientX, e.clientY, [{ label: 'Ouvrir', fn: () => { self.closeStart(); self.open(x[0]); } }, { label: 'Exécuter en tant qu’administrateur', fn: () => runAdmin(x) }], self.el); } } }, UI.icon(x[1], 22), x[2]);
-    const a = kept.filter(f), b = adm.filter(f); if (a.length) { list.append(h('div.sh', q ? 'Meilleurs résultats' : 'Applications')); a.forEach(x => list.append(mk(x))); }
+    /* la recherche trouve aussi les outils Windows qui ne sont pas épinglés (pare-feu avancé, date et heure, gestion de l'ordinateur…), comme le vrai menu Démarrer */
+    const shown = kept.concat(adm).map(x => x[0]);
+    const more = q ? [['wf', 'shield', 'Pare-feu Windows Defender avec fonctions avancées de sécurité'], ['datetime', 'clock', 'Date et heure'], ['compmgmt', 'gear', 'Gestion de l’ordinateur'], ['lusrmgr', 'users', 'Utilisateurs et groupes locaux'], ['devmgmt', 'gear', 'Gestionnaire de périphériques'], ['diskmgmt', 'gear', 'Gestion des disques'], ['certlm', 'cert', 'Certificats (ordinateur local)'], ['msinfo', 'list', 'Informations système'], ['regedit', 'gear', 'Éditeur du Registre'], ['gpedit', 'shield', 'Éditeur de stratégie de groupe locale'], ['ise', 'terminal', 'Windows PowerShell ISE']].filter(x => UI.apps[x[0]] && shown.indexOf(x[0]) < 0 && f(x)) : [];
+    const a = kept.filter(f).concat(more), b = adm.filter(f); if (a.length) { list.append(h('div.sh', q ? 'Meilleurs résultats' : 'Applications')); a.forEach(x => list.append(mk(x))); }
     if (b.length) { list.append(h('div.sh', 'Outils d’administration Windows')); b.forEach(x => list.append(mk(x))); }
     if (!a.length && !b.length) list.append(h('div.sh', 'Aucun résultat'));
   };
@@ -20542,7 +20607,9 @@ P.drawLogon = function (userPreset, step, locking) {
       const pwd = pIn.value;
       if (locking && !other) {
         const r = UI.winLogon(self.W, d, last, pwd);
-        if (!r.ok) { self.run.act(self.devId, 'Échec de déverrouillage', { kind: 'login', mutates: false }); showErr(r.msg); return; }
+        if (!r.ok) { self.env.obs('login:' + self.devId + ':' + String(last).replace(/^.*\\/, '').replace(/@.*$/, ''), false); self.run.act(self.devId, 'Échec de déverrouillage', { kind: 'login', mutates: false }); showErr(r.msg); return; }
+        /* le déverrouillage authentifie auprès du contrôleur de domaine (horaires, poste, verrouillage) : il vaut test de connexion */
+        self.env.obs('login:' + self.devId + ':' + String(r.user || last).replace(/^.*\\/, '').replace(/@.*$/, ''), true);
         vf.submit(); if (self.desk) self.desk.el.classList.remove('hidden'); root.remove(); self.mode = 'desk'; self.run.act(self.devId, 'Déverrouillage de la session', { kind: 'login', mutates: false }); return;
       }
       const r = UI.winLogon(self.W, d, name, pwd);
@@ -22520,7 +22587,11 @@ UI.app('browser', {
     addr.addEventListener('keydown', e => { if (e.key === 'Enter') load(addr.value); });
     const bar = h('div.bbar', back, fwd, reload, addr);
     const tabs = h('div.btabs', h('div.btab.on', UI.icon('globe', 14), tabLabel));
-    win = desk.wm.open({ title: 'Nouvel onglet — Navigateur', icon: 'globe', w: 1000, h: 620, className: 'browser', body: () => h('div.bwrap', tabs, bar, content, status) });
+    /* barre des favoris, comme sur un poste d'entreprise : l'intranet du site et un site externe, pour tester vite l'accès interne et Internet */
+    const dom = String((desk.d.win && desk.d.win.domain) || '').toLowerCase();
+    const favs = [/toulouse/.test(dom) ? ['Intranet', 'http://srv-fic'] : null, ['Google', 'http://www.google.fr']].filter(Boolean);
+    const favBar = h('div.bfavs', favs.map(f => h('button.bfav', { title: f[1], on: { click: () => load(f[1]) } }, UI.icon('globe', 13), f[0])));
+    win = desk.wm.open({ title: 'Nouvel onglet — Navigateur', icon: 'globe', w: 1000, h: 620, className: 'browser', body: () => h('div.bwrap', tabs, bar, favBar, content, status) });
     content.append(h('div.bpage.bnew', h('h2', 'Nouvel onglet'), h('p.muted', 'Saisissez une adresse dans la barre d’adresse.'))); btns();
     if (arg) load(arg);
     setTimeout(() => addr.focus(), 50);
@@ -25684,7 +25755,7 @@ P.home = function () {
     this.begin({ level: sel.level, mode: sel.mode, seed: seedIn.value.trim() || randomSeed(), skill: skillSel.value || undefined, faultId: faultSel.value || undefined, parts: sel.level === 5 ? +partsSel.value : undefined });
   };
   const start = () => {
-    if (firstVisit) { UI.modal('Première partie ?', h('div', UI.paras('Le tutoriel est une visite guidée de 3 minutes sur un ticket de démonstration : ticket, carte du réseau, écran et poste physique des machines, indices, journal, clôture et débrief.\n\nTu peux aussi le lancer plus tard depuis l’accueil (« Revoir le tutoriel »).')), [{ label: 'Jouer directement', fn: launch }, { label: 'Lancer le tutoriel', primary: true, fn: () => self.startTour() }]); return; }
+    if (firstVisit) { UI.modal('Première partie ?', h('div', UI.paras('Le tutoriel est une visite guidée de 2 minutes sur un ticket de démonstration : ticket, carte du réseau, écran et poste physique des machines, indices, journal, clôture et débrief.\n\nTu peux aussi le lancer plus tard depuis l’accueil (« Revoir le tutoriel »).')), [{ label: 'Jouer directement', fn: launch }, { label: 'Lancer le tutoriel', primary: true, fn: () => self.startTour() }]); return; }
     launch();
   };
   /* ---- colonne de droite : progression ---- */
@@ -25797,7 +25868,7 @@ P.begin = function (opts) {
   const btnHint = h('button.btn.small', { on: { click: () => self.hint() } }, 'Indice');
   const btnClose = h('button.btn.small.primary.gclose', { on: { click: () => self.closeTicket() } }, UI.icon('check', 16), ' Clôturer le ticket');
   const btnGive = h('button.btn.small.danger.ggive', { on: { click: () => UI.modal('Abandonner ?', h('p', 'Le ticket sera clos sans résolution et le débrief affichera la cause.'), [{ label: 'Continuer à chercher' }, { label: 'Abandonner', danger: true, fn: () => { m.giveUp(); run.finish(); } }]) } }, 'Abandonner');
-  const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), UI.rewards.contractPills(m), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'));
+  const bar = h('div.gbar', h('div.brand', UI.svg(UI.iconSvg('network'), 22), 'EDIVN Lab'), h('span.pill', h('b', run.id)), m.camp ? h('span.pill.campill', 'Chapitre ', h('b', String(m.camp.ch)), m.camp.exam ? ' · examen' : m.camp.review ? ' · révision' : '') : h('span.pill', 'Niveau ', h('b', m.lv.label)), h('span.pill', h('b', m.mode.label)), UI.rewards.contractPills(m), h('div.grow'), timer, btnHint, btnClose, btnGive, UI.prog.notesAvailable(run) ? h('button.btn.small', { title: 'Carnet de bord de ce ticket', on: { click: () => UI.prog.notesModal(run) } }, UI.icon('note', 14), ' Carnet') : null, h('button.btn.small', { on: { click: () => self.vaultModal() } }, 'Identifiants'), h('button.btn.small', { title: 'Plan d’adressage attendu (IP, masques, passerelles, DNS)', on: { click: () => self.planModal() } }, 'Adressage'), UI.bugreport ? UI.bugreport.button(run) : null);
   const t = m.fault.ticket;
   const ticket = h('div.card.ticket', h('h3', 'Ticket ' + run.id + (m.daily ? ' · ticket du jour' : '')), h('div.from', 'De : ' + t.from), h('div.subject', t.subject), h('div.body', UI.rewards.ticketBody(m, t.body)), UI.camp.verifBox(m), this.legacy ? UI.prog.goalsBox(run) : UI.simple.goalsFold(run));
   const hintsBox = h('div'); const guide = h('div'); const log = h('div.actlog');
@@ -25970,21 +26041,20 @@ UI.Tour = {
   steps(run) {
     const host = ((run.m.parts[0].vars || {}).c || {}).host || 'PC-01';
     const q = s => () => document.querySelector(s);
+    /* textes courts : une idée par étape, ce qu'il faut savoir pour jouer son premier ticket */
     return [
-      { title: 'Bienvenue dans EDIVN Lab', text: 'Tu es technicien d’un petit système d’information (Toulouse, Bordeaux, Ramonville). Un utilisateur t’envoie un ticket ; à toi de comprendre la panne et de la réparer avec les vrais outils, comme en entreprise.\n\nCette visite dure environ 3 minutes. Tu peux la quitter à tout moment.' },
-      { title: 'Le ticket', text: 'Voici le message de l’utilisateur, tel qu’il l’a écrit : vague, parfois imprécis ou trompeur. Commence toujours par le relire et par reformuler le problème.', target: q('.side .ticket'), place: 'right' },
-      { title: 'Chronomètre et mode', text: 'Le temps écoulé (MTTR) compte pour le score. En mode guidé il n’y a pas de limite ; en évaluation chronométrée un compte à rebours s’affiche.', target: q('.gbar .timer'), place: 'bottom' },
-      { title: 'Indices', text: 'Trois indices, du plus vague au plus précis. Ils sont gratuits en mode guidé, payants en mode libre, absents en évaluation.', target: () => byText('.gbar .btn', 'Indice'), place: 'bottom' },
-      { title: 'Assistant pas à pas', text: 'Uniquement en mode guidé : une méthode de diagnostic étape par étape, sans donner la réponse. Essaie-le plus tard si tu bloques.', target: () => byText('.side .card', 'Assistant'), place: 'right' },
-      { title: 'Journal de tes actions', text: 'Chaque action est tracée : ce que tu ouvres, tapes ou modifies. Le débrief final s’en sert pour comparer ton chemin au chemin optimal et signaler les impasses et les actions dangereuses.', target: q('.side .actlog'), place: 'right' },
-      { title: 'La carte, par site', text: 'Un onglet par site. Chaque icône est une machine ou un équipement réseau. Les liens montrent le câblage logique.', target: q('.tabs .tab'), place: 'bottom' },
-      { title: 'Choisis une machine', text: 'Le ticket vient d’un poste de travail. Clique sur « ' + host + ' » pour ouvrir son menu.', target: () => document.querySelector('.node[title="' + host + '"]'), place: 'left', wait: () => !!document.querySelector('.pop') },
-      { title: 'Écran ou poste physique', text: 'Chaque machine a deux faces : « l’écran » (ce que voit l’utilisateur : bureau, console…) et « le poste physique » (arrière de l’unité, câbles, alimentation, écran, prises murales). Certaines pannes sont purement matérielles !\n\nClique sur la première entrée pour ouvrir l’écran.', target: q('.pop'), place: 'left', wait: () => !!document.querySelector('.tabs .tab.on .x') },
-      { title: 'Basculer entre les deux faces', text: 'Cette barre te permet de passer à tout moment de l’écran au poste physique de la machine. Le poste physique reflète l’état réel : câble débranché, prise inactive, alimentation coupée…', target: q('.frame .fbar'), place: 'bottom' },
-      { title: 'Un vrai bureau', text: 'Ce que tu vois est une réplique des interfaces réelles : barre des tâches, menu Démarrer (clic sur la zone en bas à gauche), clic droit, fenêtres déplaçables, invite de commandes, panneau de configuration, etc. Les serveurs ont leurs consoles d’administration ; les équipements réseau, pfSense et Linux ont leurs terminaux.\n\nLes commandes sont réellement interprétées : ipconfig, ping, ls, show running-config… Les sorties dépendent de l’état du réseau.', target: q('.frame .fbody'), place: 'center' },
-      { title: 'Identifiants', text: 'Pour intervenir comme dans la réalité il faut des comptes : le bouton regroupe ceux du technicien. Utilise le compte le moins privilégié qui suffit : une action dangereuse avec un compte trop puissant sera signalée au débrief.', target: () => byText('.gbar .btn', 'Identifiants'), place: 'bottom' },
-      { title: 'Clôturer le ticket', text: 'Quand tu penses avoir réparé, clique ici. Le moteur vérifie depuis le poste de l’utilisateur que la panne a réellement disparu : un contournement (IP statique par exemple) ou une fausse résolution sont détectés. Clôturer trop tôt coûte des points sur ta note (validée à partir de 75 / 100).', target: () => document.querySelector('.gbar .btn.primary'), place: 'bottom' },
-      { title: 'À toi de jouer', text: 'Ce ticket est le tien : l’utilisatrice voit « une petite croix » sur l’icône réseau. Teste d’abord depuis son poste (écran), puis regarde du côté physique. Pense à vérifier que tout fonctionne avant de clôturer (ping, ouverture d’un dossier partagé).\n\nBon courage !', last: true }
+      { title: 'Bienvenue dans EDIVN Lab', text: 'Tu es technicien. Un utilisateur t’envoie un ticket : trouve la panne et répare-la avec les vrais outils.\n\nCette visite dure 2 minutes. Échap pour la quitter.' },
+      { title: 'Le ticket', text: 'Le message de l’utilisateur, vague comme dans la vraie vie. La ligne « Pour clôturer » te dit quel test prouvera la réparation.', target: q('.side .ticket'), place: 'right' },
+      { title: 'Indices', text: 'Bloqué ? Trois indices, du plus vague au plus précis. Gratuits en mode guidé, ils coûtent des points en mode libre.', target: () => byText('.gbar .btn', 'Indice'), place: 'bottom' },
+      { title: 'Assistant pas à pas', text: 'En mode guidé seulement : une méthode de diagnostic, étape par étape, qui ne donne pas la réponse.', target: () => byText('.side .card', 'Assistant'), place: 'right' },
+      { title: 'Journal de tes actions', text: 'Tout ce que tu ouvres, tapes ou modifies est noté ici. Le débrief s’en sert pour comparer ton chemin au chemin optimal.', target: q('.side .actlog'), place: 'right' },
+      { title: 'Choisis une machine', text: 'La carte montre les machines du site. Le ticket vient d’un poste : clique sur « ' + host + ' ».', target: () => document.querySelector('.node[title="' + host + '"]'), place: 'left', wait: () => !!document.querySelector('.pop') },
+      { title: 'Écran ou poste physique', text: 'Chaque machine a deux faces : l’écran (bureau, console) et le poste physique (câbles, alimentation, prises). Certaines pannes sont matérielles !\n\nClique sur la première entrée pour ouvrir l’écran.', target: q('.pop'), place: 'left', wait: () => !!document.querySelector('.tabs .tab.on .x') },
+      { title: 'Basculer entre les deux faces', text: 'Cette barre fait passer de l’écran au poste physique, à tout moment.', target: q('.frame .fbar'), place: 'bottom' },
+      { title: 'Un vrai bureau', text: 'Menu Démarrer, clic droit, invite de commandes, consoles d’administration : tout fonctionne. Les commandes (ipconfig, ping, show running-config…) répondent selon l’état réel du réseau.', target: q('.frame .desk'), place: 'center' },
+      { title: 'Identifiants', text: 'Les comptes dont tu as besoin sont ici : technicien, administrateur, utilisateurs. Prends le moins privilégié qui suffit.', target: () => byText('.gbar .btn', 'Identifiants'), place: 'bottom' },
+      { title: 'Clôturer le ticket', text: 'Après ta réparation, refais depuis le poste de l’utilisateur ce qui échouait : le ticket se clôt tout seul. Une courte fiche te demande alors la cause et la correction.\n\nCe bouton sert à clôturer toi-même ; trop tôt, ça coûte des points.', target: () => document.querySelector('.gbar .gclose') || document.querySelector('.gbar .btn.primary'), place: 'bottom' },
+      { title: 'À toi de jouer', text: 'L’utilisatrice voit une petite croix sur l’icône réseau. Teste depuis son poste, puis regarde côté physique.\n\nUn souci avec le jeu ? Le bouton « Bug ? » copie un rapport.', last: true }
     ];
   },
   start(app, run) {
@@ -26850,6 +26920,53 @@ US.side = function (app, prof, theme, o) {
       o.hist.slice(0, 3).map(x => h('div.hhist', o.tagOf(x), h('span.grow', (SIM.faults.find(f => f.id === x.id) || { title: 'Ticket' }).title), h('b', x.total ? String(x.total) : '—')))) : null,
     tools);
 };
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+
+/* ===== ui/98-bugreport.js ===== */
+/* ============================================================================
+   « Signaler un bug » : un rapport prêt à coller, en un clic, pendant une partie.
+   Partie lisible : version, ticket, mode, temps, journal des actions, remarque du joueur.
+   Partie technique : graine, pannes et variantes, état des sondes, dernières observations — encodée (base64) pour ne pas
+   afficher la cause de la panne au joueur qui signale un problème en cours de partie.
+   Rien n'est envoyé : le rapport est copié dans le presse-papiers, le joueur le colle où il veut.
+   ============================================================================ */
+(function (g) {
+'use strict';
+const SIM = g.SIM, UI = SIM.ui, h = UI.h;
+SIM.VERSION = 'V3 · 2026-11-12';
+const BR = UI.bugreport = {};
+const b64 = s => { try { return g.btoa(unescape(encodeURIComponent(s))); } catch (e) { return ''; } };
+BR.decode = s => JSON.parse(decodeURIComponent(escape(g.atob(String(s).replace(/\s+/g, '')))));
+const mmss = t => { t = Math.max(0, Math.round(t || 0)); return (t < 600 ? '0' : '') + Math.floor(t / 60) + ':' + (t % 60 < 10 ? '0' : '') + (t % 60); };
+BR.data = function (run) {
+  const m = run.m, W = run.W; let st = null; try { st = m.status(); } catch (e) { st = { status: 'erreur : ' + e.message, parts: [] }; }
+  return {
+    v: SIM.VERSION, ticket: run.id, seed: m.seed, mode: m.mode && (m.mode.id || m.mode.label), level: m.lv && m.lv.level, camp: m.camp ? { ch: m.camp.ch, exam: !!m.camp.exam, review: !!m.camp.review } : null,
+    faults: m.parts.map(p => ({ id: p.id, vars: Object.keys(p.vars || {}).reduce((o, k) => { const v = p.vars[k]; o[k] = v && (v.key || v.sam || v.host || v.id) || (typeof v === 'object' ? JSON.stringify(v).slice(0, 80) : v); return o; }, {}) })),
+    state: m.state, status: st.status, parts: (st.parts || []).map(p => ({ id: p.id, status: p.rt && p.rt.status, roots: p.rt && p.rt.rootsFixed, verified: p.rt && p.rt.verified, probes: ((p.rt && p.rt.probes) || []).map(x => [x.t, x.ok ? 1 : 0, String(x.why || '').slice(0, 90)]) })),
+    elapsed: Math.round(m.elapsedSec()), simElapsed: Math.round(W.clock.elapsed), hints: m.hintsUsed, wrongCloses: m.wrongCloses,
+    obs: (W.obs || []).slice(-25).map(o => [o.key, o.ok ? 1 : 0, Math.round(o.t)]),
+    sessions: Object.keys(W.dev).filter(id => W.dev[id]._rt && W.dev[id]._rt.session).map(id => id + '=' + W.dev[id]._rt.session.user),
+    ua: (g.navigator && g.navigator.userAgent || '').slice(0, 120), win: g.innerWidth + 'x' + g.innerHeight
+  };
+};
+BR.text = function (run, comment) {
+  const m = run.m; const d = BR.data(run); const tk = m.fault.ticket || {};
+  const lines = ['=== Rapport de bug EDIVN Lab ===', 'Version : ' + d.v, 'Ticket : ' + d.ticket + ' — « ' + (tk.subject || '') + ' » (' + (tk.from || '') + ')',
+    'Mode : ' + (m.mode && m.mode.label) + (d.camp ? ' · chapitre ' + d.camp.ch + (d.camp.exam ? ' (examen)' : d.camp.review ? ' (révision)' : '') : ' · niveau ' + (m.lv && m.lv.label)), 'Temps : ' + mmss(d.elapsed) + ' · indices : ' + d.hints, '',
+    'Ce qui cloche :', (comment || '').trim() || '(non précisé)', '', 'Journal des actions (les plus récentes en bas) :'];
+  m.trace.slice(-40).forEach(e => lines.push('  ' + mmss(e.t) + '  ' + (e.dev ? e.dev + '  ' : '') + String(e.text || '').slice(0, 140) + (e.cls && e.cls !== 'diagnostic' ? '  [' + e.cls + ']' : '')));
+  if (!m.trace.length) lines.push('  (aucune action)');
+  lines.push('', 'Données techniques (ne pas modifier) :', (b64(JSON.stringify(d)).match(/.{1,100}/g) || []).join('\n'), '=== fin du rapport ===');
+  return lines.join('\n');
+};
+BR.modal = function (run) {
+  const ta = h('textarea.brta', { rows: 4, placeholder: 'Décris en une phrase ce qui te semble faux (facultatif) : « le ticket s’est clôturé tout seul », « impossible d’ouvrir tel fichier »…' });
+  const body = h('div.brbox', h('p', 'Le rapport contient ce ticket, tes actions et l’état du jeu. Colle-le à la personne qui corrige le simulateur.'), ta, h('p.muted', 'Rien n’est envoyé sur Internet : le rapport est seulement copié.'));
+  UI.modal('Signaler un bug', body, [{ label: 'Annuler' }, { label: 'Copier le rapport', primary: true, fn: () => UI.copyText(BR.text(run, ta.value), 'Rapport') }]);
+  setTimeout(() => ta.focus(), 30);
+};
+BR.button = run => h('button.btn.small.gbug', { title: 'Copier un rapport de bug (ticket, actions, état du jeu)', on: { click: () => BR.modal(run) } }, 'Bug ?');
 })(typeof globalThis !== 'undefined' ? globalThis : window);
 
 /* ===== ui/99-main.js ===== */

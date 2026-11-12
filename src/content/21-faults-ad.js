@@ -12,13 +12,22 @@ const USERS = [
   { sam: 'a.martin', host: 'PC-01', name: 'Alice Martin', svc: 'la comptabilité', gg: 'GG_Compta', share: 'Compta', drive: 'drive.S', dl: 'DL_Compta_RW' },
   { sam: 'b.durand', host: 'PC-02', name: 'Bruno Durand', svc: 'les RH', gg: 'GG_RH', share: 'RH', drive: 'drive.R', dl: 'DL_RH_RW' }
 ];
+/* pannes de compte pur (verrouillé, désactivé, expiré) : n'importe quel compte de l'annuaire peut être touché, y compris sur un poste partagé.
+   Le ticket nomme le poste, puisque ce n'est pas celui du titulaire. */
+const ACCT_USERS = USERS.concat([
+  { sam: 'l.berger', host: 'PC-02', name: 'Louison Berger', svc: 'les RH, sur le poste PC-02' },
+  { sam: 'j.ribeiro', host: 'PC-01', name: 'Jano Ribeiro', svc: 'la comptabilité, sur le poste PC-01' },
+  { sam: 'm.caron', host: 'PC-02', name: 'Mathis Caron', svc: 'les RH, sur le poste PC-02' },
+  { sam: 'j.lambert', host: 'PC-01', name: 'Jenny Lambert', svc: 'la comptabilité, sur le poste PC-01' },
+  { sam: 'l.fontaine', host: 'PC-01', name: 'Liam Fontaine', svc: 'la direction, sur le poste PC-01' }
+]);
 const uSel = sam => 'SRV-DC1.win.ad.users[sam=' + sam + ']';
 const gpo = id => 'SRV-DC1.win.ad.gpos[id=' + id + ']';
 const loginProbe = [{ t: 'login', host: '{{u.host}}', user: '{{u.sam}}' }];
 
 /* ======================= COMPTES ======================= */
 add({ id: 'ad_locked', level: 1, title: 'Compte utilisateur verrouillé', skills: ['ad-compte', 'diag'],
-  vary: { u: USERS },
+  vary: { u: ACCT_USERS },
   ticket: tk('{{u.name}} ({{u.svc}})', 'Impossible d’ouvrir ma session', 'Bonjour, ce matin mon mot de passe est refusé alors que je suis sûr(e) de le connaître. J’ai essayé plusieurs fois avec la touche majuscule enfoncée par erreur et maintenant l’ordinateur me dit que mon compte est bloqué. Pouvez-vous me débloquer ?'),
   cause: 'Plusieurs saisies erronées ont atteint le seuil de verrouillage : le compte est verrouillé dans Active Directory (le mot de passe est correct).',
   solution: 'Dans « Utilisateurs et ordinateurs Active Directory », ouvrir le compte → onglet Compte → cocher « Débloquer le compte ». (Il se débloquerait aussi seul à l’issue de la durée de verrouillage.)',
@@ -32,7 +41,7 @@ add({ id: 'ad_locked', level: 1, title: 'Compte utilisateur verrouillé', skills
   optimal: ['Lire le message exact affiché au poste', 'Ouvrir Utilisateurs et ordinateurs Active Directory sur le contrôleur', 'Rechercher le compte → onglet Compte', 'Débloquer le compte', 'Faire retester l’ouverture de session'] });
 
 add({ id: 'ad_disabled', level: 1, title: 'Compte utilisateur désactivé par erreur', skills: ['ad-compte', 'ad-ou', 'diag'],
-  vary: { u: USERS },
+  vary: { u: ACCT_USERS },
   ticket: tk('{{u.name}} ({{u.svc}})', 'Mon compte ne marche plus ce matin', 'Bonjour, je reviens de congés et mon identifiant ne fonctionne plus : l’écran me dit que mon compte a été désactivé. Je n’ai rien fait de particulier. Merci de regarder rapidement, j’ai du travail en retard.'),
   cause: 'Le compte a été désactivé dans Active Directory (nettoyage des comptes des personnes absentes) alors que la personne est de retour.',
   solution: 'Dans Utilisateurs et ordinateurs Active Directory : clic droit sur le compte → « Activer le compte ».',
@@ -45,7 +54,7 @@ add({ id: 'ad_disabled', level: 1, title: 'Compte utilisateur désactivé par er
   optimal: ['Lire le message d’erreur', 'Ouvrir Utilisateurs et ordinateurs Active Directory', 'Activer le compte', 'Faire retester l’ouverture de session'] });
 
 add({ id: 'ad_pwd_expired', level: 2, title: 'Mot de passe expiré', skills: ['ad-compte', 'gpo-compte', 'diag'],
-  vary: { u: USERS },
+  vary: { u: ACCT_USERS },
   ticket: tk('{{u.name}} ({{u.svc}})', 'Mot de passe refusé depuis ce matin', 'Bonjour, mon mot de passe ne passe plus. Je n’ai pourtant pas fait de faute de frappe. Mon collègue m’a dit qu’il fallait peut-être le changer mais je n’ai reçu aucun message. Pouvez-vous m’aider ?'),
   cause: 'L’âge maximal du mot de passe (stratégie de domaine) est dépassé : le mot de passe a expiré et l’utilisateur doit en définir un nouveau.',
   solution: 'Réinitialiser le mot de passe en imposant le changement à la prochaine ouverture de session (ou laisser l’utilisateur le changer à l’écran de connexion). Ne pas cocher « Le mot de passe n’expire jamais » pour un compte nominatif.',
@@ -59,7 +68,7 @@ add({ id: 'ad_pwd_expired', level: 2, title: 'Mot de passe expiré', skills: ['a
   optimal: ['Lire le message', 'Vérifier l’âge du mot de passe et la stratégie de domaine', 'Réinitialiser le mot de passe avec changement obligatoire', 'Faire retester'] });
 
 add({ id: 'ad_acct_expired', level: 2, title: 'Compte utilisateur expiré (contrat prolongé)', skills: ['ad-compte', 'diag'],
-  vary: { u: USERS },
+  vary: { u: ACCT_USERS },
   ticket: tk('{{u.name}} ({{u.svc}})', 'Message « compte expiré » à la connexion', 'Bonjour, mon contrat vient d’être prolongé jusqu’au printemps mais ce matin l’ordinateur affiche que mon compte a expiré. Mon responsable dit avoir prévenu l’informatique. Je ne peux plus travailler.'),
   cause: 'La date d’expiration du compte (onglet Compte) est dépassée alors que le contrat a été prolongé.',
   solution: 'Modifier « Le compte expire » : choisir une nouvelle date ou « Jamais » (selon la politique de l’entreprise).',
@@ -119,8 +128,8 @@ add({ id: 'ad_secure_channel', level: 3, title: 'Relation d’approbation poste 
         { key: 'compte', path: 'SRV-DC1.win.ad.computers[name={{c.host}}].enabled', bad: false, good: true, why: 'le compte ordinateur a été désactivé dans l’annuaire' }] },
   ticket: tk('{{c.name}} ({{c.svc}})', 'Message sur la relation d’approbation à la connexion', 'Bonjour, à l’ouverture de session je reçois « La relation d’approbation entre cette station de travail et le domaine principal a échoué ». Le poste revient d’une restauration d’image faite par un technicien la semaine dernière. Mon mot de passe est bon, j’ai vérifié avec un collègue.'),
   cause: 'Le poste n’est plus reconnu par le domaine : {{m.why}}. Les identifiants de l’utilisateur n’y sont pour rien.',
-  solution: 'Réparer le canal sécurisé : (Test-ComputerSecureChannel -Repair / Reset-ComputerMachinePassword), ou réactiver le compte ordinateur, ou sortir et rejoindre le domaine avec un compte autorisé.',
-  hints: ['Le message ne concerne pas le mot de passe de l’utilisateur mais le compte de l’ordinateur dans le domaine.', 'Dans l’annuaire, regardez le compte ordinateur du poste (activé ? existant ?). Côté poste, testez le canal sécurisé.', 'Réactivez le compte ordinateur ou réparez le canal (Test-ComputerSecureChannel -Repair ; ou sortir/rejoindre le domaine).'],
+  solution: 'Compte ordinateur désactivé : le réactiver dans Utilisateurs et ordinateurs Active Directory. Canal sécurisé rompu : sortir le poste du domaine puis le rejoindre avec un compte autorisé.',
+  hints: ['Le message ne concerne pas le mot de passe de l’utilisateur mais le compte de l’ordinateur dans le domaine.', 'Dans l’annuaire, regardez le compte ordinateur du poste (activé ? existant ?). Côté poste, testez le canal sécurisé (nltest /sc_query:toulouse.local).', 'Compte ordinateur désactivé : réactivez-le dans l’annuaire. Canal rompu : sortez le poste du domaine puis rejoignez-le.'],
   inject: [{ do: 'set', path: '{{m.path}}', value: '{{m.bad}}' }],
   probes: [{ t: 'login', host: '{{c.host}}', user: '{{c.user}}' }],
   roots: [{ path: '{{m.path}}', ne: '{{m.bad}}' }],

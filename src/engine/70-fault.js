@@ -183,12 +183,19 @@ F.rootsCount = function (W, inst, base) { const rs = inst.roots || []; return { 
 /* États : active → fixed (sondes OK, racine réparée, vérification manquante) → resolved ;
    workaround = sondes OK mais racine non réparée (contournement). */
 F.OBS_TYPES = ['ping', 'connect', 'resolve', 'http', 'ipconfig', 'share', 'login', 'ssh', 'vpn', 'use'];
+F.VERIFY_BY_PROBE = {
+  http: ['http', 'connect'], share: ['share'], login: ['login'],
+  ping: ['ping', 'connect', 'http', 'share', 'ssh'], connect: ['connect', 'http', 'share', 'ssh'], resolve: ['resolve', 'ping', 'connect', 'http', 'share']
+};
 F.defaultVerify = function (inst) {
   const pats = new Set();
   for (const p of inst.probes) {
     const h = p.from || p.host || p.client;
-    if (h) F.OBS_TYPES.forEach(t => pats.add(t + ':' + h + ':*'));
-    if (!h && p.dev) F.OBS_TYPES.forEach(t => pats.add(t + ':*:' + p.dev + '*'));
+    /* le test qui prouve la réparation doit ressembler à celui qui échouait : un site se vérifie dans le navigateur (ou en se connectant au port),
+       un partage en l'ouvrant, une session en l'ouvrant. Allumer l'écran du poste (« use ») ne prouve rien, sauf pour une panne d'écran (verify explicite). */
+    const types = F.VERIFY_BY_PROBE[p.t] || F.OBS_TYPES.filter(t => t !== 'use');
+    if (h) types.forEach(t => pats.add(t + ':' + h + ':*'));
+    if (!h && p.dev) types.forEach(t => pats.add(t + ':*:' + p.dev + '*'));
   }
   return [...pats];
 };

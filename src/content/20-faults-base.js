@@ -200,7 +200,7 @@ add({ id: 'dhcp_svc_disabled', level: 2, title: 'Service DHCP désactivé (type 
   optimal: ['Constater l’APIPA', 'services.msc sur SRV-DC1', 'Type de démarrage → Automatique', 'Démarrer le service', 'ipconfig /renew'] });
 
 add({ id: 'dhcp_unauth', level: 3, title: 'Serveur DHCP non autorisé dans Active Directory', skills: ['dhcp-auth', 'dhcp', 'diag'],
-  ticket: tk('Bruno Durand (les RH)', 'Plus d’adresses depuis la migration de ce week-end', 'Bonjour, depuis la reprise de lundi les postes n’obtiennent plus d’adresse réseau. Le service informatique m’a dit que le serveur avait été remis à jour pendant le week-end et que « tout tournait ».'),
+  ticket: tk('Alice Martin (la comptabilité)', 'Plus d’adresses depuis la migration de ce week-end', 'Bonjour, depuis la reprise de lundi les postes n’obtiennent plus d’adresse réseau. Le service informatique m’a dit que le serveur avait été remis à jour pendant le week-end et que « tout tournait ».'),
   cause: 'Après la restauration du serveur, SRV-DC1 n’est plus autorisé comme serveur DHCP dans Active Directory : le service est démarré mais il cesse de répondre aux clients (une erreur du journal DHCP-Server le dit).',
   solution: 'Dans la console DHCP, clic droit sur le serveur → Autoriser, puis renouveler le bail du poste.',
   hints: ['Le service DHCP est démarré et l’étendue est active, pourtant les postes sont en APIPA : cherchez ce qui empêche le serveur de répondre.', 'Consultez les journaux de SRV-DC1 dans l’Observateur d’événements (journaux des applications et des services, DHCP-Server) autour du démarrage du service.', 'Un serveur DHCP membre d’un domaine doit être autorisé dans Active Directory : regardez la flèche à côté du nom du serveur dans la console DHCP.'],
@@ -226,7 +226,7 @@ add({ id: 'dhcp_pool', v1: 'dhcp_pool', level: 2, title: 'Étendue DHCP sans adr
   optimal: ['ipconfig : 169.254.x.x', 'Console DHCP : pool d’adresses', 'Corriger l’exclusion', 'ipconfig /renew'] });
 
 add({ id: 'dhcp_scope_off', level: 2, title: 'Étendue DHCP désactivée', skills: ['dhcp', 'diag'],
-  ticket: tk('Bruno Durand (les RH)', 'Réseau coupé pour tout l’étage', 'Bonjour, depuis ce matin on n’a plus de réseau dans le bureau des RH. Le service informatique a peut-être touché quelque chose hier.'),
+  ticket: tk('Alice Martin (la comptabilité)', 'Réseau coupé pour tout l’étage', 'Bonjour, depuis ce matin on n’a plus de réseau dans le bureau de la comptabilité. Le service informatique a peut-être touché quelque chose hier.'),
   cause: 'L’étendue 10.10.20.0 de SRV-DC1 est désactivée : le serveur DHCP ne distribue plus rien pour le VLAN 20.',
   solution: 'Activer l’étendue dans la console DHCP puis renouveler le bail.',
   hints: ['Le service DHCP est démarré mais les postes sont en APIPA : cherchez au niveau de l’étendue.', 'Dans la console DHCP, la flèche à côté de l’étendue indique son état.', 'Faites un clic droit sur l’étendue et choisissez Activer.'],
@@ -346,7 +346,7 @@ add({ id: 'dns_rec_missing', v1: 'dns_rec_missing', level: 2, title: 'Enregistre
   optimal: ['ping par IP OK, par nom KO', 'nslookup srv-fic', 'Gestionnaire DNS : recréer l’enregistrement A', 'ipconfig /flushdns'] });
 
 add({ id: 'dns_rec_wrong', v1: 'dns_rec_wrong', level: 2, title: 'Enregistrement A pointant vers une mauvaise adresse', skills: ['dns', 'diag'],
-  ticket: tk('Bruno Durand (les RH)', 'Le partage « RH » ne s’ouvre plus', 'Bonjour, mon lecteur réseau RH affiche une erreur de délai d’attente alors qu’il marchait hier. Les autres collègues ont le même souci.'),
+  ticket: tk('Alice Martin (la comptabilité)', 'Le partage « Compta » ne s’ouvre plus', 'Bonjour, mon lecteur réseau Compta affiche une erreur de délai d’attente alors qu’il marchait hier. Les autres collègues ont le même souci.'),
   cause: 'L’enregistrement A de srv-fic pointe vers 10.10.10.21 (ancienne adresse) au lieu de 10.10.10.20.',
   solution: 'Corriger l’enregistrement A (10.10.10.20) et vider le cache DNS des clients.',
   hints: ['Le nom se résout mais la connexion expire : vérifiez que l’adresse obtenue est la bonne.', 'nslookup srv-fic donne une adresse : est-ce l’adresse réelle du serveur (ipconfig sur srv-fic) ?', 'Modifiez l’enregistrement dans la zone DNS puis ipconfig /flushdns sur le client.'],
@@ -390,7 +390,8 @@ add({ id: 'dns_fwd', v1: 'dns_fwd', level: 2, title: 'Redirecteur DNS erroné : 
   hints: ['Les noms internes passent, les noms externes non : qui relaie les requêtes externes ?', 'Propriétés du serveur DNS → onglet Redirecteurs.', 'Le redirecteur 10.10.10.250 ne répond pas : mettez 8.8.8.8.'],
   inject: [{ do: 'set', path: 'SRV-DC1.win.dns.forwarders', value: ['10.10.10.250'] }],
   probes: [{ t: 'resolve', from: 'PC-01', name: 'srv-fic', expect: '10.10.10.20' }, { t: 'resolve', from: 'PC-01', name: 'www.exemple.fr', expect: '93.184.216.34' }],
-  roots: [{ path: 'SRV-DC1.win.dns.forwarders', has: '8.8.8.8' }],
+  /* tout redirecteur qui répond convient (8.8.8.8, 1.1.1.1, le pare-feu…) : la cause est corrigée dès que le redirecteur mort a disparu et que les noms externes sont résolus (sondes) */
+  roots: [{ path: 'SRV-DC1.win.dns.forwarders', hasNot: '10.10.10.250' }],
   fix: [{ do: 'set', path: 'SRV-DC1.win.dns.forwarders', value: ['8.8.8.8'] }, { do: 'flushdns', dev: 'PC-01' }],
   traps: ['Mettre 8.8.8.8 en DNS secondaire sur les postes contourne l’AD et le contrôle DNS.'],
   optimal: ['nslookup www.exemple.fr : échec', 'nslookup srv-fic : OK', 'Propriétés DNS → Redirecteurs', 'Corriger puis flushdns'] });

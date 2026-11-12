@@ -9,7 +9,18 @@ const KEY_TSSR = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJd4s5mUlA0xT8n1Qw7kYb2GfH
 SIM.CREDS = [
   { scope: 'Domaine toulouse.local', who: 'TOULOUSE\\Administrateur', secret: 'Adm!n2026', note: 'Administrateur du domaine' },
   { scope: 'Domaine toulouse.local', who: 'TOULOUSE\\tssr', secret: 'Tssr-2026!', note: 'Compte d’administration (Admins du domaine)' },
+  /* comptes des utilisateurs : pour reproduire un problème de connexion à la place de l'utilisateur (dans la vraie vie, c'est lui qui tape son mot de passe devant toi) */
+  { scope: 'Domaine toulouse.local', who: 'a.martin', secret: 'Compta#2026', note: 'Utilisatrice : Alice Martin, comptabilité (PC-01)' },
+  { scope: 'Domaine toulouse.local', who: 'b.durand', secret: 'Ress0urces!', note: 'Utilisateur : Bruno Durand, RH (PC-02)' },
+  { scope: 'Domaine toulouse.local', who: 'c.lefevre', secret: 'Direct1on#', note: 'Utilisatrice : Claire Lefèvre, direction' },
+  { scope: 'Domaine toulouse.local', who: 'd.moreau', secret: 'Moreau@2026', note: 'Utilisateur : David Moreau, comptabilité' },
   { scope: 'Domaine bordeaux.local', who: 'BORDEAUX\\Administrateur', secret: 'Adm!n-Bdx26', note: 'Administrateur du domaine de Bordeaux' },
+  { scope: 'Domaine toulouse.local', who: 'l.berger', secret: 'Berger#2026', note: 'Utilisatrice : Louison Berger, RH (poste partagé PC-02)' },
+  { scope: 'Domaine toulouse.local', who: 'j.ribeiro', secret: 'Ribeiro#2026', note: 'Utilisateur : Jano Ribeiro, comptabilité (poste partagé PC-01)' },
+  { scope: 'Domaine toulouse.local', who: 'm.caron', secret: 'Caron#2026', note: 'Utilisateur : Mathis Caron, RH (poste partagé PC-02)' },
+  { scope: 'Domaine toulouse.local', who: 'j.lambert', secret: 'Lambert#2026', note: 'Utilisatrice : Jenny Lambert, comptabilité (poste partagé PC-01)' },
+  { scope: 'Domaine toulouse.local', who: 'l.fontaine', secret: 'Fontaine#2026', note: 'Utilisateur : Liam Fontaine, direction (passe sur PC-01)' },
+  { scope: 'Domaine bordeaux.local', who: 'e.garcia', secret: 'Bordeaux#26', note: 'Utilisatrice : Elena Garcia, Bordeaux' },
   { scope: 'Postes et serveurs Windows (local)', who: 'tech', secret: 'T3ch#2026', note: 'Compte local d’intervention' },
   { scope: 'Postes et serveurs Windows (local)', who: 'Administrateur', secret: 'Loc@l-2026', note: 'Administrateur local' },
   { scope: 'Serveurs Debian', who: 'tssr', secret: 'Tssr-2026!', note: 'Clé SSH installée sur PC-ADM ; sudo' },

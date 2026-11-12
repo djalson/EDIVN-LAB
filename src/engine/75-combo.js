@@ -82,8 +82,8 @@ F.assembleBundle = function (seed, insts, mode) {
   const uniq = a => a.filter((x, i) => a.indexOf(x) === i);
   const sites = uniq(insts.map(i => i.ticket.site));
   /* Chaque message d'origine commence par sa propre formule de politesse : on la retire pour que le ticket composé se lise comme un seul message. */
-  const clean = t => { const x = t.replace(/\n+/g, ' ').replace(/^\s*(bonjour|bonsoir|salut)\s*[,!.]?\s*/i, '').trim(); return x.charAt(0).toUpperCase() + x.slice(1); };
-  const body = 'Bonjour, plusieurs problèmes en même temps, je ne sais pas s’ils sont liés :\n' + insts.map((i, k) => (k + 1) + ') ' + clean(i.ticket.body)).join('\n') + '\nMerci de regarder dès que possible.';
+  const clean = t => { const x = t.replace(/\n+/g, ' ').replace(/^\s*(bonjour|bonsoir|salut)\s*[,!.]?\s*/i, '').trim(); return /^(https?:|\\\\|\/)/i.test(x) ? x : x.charAt(0).toUpperCase() + x.slice(1); };   /* une adresse (http://, \\\\srv, /srv) garde sa casse */
+  const body = 'Bonjour, plusieurs problèmes en même temps, je ne sais pas s’ils sont liés :\n' + insts.map((i, k) => (k + 1) + ') ' + (i.ticket.from && i.ticket.from !== insts[0].ticket.from ? 'Signalé par ' + i.ticket.from + ' : ' : '') + clean(i.ticket.body)).join('\n') + '\nMerci de regarder dès que possible.';
   return {
     id: 'combo-' + seed, level: 5, bundle: true, mode, parts: insts, partIds: insts.map(i => i.id),
     title: insts.length + ' pannes dans un seul ticket',

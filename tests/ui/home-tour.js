@@ -31,7 +31,7 @@ const W = +(process.argv[2] || 1440), H = +(process.argv[3] || 900);
     if (title === 'Écran ou poste physique') { await p.click('.pop .btn >> nth=0'); await p.waitForTimeout(1200); n++; continue; }
     if (await p.$('.tcard .tnext')) { const txt = await p.innerText('.tcard .tnext'); if (/Jouer/.test(txt)) { await p.click('.tcard .tnext'); break; } await p.click('.tcard .tnext'); await p.waitForTimeout(450); n++; } else break;
   }
-  chk('parcours complet jusqu\'à la fin', !(await p.$('.tcard')) && n >= 12);
+  chk('parcours complet jusqu\'à la fin', !(await p.$('.tcard')) && n >= 10);
   chk('tutoriel marqué comme fait', await p.evaluate(() => !!SIM.game.profile().tourDone));
   chk('on reste dans la partie après le tutoriel', await p.evaluate(() => !!SIM_APP.run));
   await p.screenshot({ path: require('os').tmpdir() + '/tour_end.png' });

@@ -144,3 +144,7 @@
 .gfold .pgoalbox { border: none; margin: 0; padding: 0 10px 8px; }
 .gfold .pgoalh { display: none; }
 .v3ui .hintscard.empty { display: none; }
+
+/* « Signaler un bug » : bouton discret de la barre de partie et zone de remarque */
+.gbug { opacity: .75; } .gbug:hover { opacity: 1; }
+.brbox p { margin: 0 0 10px; } .brta { width: 100%; box-sizing: border-box; min-height: 84px; resize: vertical; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line, #3a2a7a); background: rgba(0, 0, 0, .25); color: inherit; font: inherit; margin-bottom: 10px; }

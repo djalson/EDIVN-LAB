@@ -141,7 +141,9 @@ P.drawLogon = function (userPreset, step, locking) {
       const pwd = pIn.value;
       if (locking && !other) {
         const r = UI.winLogon(self.W, d, last, pwd);
-        if (!r.ok) { self.run.act(self.devId, 'Échec de déverrouillage', { kind: 'login', mutates: false }); showErr(r.msg); return; }
+        if (!r.ok) { self.env.obs('login:' + self.devId + ':' + String(last).replace(/^.*\\/, '').replace(/@.*$/, ''), false); self.run.act(self.devId, 'Échec de déverrouillage', { kind: 'login', mutates: false }); showErr(r.msg); return; }
+        /* le déverrouillage authentifie auprès du contrôleur de domaine (horaires, poste, verrouillage) : il vaut test de connexion */
+        self.env.obs('login:' + self.devId + ':' + String(r.user || last).replace(/^.*\\/, '').replace(/@.*$/, ''), true);
         vf.submit(); if (self.desk) self.desk.el.classList.remove('hidden'); root.remove(); self.mode = 'desk'; self.run.act(self.devId, 'Déverrouillage de la session', { kind: 'login', mutates: false }); return;
       }
       const r = UI.winLogon(self.W, d, name, pwd);

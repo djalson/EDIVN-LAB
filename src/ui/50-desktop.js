@@ -164,7 +164,10 @@ P.drawTray = function () {
   this.tray.append(h('div.ti', '︿'), net, h('div.ti', '🔊'), h('div.ti', { style: { fontSize: '11px' } }, 'FRA'), this.clockEl, h('div.ti', '🗨'));
   this.drawClock();
 };
-P.drawClock = function () { if (!this.clockEl) return; const dt = this.W.nowOf(this.devId); UI.clear(this.clockEl); this.clockEl.append(h('div', E.frTime(dt).slice(0, 5)), h('div', E.frDate(dt))); };
+P.drawClock = function () { if (!this.clockEl) return; const dt = this.W.nowOf(this.devId); UI.clear(this.clockEl); this.clockEl.append(h('div', E.frTime(dt).slice(0, 5)), h('div', E.frDate(dt)));
+  /* survol : la date complète avec le jour de la semaine, comme Windows (« mardi 27 octobre 2026 ») */
+  const J = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'], M = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  this.clockEl.title = J[dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + M[dt.getUTCMonth()] + ' ' + dt.getUTCFullYear(); };
 P.closeFlyout = function () { if (this.flyout) { this.flyout.remove(); this.flyout = null; } };
 P.netFlyout = function () {
   this.closeFlyout(); const ns = UI.netState(this.W, this.d); const self = this;
@@ -194,7 +197,10 @@ P.openStart = function (focusSearch) {
     /* clic droit : « Exécuter en tant qu'administrateur » (UAC : consentement ou identifiants d'un administrateur) */
     const runAdmin = x => { self.closeStart(); if (x[0] === 'cmd' || x[0] === 'powershell') { self.open(x[0], undefined, { runas: true }); return; } self.uac(x[2], el => { if (el) self.open(x[0], undefined, { elevated: true }); }); };
     const mk = x => h('div.si', { on: { click: () => { self.closeStart(); self.open(x[0]); }, contextmenu: e => { e.preventDefault(); e.stopPropagation(); UI.w.contextMenu(e.clientX, e.clientY, [{ label: 'Ouvrir', fn: () => { self.closeStart(); self.open(x[0]); } }, { label: 'Exécuter en tant qu’administrateur', fn: () => runAdmin(x) }], self.el); } } }, UI.icon(x[1], 22), x[2]);
-    const a = kept.filter(f), b = adm.filter(f); if (a.length) { list.append(h('div.sh', q ? 'Meilleurs résultats' : 'Applications')); a.forEach(x => list.append(mk(x))); }
+    /* la recherche trouve aussi les outils Windows qui ne sont pas épinglés (pare-feu avancé, date et heure, gestion de l'ordinateur…), comme le vrai menu Démarrer */
+    const shown = kept.concat(adm).map(x => x[0]);
+    const more = q ? [['wf', 'shield', 'Pare-feu Windows Defender avec fonctions avancées de sécurité'], ['datetime', 'clock', 'Date et heure'], ['compmgmt', 'gear', 'Gestion de l’ordinateur'], ['lusrmgr', 'users', 'Utilisateurs et groupes locaux'], ['devmgmt', 'gear', 'Gestionnaire de périphériques'], ['diskmgmt', 'gear', 'Gestion des disques'], ['certlm', 'cert', 'Certificats (ordinateur local)'], ['msinfo', 'list', 'Informations système'], ['regedit', 'gear', 'Éditeur du Registre'], ['gpedit', 'shield', 'Éditeur de stratégie de groupe locale'], ['ise', 'terminal', 'Windows PowerShell ISE']].filter(x => UI.apps[x[0]] && shown.indexOf(x[0]) < 0 && f(x)) : [];
+    const a = kept.filter(f).concat(more), b = adm.filter(f); if (a.length) { list.append(h('div.sh', q ? 'Meilleurs résultats' : 'Applications')); a.forEach(x => list.append(mk(x))); }
     if (b.length) { list.append(h('div.sh', 'Outils d’administration Windows')); b.forEach(x => list.append(mk(x))); }
     if (!a.length && !b.length) list.append(h('div.sh', 'Aucun résultat'));
   };

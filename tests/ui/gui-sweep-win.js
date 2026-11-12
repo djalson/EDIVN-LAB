@@ -37,7 +37,15 @@ const FAM = /^(ad|gpo|dhcp|dns|iis|sh|fw|nic|ipv4|web)_/;
     await p.waitForFunction(d => !!SIM_APP.run.surfaces[d].desk || !!document.querySelector('.logon'), dev, { timeout: 5000 }); await p.waitForTimeout(150);
     if (!logged.has(dev) && await p.$('.logon')) {
       const c = await creds(dev); await p.click('.logon'); await p.waitForTimeout(100);
-      await p.fill('.logon input[type=text]', c.user); await p.fill('.logon input[type=password]', c.pwd); await p.keyboard.press('Enter'); await p.waitForTimeout(1700);
+      /* écran sur la tuile du dernier utilisateur (panne de connexion : il est déconnecté) : « Autre utilisateur » */
+      if (!(await p.$('.logon input[type=text]'))) { const o = await p.$('.logon .other'); if (o) { await o.click(); await p.waitForTimeout(120); } }
+      await p.fill('.logon input[type=text]', c.user); await p.fill('.logon input[type=password]', c.pwd); await p.keyboard.press('Enter'); await p.waitForTimeout(1700);      /* le domaine refuse l'ouverture (horloge décalée, contrôleur injoignable…) : le technicien passe par le compte LOCAL d'intervention du poste */
+      if (await p.$('.logon')) {
+        const okb = await p.$('.logon button.go'); if (okb && (await okb.textContent()).trim() === 'OK') { await okb.click(); await p.waitForTimeout(120); }
+        if (!(await p.$('.logon input[type=text]'))) { const o = await p.$('.logon .other'); if (o) { await o.click(); await p.waitForTimeout(120); } }
+        const loc = await p.evaluate(() => (SIM.VAULT.find(v => v.user === 'tech' && v.tags.indexOf('win') >= 0) || {}).secret);   /* « tech » : compte local d'intervention, administrateur du poste (l'Administrateur local des postes est désactivé) */
+        if (await p.$('.logon input[type=text]')) { await p.fill('.logon input[type=text]', '.\\tech'); await p.fill('.logon input[type=password]', loc); await p.keyboard.press('Enter'); await p.waitForTimeout(1700); }
+      }
     }
     logged.add(dev);
     return await p.evaluate(d => !!SIM_APP.run.surfaces[d].desk, dev);

@@ -176,6 +176,14 @@ function Mission(o) {
   this.trace = []; this.hintsUsed = 0; this.hintLog = []; this.dangers = []; this.wrongCloses = 0; this.falseRes = 0; this.impacts = []; this.refunded = []; this.aids = []; this.fx = []; this._blk = this._blockedNow();
   this.state = 'running'; this.result = null; this.resolvedAtSec = null; this.firstFixedAtSec = null; this.endSec = null;
   this.parts.forEach(p => F.runSteps(this.W, p.inject, { inst: p }));
+  /* Panne « je ne peux plus ouvrir ma session » : l'utilisateur est devant l'écran de connexion, pas déjà connecté.
+     Sans cela, le poste s'ouvrait sur sa session encore active et le message d'erreur n'apparaissait jamais. */
+  this.parts.forEach(p => (p.probes || []).forEach(pr => {
+    if (pr.t !== 'login' || !pr.host || !pr.user) return; const host = this.W.dev[pr.host]; const ss = host && host._rt && host._rt.session;
+    if (!ss || String(ss.user).toLowerCase() !== String(pr.user).toLowerCase()) return;
+    let r; try { r = SIM.probes.login(this.W, pr, p); } catch (e) { r = { ok: true }; }
+    if (!r.ok) SIM.ad.sessionEnd(this.W, pr.host);
+  }));
   this.prevSem = this.W.sem(); this.simStart = this.W.clock.elapsed;
   this.prog = this._progress(); this.counters = { diagnostic: 0, change: 0, progress: 0, regress: 0, detour: 0 };
   this.okDanger = [].concat.apply([], this.parts.map(p => p.okDanger || []));
@@ -260,7 +268,8 @@ Mission.prototype.hint = function (partIdx) {
 Mission.prototype.close = function () {
   if (this.state !== 'running') return { already: true };
   const st = this.check(); if (this.state !== 'running') return { ok: true, result: this.result };
-  if (st.status === 'workaround') { this.falseRes++; this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture sur un contournement', cls: 'false-close' }); const wn = this.parts.filter(p => p.rt && p.rt.status === 'workaround' && p.workaroundNote).map(p => p.workaroundNote); return { ok: false, why: 'workaround', message: 'Le service remarche pour l’utilisateur mais la cause racine n’est pas corrigée' + (wn.length ? '. ' + wn.join(' ') + ' Le ticket est rouvert.' : ' : la panne reviendra. Le ticket est rouvert.') }; }
+  if (st.status === 'workaround') { this.falseRes++; this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture sur un contournement', cls: 'false-close' }); /* explication : la note propre à la panne, sinon ses pièges déclarés (ils décrivent justement les fausses bonnes idées) */
+    const wn = this.parts.filter(p => p.rt && p.rt.status === 'workaround').map(p => p.workaroundNote || (p.traps || []).slice(0, 2).join(' ')).filter(Boolean); return { ok: false, why: 'workaround', message: 'Le service remarche pour l’utilisateur, mais tu as contourné la cause au lieu de la corriger' + (wn.length ? '. ' + wn.join(' ') + ' Le ticket est rouvert.' : ' : la panne reviendra. Le ticket est rouvert.') }; }
   /* panne « silencieuse » (D-93) : la clôture sur un test qui réussit est refusée ; la panne dit POURQUOI (champ closeNote), sans nommer la cause ni la commande */
   const notes = this.parts.filter(p => p.rt && p.rt.status !== 'resolved' && p.closeNote).map(p => p.closeNote);
   this.wrongCloses++; this.trace.push({ t: this.elapsedSec(), kind: 'close', text: 'Clôture prématurée', cls: 'wrong-close', note: notes.length ? notes.join(' ') : undefined });

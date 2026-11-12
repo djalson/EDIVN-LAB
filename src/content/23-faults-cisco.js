@@ -68,10 +68,10 @@ add({ id: 'c_portsec', level: 3, title: 'Port en err-disabled (port-security) ap
 /* ======================= TRUNKS ======================= */
 add({ id: 'c_trunk_allowed', level: 3, title: 'VLAN absent de la liste autorisée du trunk', skills: ['trunk', 'vlan', 'diag'],
   vary: { c: [
-    { sw: 'SW-T2', host: 'PC-01', bad: [10, 30], good: [10, 20, 30], who: 'SW-T2', label: 'les postes des commutateurs SW-T2 et SW-T3' },
-    { sw: 'SW-T3', host: 'PC-02', bad: [30], good: [20, 30], who: 'SW-T3', label: 'les postes branchés sur SW-T3' }
+    { sw: 'SW-T2', host: 'PC-01', user: 'Alice Martin (la comptabilité)', bad: [10, 30], good: [10, 20, 30], who: 'SW-T2', label: 'les postes des commutateurs SW-T2 et SW-T3' },
+    { sw: 'SW-T3', host: 'PC-02', user: 'Bruno Durand (les RH)', bad: [30], good: [20, 30], who: 'SW-T3', label: 'les postes branchés sur SW-T3' }
   ] },
-  ticket: tk('Bruno Durand (les RH)', 'Plus d’adresse réseau pour plusieurs postes', 'Bonjour, depuis la maintenance de la nuit plusieurs postes n’ont plus de réseau : « réseau non identifié ». Le technicien dit avoir seulement « ajouté le VLAN 30 sur la liaison entre les commutateurs ». Les serveurs fonctionnent.'),
+  ticket: tk('{{c.user}}', 'Plus d’adresse réseau pour plusieurs postes', 'Bonjour, depuis la maintenance de la nuit plusieurs postes n’ont plus de réseau : « réseau non identifié ». Le technicien dit avoir seulement « ajouté le VLAN 30 sur la liaison entre les commutateurs ». Les serveurs fonctionnent.'),
   cause: 'Sur le trunk Gi0/1 de {{c.who}}, la liste des VLAN autorisés a été remplacée (switchport trunk allowed vlan …) au lieu d’être complétée (add) : le VLAN 20 ne traverse plus la liaison, {{c.label}} perdent le réseau.',
   solution: 'Réintroduire le VLAN 20 : switchport trunk allowed vlan add 20 (des deux côtés du trunk), puis renouveler les baux.',
   hints: ['Les serveurs (VLAN 10) fonctionnent, les postes (VLAN 20) non : un VLAN précis ne passe plus entre deux commutateurs.', 'show interfaces trunk sur les deux commutateurs : comparez « VLANs allowed » de la liaison.', 'switchport trunk allowed vlan add 20 sur la liaison concernée, puis ipconfig /renew.'],

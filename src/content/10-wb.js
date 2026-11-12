@@ -42,6 +42,8 @@ WB.buildNet = function (W) {
     },
     pub: {
       '8.8.8.8': { name: 'dns.google', svc: ['udp/53', 'tcp/53'] },
+      /* autres résolveurs publics qu'un technicien met spontanément en redirecteur ou pour tester */
+      '1.1.1.1': { name: 'one.one.one.one', svc: ['udp/53', 'tcp/53'] }, '9.9.9.9': { name: 'dns.quad9.net', svc: ['udp/53', 'tcp/53'] },
       '93.184.216.34': { name: 'www.exemple.fr', svc: ['tcp/80', 'tcp/443'] },
       '142.250.74.227': { name: 'www.google.fr', svc: ['tcp/80', 'tcp/443'] },
       '185.15.59.224': { name: 'wikipedia.org', svc: ['tcp/80', 'tcp/443'], pages: { '*': { title: 'Encyclopédie', html: '<h1>Encyclopédie libre</h1><p>Page d’accueil fictive.</p>' } } },

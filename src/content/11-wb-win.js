@@ -44,14 +44,19 @@ WB.adToulouse = function () {
       { sam: 'b.durand', name: 'Bruno Durand', ou: 'OU=RH,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Ress0urces!', pwdSetDays: 10 },
       { sam: 'c.lefevre', name: 'Claire Lefèvre', ou: 'OU=Direction,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Direct1on#', pwdSetDays: 50 },
       { sam: 'd.moreau', name: 'David Moreau', ou: 'OU=Compta,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Moreau@2026', pwdSetDays: 5 },
+      { sam: 'l.berger', name: 'Louison Berger', ou: 'OU=RH,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Berger#2026', pwdSetDays: 22 },
+      { sam: 'j.ribeiro', name: 'Jano Ribeiro', ou: 'OU=Compta,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Ribeiro#2026', pwdSetDays: 31 },
+      { sam: 'm.caron', name: 'Mathis Caron', ou: 'OU=RH,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Caron#2026', pwdSetDays: 14 },
+      { sam: 'j.lambert', name: 'Jenny Lambert', ou: 'OU=Compta,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Lambert#2026', pwdSetDays: 44 },
+      { sam: 'l.fontaine', name: 'Liam Fontaine', ou: 'OU=Direction,OU=Utilisateurs,' + dn(), enabled: true, pwd: 'Fontaine#2026', pwdSetDays: 8 },
       { sam: 'svc-backup', name: 'Compte de service sauvegarde', ou: 'CN=Users,' + dn(), enabled: true, pwd: 'Svc-B@ckup1', pwdNeverExpires: true, pwdSetDays: 300 }
     ],
     groups: [
       { name: 'Admins du domaine', scope: 'Global', ou: 'CN=Users,' + dn(), members: ['Administrateur', 'tssr'] },
       { name: 'Administrateurs', scope: 'DomainLocal', builtin: true, ou: 'CN=Builtin,' + dn(), members: ['Admins du domaine', 'Administrateur'] },
-      { name: 'GG_Compta', scope: 'Global', ou: dn('Groupes'), members: ['a.martin', 'd.moreau'] },
-      { name: 'GG_RH', scope: 'Global', ou: dn('Groupes'), members: ['b.durand'] },
-      { name: 'GG_Direction', scope: 'Global', ou: dn('Groupes'), members: ['c.lefevre'] },
+      { name: 'GG_Compta', scope: 'Global', ou: dn('Groupes'), members: ['a.martin', 'd.moreau', 'j.ribeiro', 'j.lambert'] },
+      { name: 'GG_RH', scope: 'Global', ou: dn('Groupes'), members: ['b.durand', 'l.berger', 'm.caron'] },
+      { name: 'GG_Direction', scope: 'Global', ou: dn('Groupes'), members: ['c.lefevre', 'l.fontaine'] },
       { name: 'GG_IT', scope: 'Global', ou: dn('Groupes'), members: ['tssr'] },
       { name: 'DL_Compta_RW', scope: 'DomainLocal', ou: dn('Groupes'), members: ['GG_Compta'] },
       { name: 'DL_RH_RW', scope: 'DomainLocal', ou: dn('Groupes'), members: ['GG_RH'] },
@@ -180,7 +185,7 @@ WB.buildWin = function (W) {
 
   /* ===== SRV-FIC : fichiers + IIS (Toulouse) ===== */
   const fic = WB.winServer('SRV-FIC', { ip: '10.10.10.20', gw: '10.10.10.1', dns: ['10.10.10.10'], domain: 'toulouse.local', suffix: 'toulouse.local', roles: ['web', 'rdp'], rdp: true,
-    svc: { W3SVC: [R, 'auto'], WAS: [R, 'manual'], TermService: [R, 'auto'], LanmanServer: [R, 'auto'], Dhcp: [S, 'manual'] } });
+    svc: { W3SVC: [R, 'auto'], WAS: [R, 'manual'], TermService: [R, 'auto'], LanmanServer: [R, 'auto'], Dhcp: [R, 'auto'] } });
   const fd = WB.fileServerData();
   fic.win.certs = [{ cn: 'srv-fic.toulouse.local', san: ['srv-fic.toulouse.local', 'srv-fic'], issuer: 'CA-FormaTech', notBefore: '2026-03-01', notAfter: '2028-03-01' }, { cn: 'portail.toulouse.local', san: ['portail.toulouse.local'], issuer: 'CA-FormaTech', notBefore: '2026-03-01', notAfter: '2028-03-01' }];
   fic.win.fw.rules.push(rule('Portail intranet (TCP 8080)', { id: 'http-8080', proto: 'TCP', lport: '8080', group: '' }));

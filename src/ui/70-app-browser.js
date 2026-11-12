@@ -67,7 +67,11 @@ UI.app('browser', {
     addr.addEventListener('keydown', e => { if (e.key === 'Enter') load(addr.value); });
     const bar = h('div.bbar', back, fwd, reload, addr);
     const tabs = h('div.btabs', h('div.btab.on', UI.icon('globe', 14), tabLabel));
-    win = desk.wm.open({ title: 'Nouvel onglet — Navigateur', icon: 'globe', w: 1000, h: 620, className: 'browser', body: () => h('div.bwrap', tabs, bar, content, status) });
+    /* barre des favoris, comme sur un poste d'entreprise : l'intranet du site et un site externe, pour tester vite l'accès interne et Internet */
+    const dom = String((desk.d.win && desk.d.win.domain) || '').toLowerCase();
+    const favs = [/toulouse/.test(dom) ? ['Intranet', 'http://srv-fic'] : null, ['Google', 'http://www.google.fr']].filter(Boolean);
+    const favBar = h('div.bfavs', favs.map(f => h('button.bfav', { title: f[1], on: { click: () => load(f[1]) } }, UI.icon('globe', 13), f[0])));
+    win = desk.wm.open({ title: 'Nouvel onglet — Navigateur', icon: 'globe', w: 1000, h: 620, className: 'browser', body: () => h('div.bwrap', tabs, bar, favBar, content, status) });
     content.append(h('div.bpage.bnew', h('h2', 'Nouvel onglet'), h('p.muted', 'Saisissez une adresse dans la barre d’adresse.'))); btns();
     if (arg) load(arg);
     setTimeout(() => addr.focus(), 50);
