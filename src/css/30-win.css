@@ -9,7 +9,7 @@
 .dicon { width: 76px; text-align: center; color: #fff; padding: 4px 2px; border: 1px solid transparent; border-radius: 2px; cursor: default; text-shadow: 0 1px 2px #000a; }
 .dicon:hover { background: #ffffff22; border-color: #ffffff33; } .dicon.sel { background: #3a78c455; border-color: #6aa6ff88; }
 .dicon .ico { display: block; margin: 0 auto 2px; }
-.wmarea { position: absolute; inset: 0 0 40px 0; overflow: hidden; }
+.wmarea { position: absolute; inset: 0 0 40px 0; overflow: hidden; pointer-events: none; } .wmarea > * { pointer-events: auto; } /* la zone des fenêtres laisse passer les clics vers le bureau (icônes, clic droit) ; les fenêtres, elles, les reçoivent */
 .desk.noTaskbar .wmarea { bottom: 0; }
 
 /* fenêtres */

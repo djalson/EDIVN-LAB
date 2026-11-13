@@ -16,7 +16,7 @@ const outside = e => { if (openMenu && !openMenu.contains(e.target) && !(e.targe
 const escKey = e => { if (e.key === 'Escape') closeMenus(); };
 function buildMenu(items, close, level) {
   const m = h('div.ctx' + (level ? '.sub' : ''));
-  items.forEach(it => {
+  items.filter(Boolean).forEach(it => {
     if (it === '-' || it.sep) { m.append(h('div.ctxsep')); return; }
     const row = h('div.ctxi' + (it.disabled ? '.dis' : '') + (it.def ? '.def' : ''), (it.checked ? h('span.ck', '✓') : h('span.ck')), h('span.lb', it.label), it.key ? h('span.kb', it.key) : null, it.items ? h('span.ar', '›') : null);
     if (it.items) {
@@ -31,9 +31,16 @@ function buildMenu(items, close, level) {
 w.contextMenu = function (x, y, items, root) {
   closeMenus(); if (!items || !items.length) return;
   const m = buildMenu(items, closeMenus, 0); m.classList.add('top');
-  m.style.left = x + 'px'; m.style.top = y + 'px'; (root || document.body).appendChild(m); openMenu = m;
-  const r = m.getBoundingClientRect(); const W = window.innerWidth, H = window.innerHeight;
-  if (r.right > W) m.style.left = Math.max(0, x - r.width) + 'px'; if (r.bottom > H) m.style.top = Math.max(0, y - r.height) + 'px';
+  /* x, y sont des coordonnées de la fenêtre du navigateur (clientX/clientY). Le menu est en position fixe, mais un conteneur du bureau simulé
+     peut changer sa référence (transformation, confinement) : on le place, on mesure où il atterrit et on corrige l'écart. Il reste ensuite
+     dans le conteneur (le bureau) : il s'ouvre vers le haut ou vers la gauche quand il dépasse. */
+  const host = root || document.body; host.appendChild(m); openMenu = m;
+  m.style.left = x + 'px'; m.style.top = y + 'px';
+  let r = m.getBoundingClientRect(); const dx = r.left - x, dy = r.top - y;
+  const hr = host === document.body ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight } : host.getBoundingClientRect();
+  const W = Math.min(window.innerWidth, hr.right), H = Math.min(window.innerHeight, hr.bottom);
+  let X = x, Y = y; if (X + r.width > W) X = Math.max(hr.left, x - r.width); if (Y + r.height > H) Y = Math.max(hr.top, y - r.height);
+  m.style.left = (X - dx) + 'px'; m.style.top = (Y - dy) + 'px';
   setTimeout(() => { document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', escKey, true); }, 0);
 };
 w.menuBar = function (menus, win) {

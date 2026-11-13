@@ -186,7 +186,7 @@ code { font-family: var(--mono); background: #0c131d; padding: 1px 5px; border-r
 .dicon { width: 76px; text-align: center; color: #fff; padding: 4px 2px; border: 1px solid transparent; border-radius: 2px; cursor: default; text-shadow: 0 1px 2px #000a; }
 .dicon:hover { background: #ffffff22; border-color: #ffffff33; } .dicon.sel { background: #3a78c455; border-color: #6aa6ff88; }
 .dicon .ico { display: block; margin: 0 auto 2px; }
-.wmarea { position: absolute; inset: 0 0 40px 0; overflow: hidden; }
+.wmarea { position: absolute; inset: 0 0 40px 0; overflow: hidden; pointer-events: none; } .wmarea > * { pointer-events: auto; } /* la zone des fenêtres laisse passer les clics vers le bureau (icônes, clic droit) ; les fenêtres, elles, les reçoivent */
 .desk.noTaskbar .wmarea { bottom: 0; }
 
 /* fenêtres */
@@ -20294,7 +20294,7 @@ const outside = e => { if (openMenu && !openMenu.contains(e.target) && !(e.targe
 const escKey = e => { if (e.key === 'Escape') closeMenus(); };
 function buildMenu(items, close, level) {
   const m = h('div.ctx' + (level ? '.sub' : ''));
-  items.forEach(it => {
+  items.filter(Boolean).forEach(it => {
     if (it === '-' || it.sep) { m.append(h('div.ctxsep')); return; }
     const row = h('div.ctxi' + (it.disabled ? '.dis' : '') + (it.def ? '.def' : ''), (it.checked ? h('span.ck', '✓') : h('span.ck')), h('span.lb', it.label), it.key ? h('span.kb', it.key) : null, it.items ? h('span.ar', '›') : null);
     if (it.items) {
@@ -20309,9 +20309,16 @@ function buildMenu(items, close, level) {
 w.contextMenu = function (x, y, items, root) {
   closeMenus(); if (!items || !items.length) return;
   const m = buildMenu(items, closeMenus, 0); m.classList.add('top');
-  m.style.left = x + 'px'; m.style.top = y + 'px'; (root || document.body).appendChild(m); openMenu = m;
-  const r = m.getBoundingClientRect(); const W = window.innerWidth, H = window.innerHeight;
-  if (r.right > W) m.style.left = Math.max(0, x - r.width) + 'px'; if (r.bottom > H) m.style.top = Math.max(0, y - r.height) + 'px';
+  /* x, y sont des coordonnées de la fenêtre du navigateur (clientX/clientY). Le menu est en position fixe, mais un conteneur du bureau simulé
+     peut changer sa référence (transformation, confinement) : on le place, on mesure où il atterrit et on corrige l'écart. Il reste ensuite
+     dans le conteneur (le bureau) : il s'ouvre vers le haut ou vers la gauche quand il dépasse. */
+  const host = root || document.body; host.appendChild(m); openMenu = m;
+  m.style.left = x + 'px'; m.style.top = y + 'px';
+  let r = m.getBoundingClientRect(); const dx = r.left - x, dy = r.top - y;
+  const hr = host === document.body ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight } : host.getBoundingClientRect();
+  const W = Math.min(window.innerWidth, hr.right), H = Math.min(window.innerHeight, hr.bottom);
+  let X = x, Y = y; if (X + r.width > W) X = Math.max(hr.left, x - r.width); if (Y + r.height > H) Y = Math.max(hr.top, y - r.height);
+  m.style.left = (X - dx) + 'px'; m.style.top = (Y - dy) + 'px';
   setTimeout(() => { document.addEventListener('pointerdown', outside, true); document.addEventListener('keydown', escKey, true); }, 0);
 };
 w.menuBar = function (menus, win) {
@@ -20631,7 +20638,7 @@ P.buildIcons = function () {
 P.drawTaskbar = function () {
   const self = this; UI.clear(this.taskbar);
   const startIc = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="none" stroke="#fff" stroke-width="2"/>' + [[10, 10], [16, 10], [22, 10], [10, 16], [16, 16], [22, 16], [10, 22], [16, 22], [22, 22]].map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="1.5" fill="#fff"/>').join('') + '</svg>';
-  const sb = h('div.tbtn.startb' + (this.start ? '.on' : ''), { title: 'Démarrer', on: { click: () => this.toggleStart(), contextmenu: e => { e.preventDefault(); UI.w.contextMenu(e.clientX, e.clientY - 150, this.startContext(), this.el); } } }); sb.innerHTML = startIc; sb.firstChild.setAttribute('width', 22); sb.firstChild.setAttribute('height', 22);
+  const sb = h('div.tbtn.startb' + (this.start ? '.on' : ''), { title: 'Démarrer', on: { click: () => this.toggleStart(), contextmenu: e => { e.preventDefault(); UI.w.contextMenu(e.clientX, e.clientY, this.startContext(), this.el); } } }); sb.innerHTML = startIc; sb.firstChild.setAttribute('width', 22); sb.firstChild.setAttribute('height', 22);
   const search = h('div.search', { on: { click: () => this.toggleStart(true) } }, 'Taper ici pour rechercher');
   this.taskbar.append(sb, search);
   /* épinglées */
@@ -20854,7 +20861,8 @@ P.showDesk = function () {
 /* ------------------------------------------------------------------ connexion / verrouillage */
 P.clockBits = function () { const dt = this.W.nowOf(this.devId); return { t: E.frTime(dt).slice(0, 5), dt: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'][dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][dt.getUTCMonth()] }; };
 P.showLogon = function () {
-  this.killDesk(); this.mode = 'logon'; this.drawLogon(null, 'lock');
+  /* l'écran de démarrage (roue qui tourne) doit disparaître : resté au-dessus, il masquait l'écran de connexion après un redémarrage */
+  this.killDesk(); this.mode = 'logon'; this.layer.querySelectorAll('.bootscr').forEach(x => x.remove()); this.drawLogon(null, 'lock');
 };
 P.showLock = function () {
   /* session conservée, bureau masqué sous l'écran de verrouillage */
@@ -21426,7 +21434,9 @@ UI.app('explorer', {
       else desk.msg({ title: 'Propriétés de ' + r.name, icon: 'info', owner: win, text: 'Nom : ' + r.name + '\nType : ' + r.type + (r.size ? '\nTaille : ' + r.size : '') + (r.date ? '\nModifié le : ' + fmtDT(r.date) : '') });
     };
     const ctx = (r, e) => {
-      UI.w.contextMenu(e.clientX, e.clientY, [{ label: 'Ouvrir', def: true, fn: () => open(r) }, { label: 'Ouvrir dans une nouvelle fenêtre', disabled: r.kind !== 'dir', fn: () => desk.open('explorer', r.path, { fresh: true }) }, '-', { label: 'Copier', disabled: true }, { label: 'Couper', disabled: true }, '-', { label: 'Supprimer', disabled: true }, { label: 'Renommer', disabled: true }, '-', { label: 'Propriétés', fn: () => props(r) }], desk.el);
+      /* « Ouvrir avec » : un fichier texte (hosts, .txt, .ini…) s'ouvre dans le Bloc-notes, comme sous Windows. Il n'y a pas d'« Exécuter en tant qu'administrateur » sur un fichier texte : pour modifier un fichier protégé, on lance le Bloc-notes en administrateur (menu Démarrer, clic droit) puis Fichier → Ouvrir. */
+      const txt = r.kind !== 'dir' && fileText(r) !== null;
+      UI.w.contextMenu(e.clientX, e.clientY, [{ label: 'Ouvrir', def: true, fn: () => open(r) }, txt ? { label: 'Ouvrir avec', items: [{ label: 'Bloc-notes', fn: () => desk.open('notepad', { path: r.path, name: r.name, text: fileText(r), dev: loc.dev }) }] } : null, { label: 'Ouvrir dans une nouvelle fenêtre', disabled: r.kind !== 'dir', fn: () => desk.open('explorer', r.path, { fresh: true }) }, '-', { label: 'Copier', disabled: true }, { label: 'Couper', disabled: true }, '-', { label: 'Supprimer', disabled: true }, { label: 'Renommer', disabled: true }, '-', { label: 'Propriétés', fn: () => props(r) }], desk.el);
     };
     const ctxEmpty = (e) => UI.w.contextMenu(e.clientX, e.clientY, [{ label: 'Actualiser', fn: () => go(addr.value, false) }, '-', { label: 'Nouveau', items: [{ label: 'Dossier', fn: newFolder }] }, '-', { label: 'Propriétés', disabled: !(loc && (loc.node || loc.root)), fn: () => { if (loc.node) props({ kind: 'dir', name: loc.title, path: loc.unc ? loc.unc + loc.path.slice(loc.shareBase.length) : loc.path, type: 'Dossier de fichiers' }); } }], desk.el);
     const newFolder = () => {

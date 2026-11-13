@@ -105,7 +105,8 @@ P.showDesk = function () {
 /* ------------------------------------------------------------------ connexion / verrouillage */
 P.clockBits = function () { const dt = this.W.nowOf(this.devId); return { t: E.frTime(dt).slice(0, 5), dt: ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'][dt.getUTCDay()] + ' ' + dt.getUTCDate() + ' ' + ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][dt.getUTCMonth()] }; };
 P.showLogon = function () {
-  this.killDesk(); this.mode = 'logon'; this.drawLogon(null, 'lock');
+  /* l'écran de démarrage (roue qui tourne) doit disparaître : resté au-dessus, il masquait l'écran de connexion après un redémarrage */
+  this.killDesk(); this.mode = 'logon'; this.layer.querySelectorAll('.bootscr').forEach(x => x.remove()); this.drawLogon(null, 'lock');
 };
 P.showLock = function () {
   /* session conservée, bureau masqué sous l'écran de verrouillage */

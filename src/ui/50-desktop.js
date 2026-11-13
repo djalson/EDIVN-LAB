@@ -140,7 +140,7 @@ P.buildIcons = function () {
 P.drawTaskbar = function () {
   const self = this; UI.clear(this.taskbar);
   const startIc = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="none" stroke="#fff" stroke-width="2"/>' + [[10, 10], [16, 10], [22, 10], [10, 16], [16, 16], [22, 16], [10, 22], [16, 22], [22, 22]].map(p => '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="1.5" fill="#fff"/>').join('') + '</svg>';
-  const sb = h('div.tbtn.startb' + (this.start ? '.on' : ''), { title: 'Démarrer', on: { click: () => this.toggleStart(), contextmenu: e => { e.preventDefault(); UI.w.contextMenu(e.clientX, e.clientY - 150, this.startContext(), this.el); } } }); sb.innerHTML = startIc; sb.firstChild.setAttribute('width', 22); sb.firstChild.setAttribute('height', 22);
+  const sb = h('div.tbtn.startb' + (this.start ? '.on' : ''), { title: 'Démarrer', on: { click: () => this.toggleStart(), contextmenu: e => { e.preventDefault(); UI.w.contextMenu(e.clientX, e.clientY, this.startContext(), this.el); } } }); sb.innerHTML = startIc; sb.firstChild.setAttribute('width', 22); sb.firstChild.setAttribute('height', 22);
   const search = h('div.search', { on: { click: () => this.toggleStart(true) } }, 'Taper ici pour rechercher');
   this.taskbar.append(sb, search);
   /* épinglées */
