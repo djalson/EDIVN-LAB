@@ -181,3 +181,8 @@
 .chline { display: flex; gap: 6px; margin-top: 6px; align-items: center; } .chin { flex: 1; min-width: 0; } .cherr { color: var(--bad, #f66); font-size: 12px; }
 
 .ptrait { opacity: .75; font-style: italic; }
+
+/* ---- examens : série de tickets ---- */
+.exbox p { margin: 0 0 10px; line-height: 1.5; } .exprog { margin: 6px 0; } .exall { color: var(--track, #f5b942); font-weight: 700; }
+.exdots { display: flex; gap: 8px; margin: 8px 0 14px; } .exdot { width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid var(--line); font: 700 14px var(--mono); }
+.exdot.ok { background: color-mix(in srgb, var(--ok) 35%, transparent); border-color: var(--ok); } .exdot.ko { border-color: var(--bad, #f66); } .exdot.next { outline: 2px solid var(--hc); outline-offset: 2px; }

@@ -65,7 +65,7 @@ C.seedInScope = function (def, seed, n) {
 };
 
 /* ------------------------------------------------------------------ état de la campagne (lu sur le profil) */
-C.blank = () => ({ ok: {}, exams: {}, seen: {}, review: [], n: 0 });
+C.blank = () => ({ ok: {}, exams: {}, seen: {}, review: [], n: 0, examTk: {}, examLast: {} });
 C.clean = function (c) {
   const out = C.blank(); if (!c || typeof c !== 'object' || Array.isArray(c)) return out;
   const okKey = k => k !== '__proto__' && k !== 'constructor' && k !== 'prototype';
@@ -76,6 +76,9 @@ C.clean = function (c) {
   if (obj(c.seen)) Object.keys(c.seen).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10); if (i >= 1 && i <= 40 && c.seen[k]) out.seen[i] = 1; });
   if (Array.isArray(c.review)) out.review = c.review.filter(obj).slice(0, 60).filter(x => typeof x.id === 'string').map(x => ({ id: x.id.slice(0, 60), due: typeof x.due === 'number' && isFinite(x.due) ? Math.max(0, Math.floor(x.due)) : 0 }));
   out.n = typeof c.n === 'number' && isFinite(c.n) ? Math.min(1e6, Math.max(0, Math.floor(c.n))) : 0;
+  /* tickets d'examen : meilleure note par chapitre et par ticket ; dernier ticket joué (pour « refaire le même ») */
+  if (obj(c.examTk)) Object.keys(c.examTk).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10); if (!(i >= 1 && i <= 40) || !obj(c.examTk[k])) return; const row = {}; Object.keys(c.examTk[k]).slice(0, 12).forEach(j => { const t = parseInt(j, 10), v = note(c.examTk[k][j]); if (t >= 0 && t < 12 && v) row[t] = v; }); if (Object.keys(row).length) out.examTk[i] = row; });
+  if (obj(c.examLast)) Object.keys(c.examLast).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10), t = c.examLast[k]; if (i >= 1 && i <= 40 && typeof t === 'number' && t >= 0 && t < 12) out.examLast[i] = Math.floor(t); });
   return out;
 };
 const campOf = p => (p.camp = p.camp || C.blank());
@@ -112,24 +115,40 @@ C.next = function (p, n, seed, opts) {
 };
 /* Examen du chapitre n : deux pannes de natures différentes prises dans le périmètre connu, dont une au moins du chapitre ;
    chronométré, sans indice. Si le chapitre ne permet pas d'assembler deux pannes (chapitre 1 : pannes de niveau 1), une seule panne, la plus difficile. */
-C.exam = function (p, n, seed) {
-  const ch = C.chapter(n); const own = C.pool(n).map(d => d.id); const known = []; for (let i = 1; i <= n; i++) C.pool(i).forEach(d => known.push(d.id));
+/* ------------------------------------------------------------------ examens : une série fixe de tickets par chapitre
+   Chaque chapitre a jusqu'à C.EXAM_TICKETS tickets d'examen, chacun ancré sur une panne DIFFÉRENTE du chapitre (les plus difficiles d'abord,
+   compétences variées). Un ticket d'examen est fixe : le rejouer redonne exactement le même incident. Réussir n'importe lequel ouvre le
+   chapitre suivant ; les réussir tous donne le badge du chapitre. Avant : un seul tirage « parmi les plus difficiles », qui retombait
+   toujours sur la même panne quand le chapitre n'en avait qu'une au niveau le plus haut (chapitre 1 : toujours le fichier hosts). */
+C.EXAM_TICKETS = 5;
+const examSetCache = {};
+C.examSet = function (n) {
+  if (examSetCache[n]) return examSetCache[n];
   const unproven = (SIM.UNPROVEN_FAULTS || []).map(u => u.fault);
-  const count = ch.examParts || 2;
-  try {
-    const anchor = own.filter(id => unproven.indexOf(id) < 0);
-    if (count < 2) throw new Error('examen à une seule panne');
-    if (!anchor.length) throw new Error('aucune panne du chapitre assemblable');
-    /* quelques graines dérivées avant de renoncer : l'assemblage est validé par simulation et peut être refusé */
-    let bseed = null, lastErr = null;
-    for (let k = 0; k < 4 && !bseed; k++) { const s = 'exam|' + n + '|' + seed + (k ? '~' + k : ''); try { const b = F.bundle(s, { count, pool: known, anchor, exclude: unproven, mode: 'indep' }); if (b.parts.some(x => own.indexOf(x.id) >= 0)) bseed = s; } catch (e) { lastErr = e; } }
-    if (!bseed) throw lastErr || new Error('aucune panne du chapitre dans l’assemblage');
-    return { level: 3, mode: 'timed', seed: String(seed), parts: count, bundle: { count, pool: known, anchor, exclude: unproven, mode: 'indep', seed: bseed }, camp: { ch: n, exam: true } };
-  } catch (e) {
-    const pool = C.pool(n).filter(d => unproven.indexOf(d.id) < 0); const top = Math.max.apply(null, pool.map(d => d.level));
-    const def = U.rng('exam1|' + n + '|' + seed).pick(pool.filter(d => d.level === top));
-    return { level: def.level, mode: 'timed', seed: C.seedInScope(def, seed, n), parts: 1, faultId: def.id, camp: { ch: n, exam: true } };
+  const pool = C.pool(n).filter(d => unproven.indexOf(d.id) < 0 && !(SIM.isRetiredFault && SIM.isRetiredFault(d.id)));
+  /* les plus difficiles d'abord ; à niveau égal, des compétences différentes */
+  const sorted = pool.slice().sort((a, b) => (b.level - a.level) || (U.hash8(a.id) < U.hash8(b.id) ? -1 : 1));
+  const pick = [], skills = [];
+  sorted.forEach(d => { if (pick.length >= C.EXAM_TICKETS) return; const k = (d.skills || [])[0]; if (skills.indexOf(k) < 0) { pick.push(d); skills.push(k); } });
+  sorted.forEach(d => { if (pick.length < C.EXAM_TICKETS && pick.indexOf(d) < 0) pick.push(d); });
+  return (examSetCache[n] = pick.map((d, k) => ({ k, anchor: d.id, level: d.level, title: d.title })));
+};
+C.examProgress = function (p, n) { const set = C.examSet(n); const row = campOf(p).examTk[n] || {}; const passed = set.filter(t => (row[t.k] || 0) >= Game.PASS).length; return { total: set.length, passed, all: set.length > 0 && passed === set.length, notes: set.map(t => row[t.k] || 0), last: campOf(p).examLast[n] }; };
+/* le ticket proposé par défaut : le premier pas encore réussi ; tous réussis → un ticket au hasard */
+C.examNext = function (p, n, seed) { const pr = C.examProgress(p, n); const todo = pr.notes.map((v, k) => v >= Game.PASS ? -1 : k).filter(k => k >= 0); if (todo.length) { const notLast = todo.filter(k => k !== pr.last); return (notLast.length ? notLast : todo)[0]; } return U.rng('examany|' + n + '|' + seed).int(pr.total); };
+/* la spécification d'un ticket d'examen (opts.k : numéro du ticket ; défaut : C.examNext) */
+C.exam = function (p, n, seed, opts) {
+  opts = opts || {}; const ch = C.chapter(n); const set = C.examSet(n); if (!set.length) throw new Error('aucune panne d’examen dans ce chapitre');
+  const k = typeof opts.k === 'number' && opts.k >= 0 && opts.k < set.length ? opts.k : C.examNext(p, n, seed); const tk = set[k];
+  const known = []; for (let i = 1; i <= n; i++) C.pool(i).forEach(d => known.push(d.id));
+  const unproven = (SIM.UNPROVEN_FAULTS || []).map(u => u.fault); const count = ch.examParts || 2;
+  const camp = { ch: n, exam: true, examK: k, examN: set.length };
+  if (count >= 2) {
+    /* assemblage figé pour ce ticket : la panne d'ancrage + des pannes déjà vues, validé par simulation (quelques graines dérivées) */
+    for (let j = 0; j < 6; j++) { const s = 'exam|' + n + '|t' + k + (j ? '~' + j : ''); try { const b = F.bundle(s, { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep' }); if (b.parts.some(x => x.id === tk.anchor)) return { level: 3, mode: 'timed', seed: s, parts: count, bundle: { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep', seed: s }, camp }; } catch (e) { /* graine suivante */ } }
   }
+  const def = SIM.faults.find(d => d.id === tk.anchor);
+  return { level: def.level, mode: 'timed', seed: C.seedInScope(def, 'exam|' + n + '|t' + k, n), parts: 1, faultId: def.id, camp };
 };
 /* périmètre affiché pendant une mission de campagne : celui du chapitre, complété des équipements que la panne nomme */
 C.missionScope = function (m) {
@@ -153,7 +172,12 @@ C.record = function (p, m, r) {
   if (!m.camp) return null;
   const n = m.camp.ch; const out = { ch: n, exam: !!m.camp.exam, review: !!m.camp.review, passed: !!r.passed };
   const readyBefore = C.chapterState(p, n).examReady;
-  if (m.camp.exam) { const first = !C.examPassed(p, n); if (r.passed) { c.exams[n] = Math.max(c.exams[n] || 0, r.total); if (first) { out.examFirst = true; m.camp.examFirst = true; } } }
+  if (m.camp.exam) {
+    const first = !C.examPassed(p, n); const allBefore = C.examProgress(p, n).all;
+    if (typeof m.camp.examK === 'number') { const row = c.examTk[n] = c.examTk[n] || {}; row[m.camp.examK] = Math.max(row[m.camp.examK] || 0, r.total || 0); c.examLast[n] = m.camp.examK; }
+    if (r.passed) { c.exams[n] = Math.max(c.exams[n] || 0, r.total); if (first) { out.examFirst = true; m.camp.examFirst = true; } }
+    const pr = C.examProgress(p, n); out.examK = m.camp.examK; out.examPassedN = pr.passed; out.examTotal = pr.total; if (pr.all && !allBefore) out.examAll = true;
+  }
   else if (r.passed) m.parts.forEach(pt => { if (C.isBase(pt)) c.ok[pt.id] = Math.max(c.ok[pt.id] || 0, r.total); });
   const st = C.chapterState(p, n); out.validated = st.validated; out.need = st.need; out.pool = st.pool; out.examReady = st.examReady; out.examNowReady = st.examReady && !readyBefore && !st.done;
   const after = C.unlocked(p); if (after > before) out.unlocked = after;

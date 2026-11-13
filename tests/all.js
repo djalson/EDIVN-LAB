@@ -17,7 +17,7 @@ const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 /* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
 const FAST = process.argv.includes('--fast');
-const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|challenge|personas-text|desk-clicks|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
+const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|challenge|personas-text|desk-clicks|exams-ui|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -38,6 +38,7 @@ t('Moteur', 'hints-commands (les commandes citées dans les indices et solutions
 t('Moteur', 'calendar (dates et heures du jeu : toutes les pannes se comportent pareil à une autre date)', ['tests/calendar.js'], { timeout: 900, expect: /^OK/m });
 t('Moteur', 'events (événements en partie : fréquence, panne ajoutée obligatoire et réparable, QCM du téléphone, échéance du responsable)', ['tests/events.js'], { timeout: 900, expect: /^OK/m });
 t('Moteur', 'personas-text (personnalités : le ton change, aucun élément technique du ticket n’est perdu)', ['tests/personas-text.js'], { expect: /^OK/m });
+t('Moteur', 'exams (examens : série fixe de tickets différents par chapitre, suivant / refaire le même, badge à 100 %)', ['tests/exams.js'], { timeout: 600, expect: /^OK/m });
 t('Moteur', 'dns-cache-ttl (cache DNS client : TTL de l’enregistrement ; dns_cache ne se répare plus tout seul)', ['tests/dns-cache-ttl.js'], { expect: /^OK/m });
 t('Moteur', 'unproven-timed (panne irréparable retirée de tous les tirages ; pannes proxy revenues en chronométré ; liste vidée → revient)', ['tests/unproven-timed.js'], { expect: /^OK/m });
 t('Moteur', 'codes-audit (D-106 : registre des codes d’erreur, masquage, audit statique + exécution, neutralisation)', ['tests/codes-audit.js'], { expect: /^OK/m });
@@ -86,6 +87,8 @@ t('Interface', 'resume (ticket interrompu par un rechargement : reprise proposé
 t('Interface', 'events-ui (panneau Messages, téléphone et QCM, deuxième ticket, collègue, responsable)', ['tests/ui/events.js'], { expect: /tout passe/ });
 t('Interface', 'challenge (défi entre élèves : même code = même incident ; panne mystère : un essai par jour)', ['tests/ui/challenge.js'], { expect: /tout passe/ });
 t('Interface', 'desk-clicks (icônes du bureau cliquables, menus contextuels sous le pointeur, Ouvrir avec → Bloc-notes, redémarrage sans roue figée)', ['tests/ui/desk-clicks.js'], { expect: /tout passe/ });
+t('Interface', 'exams-ui (fenêtre d’examen : pastilles, Commencer, Refaire le même, Ticket suivant)', ['tests/ui/exams-ui.js'], { expect: /tout passe/ });
+t('Interface', 'ui-audit (audit graphique : éléments recouverts, menus du clic droit, fenêtres, écrans bloqués, débordements, sur tous les écrans et toutes les applications)', ['tests/ui/ui-audit.js'], { timeout: 900, expect: /tout passe/ });
 t('Interface', 'bugreport (bouton « Bug ? » : rapport copiable, cause non affichée, données décodables)', ['tests/ui/bugreport.js'], { expect: /tout passe/ });
 t('Interface', 'sweep (toutes les pannes × 2 graines, 3 modes)', ['tests/ui/sweep.js'], { timeout: 1200, expect: /pannes × 2 graines/ });
 t('Réparation graphique', 'gui-sweep-neutral (neutralisation : recette non jouée → le balayage graphique vire au rouge)', ['tests/ui/gui-sweep-neutral.js'], { timeout: 600, expect: /0 échec/ });

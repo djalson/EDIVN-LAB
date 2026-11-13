@@ -1,3 +1,4 @@
 node_modules/
 dist/*.png
 *.log
+tests/.audit/
