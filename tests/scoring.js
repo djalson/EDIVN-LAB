@@ -57,7 +57,11 @@ ok(m.result.kind === 'resolved', 'chronométré : résolution juste avant l’é
 
 console.log('== temps cible par panne');
 const pars = SIM.faults.map(d => G.parOf(F.instantiate(d, 'x')));
-ok(pars.every(p => p >= 360 && p <= 1200 && p % 30 === 0), 'toutes les pannes ont un temps cible entre 6 et 20 min (' + Math.min.apply(null, pars) + '–' + Math.max.apply(null, pars) + ' s)');
+ok(pars.every(p => p >= 240 && p <= 1320 && p % 30 === 0), 'toutes les pannes ont un temps cible entre 4 et 22 min (' + Math.min.apply(null, pars) + '–' + Math.max.apply(null, pars) + ' s)');
+{ /* le niveau compte : chaque niveau a une cible médiane plus longue que le précédent, et les plages ne se recouvrent pas */
+  const med = lv => { const a = SIM.faults.filter(d => d.level === lv).map(d => G.parOf(d)).sort((x, y) => x - y); return a[a.length >> 1]; };
+  const ranges = [1, 2, 3, 4].map(lv => { const a = SIM.faults.filter(d => d.level === lv).map(d => G.parOf(d)); return [Math.min.apply(null, a), Math.max.apply(null, a)]; });
+  ok(med(1) < med(2) && med(2) < med(3) && med(3) < med(4) && ranges.every((r, i) => i === 0 || r[0] > ranges[i - 1][1]), 'temps cible croissant avec le niveau (médianes ' + [1, 2, 3, 4].map(med).join(' < ') + ' s)'); }
 ok(new Set(pars).size > 2, 'temps cible différencié selon la panne (' + Array.from(new Set(pars)).sort((a, b) => a - b).join(', ') + ')');
 m = mk('admin', 'free', 's3'); ok(m.parSec === G.parOfParts(m.parts) && m.parSec > G.parOf(m.parts[0]), 'panne composée : temps cible = somme des causes − recouvrement');
 m = mk('admin', 'timed', 's3'); ok(m.deadlineSec === Math.round(m.parSec * G.TIMED_FACTOR), 'échéance du mode chronométré = 1,5 × temps cible');

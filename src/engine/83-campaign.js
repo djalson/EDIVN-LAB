@@ -65,7 +65,7 @@ C.seedInScope = function (def, seed, n) {
 };
 
 /* ------------------------------------------------------------------ état de la campagne (lu sur le profil) */
-C.blank = () => ({ ok: {}, exams: {}, seen: {}, review: [], n: 0, examTk: {}, examLast: {} });
+C.blank = () => ({ ok: {}, exams: {}, seen: {}, review: [], n: 0, examTk: {}, examLast: {}, ev: 2 });
 C.clean = function (c) {
   const out = C.blank(); if (!c || typeof c !== 'object' || Array.isArray(c)) return out;
   const okKey = k => k !== '__proto__' && k !== 'constructor' && k !== 'prototype';
@@ -79,6 +79,11 @@ C.clean = function (c) {
   /* tickets d'examen : meilleure note par chapitre et par ticket ; dernier ticket joué (pour « refaire le même ») */
   if (obj(c.examTk)) Object.keys(c.examTk).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10); if (!(i >= 1 && i <= 40) || !obj(c.examTk[k])) return; const row = {}; Object.keys(c.examTk[k]).slice(0, 12).forEach(j => { const t = parseInt(j, 10), v = note(c.examTk[k][j]); if (t >= 0 && t < 12 && v) row[t] = v; }); if (Object.keys(row).length) out.examTk[i] = row; });
   if (obj(c.examLast)) Object.keys(c.examLast).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10), t = c.examLast[k]; if (i >= 1 && i <= 40 && typeof t === 'number' && t >= 0 && t < 12) out.examLast[i] = Math.floor(t); });
+  /* profils d'avant le réordonnancement des séries (ev absent) : les numéros de ticket suivaient l'ordre « plus difficile d'abord » (= t.sk) */
+  if (c.ev !== 2) {
+    Object.keys(out.examTk).forEach(i => { const set = C.examSet(+i); const row = {}; Object.keys(out.examTk[i]).forEach(j => { const t = set.find(x => x.sk === +j); if (t) row[t.k] = out.examTk[i][j]; }); out.examTk[i] = row; });
+    Object.keys(out.examLast).forEach(i => { const t = C.examSet(+i).find(x => x.sk === out.examLast[i]); if (t) out.examLast[i] = t.k; else delete out.examLast[i]; });
+  }
   return out;
 };
 const campOf = p => (p.camp = p.camp || C.blank());
@@ -117,7 +122,8 @@ C.next = function (p, n, seed, opts) {
    chronométré, sans indice. Si le chapitre ne permet pas d'assembler deux pannes (chapitre 1 : pannes de niveau 1), une seule panne, la plus difficile. */
 /* ------------------------------------------------------------------ examens : une série fixe de tickets par chapitre
    Chaque chapitre a jusqu'à C.EXAM_TICKETS tickets d'examen, chacun ancré sur une panne DIFFÉRENTE du chapitre (les plus difficiles d'abord,
-   compétences variées). Un ticket d'examen est fixe : le rejouer redonne exactement le même incident. Réussir n'importe lequel ouvre le
+   compétences variées), puis présentée du plus simple au plus difficile : la panne la plus dure ferme la série au lieu de l'ouvrir
+   (chapitre 1 : le fichier hosts, qui demandait plusieurs essais, est le dernier ticket). Un ticket d'examen est fixe : le rejouer redonne exactement le même incident. Réussir n'importe lequel ouvre le
    chapitre suivant ; les réussir tous donne le badge du chapitre. Avant : un seul tirage « parmi les plus difficiles », qui retombait
    toujours sur la même panne quand le chapitre n'en avait qu'une au niveau le plus haut (chapitre 1 : toujours le fichier hosts). */
 C.EXAM_TICKETS = 5;
@@ -125,13 +131,19 @@ const examSetCache = {};
 C.examSet = function (n) {
   if (examSetCache[n]) return examSetCache[n];
   const unproven = (SIM.UNPROVEN_FAULTS || []).map(u => u.fault);
-  const pool = C.pool(n).filter(d => unproven.indexOf(d.id) < 0 && !(SIM.isRetiredFault && SIM.isRetiredFault(d.id)));
+  let pool = C.pool(n).filter(d => unproven.indexOf(d.id) < 0 && !(SIM.isRetiredFault && SIM.isRetiredFault(d.id)));
+  /* examen à plusieurs pannes : une panne d'ancrage trop simple pour être assemblée (niveau < F.COMBO_MIN_LEVEL) donnerait un examen
+     à une seule panne ; on la laisse de côté tant qu'il en reste d'autres (chapitre 9 : phys_eth_rv, ipv4_gw_rv) */
+  const ch = C.chapter(n); const combo = pool.filter(d => d.level >= F.COMBO_MIN_LEVEL);
+  if ((ch && ch.examParts || 2) >= 2 && combo.length) pool = combo;
   /* les plus difficiles d'abord ; à niveau égal, des compétences différentes */
   const sorted = pool.slice().sort((a, b) => (b.level - a.level) || (U.hash8(a.id) < U.hash8(b.id) ? -1 : 1));
   const pick = [], skills = [];
   sorted.forEach(d => { if (pick.length >= C.EXAM_TICKETS) return; const k = (d.skills || [])[0]; if (skills.indexOf(k) < 0) { pick.push(d); skills.push(k); } });
   sorted.forEach(d => { if (pick.length < C.EXAM_TICKETS && pick.indexOf(d) < 0) pick.push(d); });
-  return (examSetCache[n] = pick.map((d, k) => ({ k, anchor: d.id, level: d.level, title: d.title })));
+  /* sk : rang dans la sélection (« plus difficile d'abord ») ; il fixe la graine du ticket, qui reste donc le même incident qu'avant */
+  const order = pick.map((d, sk) => ({ d, sk })).sort((a, b) => (a.d.level - b.d.level) || (b.sk - a.sk));
+  return (examSetCache[n] = order.map((o, k) => ({ k, sk: o.sk, anchor: o.d.id, level: o.d.level, title: o.d.title })));
 };
 C.examProgress = function (p, n) { const set = C.examSet(n); const row = campOf(p).examTk[n] || {}; const passed = set.filter(t => (row[t.k] || 0) >= Game.PASS).length; return { total: set.length, passed, all: set.length > 0 && passed === set.length, notes: set.map(t => row[t.k] || 0), last: campOf(p).examLast[n] }; };
 /* le ticket proposé par défaut : le premier pas encore réussi ; tous réussis → un ticket au hasard */
@@ -145,10 +157,10 @@ C.exam = function (p, n, seed, opts) {
   const camp = { ch: n, exam: true, examK: k, examN: set.length };
   if (count >= 2) {
     /* assemblage figé pour ce ticket : la panne d'ancrage + des pannes déjà vues, validé par simulation (quelques graines dérivées) */
-    for (let j = 0; j < 6; j++) { const s = 'exam|' + n + '|t' + k + (j ? '~' + j : ''); try { const b = F.bundle(s, { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep' }); if (b.parts.some(x => x.id === tk.anchor)) return { level: 3, mode: 'timed', seed: s, parts: count, bundle: { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep', seed: s }, camp }; } catch (e) { /* graine suivante */ } }
+    for (let j = 0; j < 6; j++) { const s = 'exam|' + n + '|t' + tk.sk + (j ? '~' + j : ''); try { const b = F.bundle(s, { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep' }); if (b.parts.some(x => x.id === tk.anchor)) return { level: 3, mode: 'timed', seed: s, parts: count, bundle: { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep', seed: s }, camp }; } catch (e) { /* graine suivante */ } }
   }
   const def = SIM.faults.find(d => d.id === tk.anchor);
-  return { level: def.level, mode: 'timed', seed: C.seedInScope(def, 'exam|' + n + '|t' + k, n), parts: 1, faultId: def.id, camp };
+  return { level: def.level, mode: 'timed', seed: C.seedInScope(def, 'exam|' + n + '|t' + tk.sk, n), parts: 1, faultId: def.id, camp };
 };
 /* périmètre affiché pendant une mission de campagne : celui du chapitre, complété des équipements que la panne nomme */
 C.missionScope = function (m) {

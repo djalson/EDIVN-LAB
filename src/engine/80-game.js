@@ -36,9 +36,15 @@ Game.PARTIAL_TIMEOUT = 60; Game.PARTIAL_GIVEUP = 40;   /* note maximale d'un tic
 /* Étoiles : 0 sous 75 (À repasser), 1 de 75 à 84, 2 de 85 à 94, 3 de 95 à 100 ; 100 = Parfait (animation du thème). */
 Game.starsOf = n => n < Game.PASS ? 0 : n < 85 ? 1 : n < 95 ? 2 : 3;
 Game.tierOf = n => n >= 100 ? 'Parfait' : n >= 95 ? 'Expert' : n >= 85 ? 'Solide' : n >= Game.PASS ? 'Validé' : 'À repasser';
-/* Temps cible d'une panne : dérivé du chemin optimal (nombre d'étapes), borné. Une panne composée : somme des causes, avec 15 % de recouvrement
-   (les vérifications initiales sont communes). */
-Game.parOf = function (def) { const steps = Math.max(1, ((def && def.optimal) || []).length); return Math.min(1200, Math.max(360, Math.round((120 + 110 * steps) / 30) * 30)); };
+/* Temps cible d'une panne : d'abord le niveau (une panne de niveau 4 demande plus de temps qu'une de niveau 1), puis la longueur du
+   chemin optimal (± 30 s par étape autour de 4), borné dans la plage du niveau. Avant : le seul nombre d'étapes, entre 6 et 20 min,
+   si bien qu'un niveau 1 et un niveau 4 avaient souvent la même cible et que le temps ne pesait presque jamais (relevé sur un profil
+   réel : niveau 1 résolu en 4 à 17 % de la cible). Une panne composée : somme des causes, avec 15 % de recouvrement. */
+Game.PAR_BY_LEVEL = { 1: [300, 240, 360], 2: [480, 420, 540], 3: [660, 600, 720], 4: [960, 840, 1080], 5: [1200, 1080, 1320] };   /* [base, min, max] en secondes */
+Game.parOf = function (def) {
+  const steps = Math.max(1, ((def && def.optimal) || []).length); const lv = Game.PAR_BY_LEVEL[(def && def.level) || 2] || Game.PAR_BY_LEVEL[2];
+  return Math.min(lv[2], Math.max(lv[1], lv[0] + 30 * (steps - 4)));
+};
 /* Temps cible moyen d'un ticket d'un niveau (pour l'affichage à l'accueil) */
 Game.levelPar = function (level) {
   const lv = Game.levelOf(level); const pool = SIM.faults.filter(d => lv.faults > 1 ? (lv.pool ? lv.pool.indexOf(d.level) >= 0 : d.level >= 2 && d.level <= 4) : d.level === lv.level);
@@ -131,7 +137,7 @@ Game.cleanProfile = function (p) {
   if (isObj(p.skills)) Object.keys(p.skills).filter(okKey).slice(0, 500).forEach(k => { const v = p.skills[k]; if (isObj(v)) out.skills[k] = { ok: Math.max(0, num(v.ok, 0)), ko: Math.max(0, num(v.ko, 0)) }; });
   if (isObj(p.best)) Object.keys(p.best).filter(okKey).slice(0, 20).forEach(k => { if (typeof p.best[k] === 'number' && isFinite(p.best[k])) out.best[k] = n100(p.best[k]); });
   if (Array.isArray(p.badges)) out.badges = p.badges.filter(x => typeof x === 'string').map(x => x.slice(0, 40)).slice(0, 100);
-  if (Array.isArray(p.history)) out.history = p.history.filter(isObj).slice(-200).map(x => ({ at: num(x.at, 0), seed: String(x.seed === undefined ? '' : x.seed).slice(0, 40), level: Math.min(5, Math.max(1, num(x.level, 1))), mode: typeof x.mode === 'string' ? x.mode.slice(0, 12) : 'free', id: typeof x.id === 'string' ? x.id.slice(0, 60) : '', kind: typeof x.kind === 'string' ? x.kind.slice(0, 20) : '', total: n100(x.total), mttr: num(x.mttr, 0), stars: legacy ? 0 : Math.min(3, Math.max(0, num(x.stars, 0))), perfect: !legacy && x.perfect === true, skills: Array.isArray(x.skills) ? x.skills.filter(y => typeof y === 'string').slice(0, 20) : [] }));
+  if (Array.isArray(p.history)) out.history = p.history.filter(isObj).slice(-200).map(x => ({ at: num(x.at, 0), seed: String(x.seed === undefined ? '' : x.seed).slice(0, 40), level: Math.min(5, Math.max(1, num(x.level, 1))), mode: typeof x.mode === 'string' ? x.mode.slice(0, 12) : 'free', id: typeof x.id === 'string' ? x.id.slice(0, 60) : '', try: Math.min(999, Math.max(0, Math.floor(num(x.try, 0)))), kind: typeof x.kind === 'string' ? x.kind.slice(0, 20) : '', total: n100(x.total), mttr: num(x.mttr, 0), stars: legacy ? 0 : Math.min(3, Math.max(0, num(x.stars, 0))), perfect: !legacy && x.perfect === true, skills: Array.isArray(x.skills) ? x.skills.filter(y => typeof y === 'string').slice(0, 20) : [] }));
   return out;
 };
 Game.profile = function () { const p = Game.cleanProfile(Game.store.get('profile')); return SIM.prog ? SIM.prog.migrate(p) : p; };
@@ -349,7 +355,8 @@ Game.record = function (m, profile) {
   const prev = { counts: {}, bests: {} }; m.parts.forEach(pt => { const d = p.done[pt.id]; prev.counts[pt.id] = d ? d.count : 0; prev.bests[pt.id] = d ? d.best : 0; });
   const lvBefore = P.levelOf(p.xp), stBefore = P.streakInfo(p);
   const pre = P.collectMission(p, m, r);          /* succès « de ticket » : évalués avant l'ajout à l'historique */
-  const entry = { at: Date.now(), seed: m.seed, level: m.lv.level, mode: m.mode.id, id: m.fault.id, kind: r.kind, total: r.total, mttr: r.mttrSec, stars: r.stars, perfect: !!r.perfect, skills: m.fault.skills };
+  const tries = 1 + p.history.filter(h => h.id === m.fault.id).length;   /* n° de l'essai sur cette panne (abandons et échecs compris) : sert à repérer les pannes qui bloquent */
+  const entry = { at: Date.now(), seed: m.seed, level: m.lv.level, mode: m.mode.id, id: m.fault.id, try: tries, kind: r.kind, total: r.total, mttr: r.mttrSec, stars: r.stars, perfect: !!r.perfect, skills: m.fault.skills };
   p.history.push(entry); if (p.history.length > 200) p.history.shift();
   m.parts.forEach(pt => { const d = p.done[pt.id] || { count: 0, best: 0 }; d.count++; d.best = Math.max(d.best, r.total); p.done[pt.id] = d; });
   (m.fault.skills || []).forEach(s => { const k = p.skills[s] || { ok: 0, ko: 0 }; if (r.passed && !m.hintLog.length && !m.dangers.length && !(r.report && !r.report.causeOk)) k.ok++; else k.ko++; p.skills[s] = k; });

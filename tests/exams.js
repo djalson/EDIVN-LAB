@@ -28,4 +28,16 @@ for (const ch of SIM.CHAPTERS) {
   const b = Game.BADGES.find(x => x.id === 'exam100_1'); ok(b && b.test(p), 'badge « Examen à 100 % : Le bureau »');
   ok(!Game.BADGES.find(x => x.id === 'exam100_2').test(p), 'pas de badge pour le chapitre 2');
   const q = Game.cleanProfile(JSON.parse(JSON.stringify(p))); ok(C.examProgress(q, 1).all && C.examProgress(q, 1).last === p.camp.examLast[1], 'progression conservée après sauvegarde et relecture du profil'); }
+/* ordre de la série : du plus simple au plus difficile (chapitre 1 : le fichier hosts en dernier) ; examens à plusieurs pannes : jamais d'ancrage seul */
+{ const s1 = C.examSet(1); ok(s1[s1.length - 1].anchor === 'dns_hosts' && s1.every((t, i) => !i || t.level >= s1[i - 1].level), 'chapitre 1 : série du plus simple au plus difficile, fichier hosts en dernier (' + s1.map(t => t.anchor).join(', ') + ')');
+  const solo = []; SIM.CHAPTERS.filter(ch => (ch.examParts || 2) >= 2).forEach(ch => C.examSet(ch.n).forEach(t => { if (C.exam(prof(), ch.n, 'x', { k: t.k }).parts < 2) solo.push(ch.n + ':' + t.anchor); }));
+  ok(!solo.length, 'examens à plusieurs pannes : chaque ticket en assemble bien plusieurs' + (solo.length ? ' — ' + solo.join(', ') : ''));
+  /* profil d'avant le réordonnancement (pas de « ev ») : les notes suivent leur panne, pas leur ancien numéro */
+  const hosts = s1.find(t => t.anchor === 'dns_hosts'); const old = { examTk: { 1: { [hosts.sk]: 100 } }, examLast: { 1: hosts.sk } };
+  const c = C.clean(old); ok(c.examTk[1][hosts.k] === 100 && Object.keys(c.examTk[1]).length === 1 && c.examLast[1] === hosts.k && c.ev === 2, 'ancien profil : la note du ticket hosts reste sur le ticket hosts après réordonnancement');
+  const c2 = C.clean(JSON.parse(JSON.stringify(c))); ok(JSON.stringify(c2.examTk) === JSON.stringify(c.examTk), 'migration appliquée une seule fois'); }
+/* historique : numéro d'essai par panne (échecs et abandons compris) */
+{ const p = prof(); const sp = C.exam(p, 1, 'x', { k: 0 }); const t = () => { const m = Game.create(Object.assign({}, sp)); m.giveUp(); Game.record(m, p); return p.history[p.history.length - 1].try; };
+  const a = t(), b = t(), c = t(); ok(a === 1 && b === 2 && c === 3, 'historique : essais numérotés 1, 2, 3 sur la même panne');
+  ok(Game.cleanProfile(JSON.parse(JSON.stringify(p))).history[2].try === 3, 'numéro d’essai conservé dans le profil sauvegardé'); }
 console.log(fails ? '✗ ' + fails + ' échec(s)' : 'OK'); process.exit(fails ? 1 : 0);

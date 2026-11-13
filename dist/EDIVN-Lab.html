@@ -725,7 +725,7 @@ code { font-family: var(--mono); background: #0c131d; padding: 1px 5px; border-r
    Animations « note parfaite » (100 / 100), une par thème. Superposition plein écran, fermée par clic, Échap ou après ~5 s.
    Tout est dessiné en CSS / canvas ; aucune image, police ni son tiers. Respecte prefers-reduced-motion (JS : carte fixe seule).
    ============================================================================ */
-.hperf { position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--bg) 82%, transparent); animation: pfin .25s ease-out; }
+.hperf { position: fixed; inset: 0; z-index: 200500; /* au-dessus des fenêtres modales (.overlay 200000) : l’aperçu se lance depuis le choix du thème */ display: grid; place-items: center; overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--bg) 82%, transparent); animation: pfin .25s ease-out; }
 .hperf.out { opacity: 0; transition: opacity .25s; }
 @keyframes pfin { from { opacity: 0; } }
 .pf-card { position: relative; z-index: 2; text-align: center; padding: 22px 34px; max-width: 90vw; }
@@ -6594,9 +6594,15 @@ Game.PARTIAL_TIMEOUT = 60; Game.PARTIAL_GIVEUP = 40;   /* note maximale d'un tic
 /* Étoiles : 0 sous 75 (À repasser), 1 de 75 à 84, 2 de 85 à 94, 3 de 95 à 100 ; 100 = Parfait (animation du thème). */
 Game.starsOf = n => n < Game.PASS ? 0 : n < 85 ? 1 : n < 95 ? 2 : 3;
 Game.tierOf = n => n >= 100 ? 'Parfait' : n >= 95 ? 'Expert' : n >= 85 ? 'Solide' : n >= Game.PASS ? 'Validé' : 'À repasser';
-/* Temps cible d'une panne : dérivé du chemin optimal (nombre d'étapes), borné. Une panne composée : somme des causes, avec 15 % de recouvrement
-   (les vérifications initiales sont communes). */
-Game.parOf = function (def) { const steps = Math.max(1, ((def && def.optimal) || []).length); return Math.min(1200, Math.max(360, Math.round((120 + 110 * steps) / 30) * 30)); };
+/* Temps cible d'une panne : d'abord le niveau (une panne de niveau 4 demande plus de temps qu'une de niveau 1), puis la longueur du
+   chemin optimal (± 30 s par étape autour de 4), borné dans la plage du niveau. Avant : le seul nombre d'étapes, entre 6 et 20 min,
+   si bien qu'un niveau 1 et un niveau 4 avaient souvent la même cible et que le temps ne pesait presque jamais (relevé sur un profil
+   réel : niveau 1 résolu en 4 à 17 % de la cible). Une panne composée : somme des causes, avec 15 % de recouvrement. */
+Game.PAR_BY_LEVEL = { 1: [300, 240, 360], 2: [480, 420, 540], 3: [660, 600, 720], 4: [960, 840, 1080], 5: [1200, 1080, 1320] };   /* [base, min, max] en secondes */
+Game.parOf = function (def) {
+  const steps = Math.max(1, ((def && def.optimal) || []).length); const lv = Game.PAR_BY_LEVEL[(def && def.level) || 2] || Game.PAR_BY_LEVEL[2];
+  return Math.min(lv[2], Math.max(lv[1], lv[0] + 30 * (steps - 4)));
+};
 /* Temps cible moyen d'un ticket d'un niveau (pour l'affichage à l'accueil) */
 Game.levelPar = function (level) {
   const lv = Game.levelOf(level); const pool = SIM.faults.filter(d => lv.faults > 1 ? (lv.pool ? lv.pool.indexOf(d.level) >= 0 : d.level >= 2 && d.level <= 4) : d.level === lv.level);
@@ -6689,7 +6695,7 @@ Game.cleanProfile = function (p) {
   if (isObj(p.skills)) Object.keys(p.skills).filter(okKey).slice(0, 500).forEach(k => { const v = p.skills[k]; if (isObj(v)) out.skills[k] = { ok: Math.max(0, num(v.ok, 0)), ko: Math.max(0, num(v.ko, 0)) }; });
   if (isObj(p.best)) Object.keys(p.best).filter(okKey).slice(0, 20).forEach(k => { if (typeof p.best[k] === 'number' && isFinite(p.best[k])) out.best[k] = n100(p.best[k]); });
   if (Array.isArray(p.badges)) out.badges = p.badges.filter(x => typeof x === 'string').map(x => x.slice(0, 40)).slice(0, 100);
-  if (Array.isArray(p.history)) out.history = p.history.filter(isObj).slice(-200).map(x => ({ at: num(x.at, 0), seed: String(x.seed === undefined ? '' : x.seed).slice(0, 40), level: Math.min(5, Math.max(1, num(x.level, 1))), mode: typeof x.mode === 'string' ? x.mode.slice(0, 12) : 'free', id: typeof x.id === 'string' ? x.id.slice(0, 60) : '', kind: typeof x.kind === 'string' ? x.kind.slice(0, 20) : '', total: n100(x.total), mttr: num(x.mttr, 0), stars: legacy ? 0 : Math.min(3, Math.max(0, num(x.stars, 0))), perfect: !legacy && x.perfect === true, skills: Array.isArray(x.skills) ? x.skills.filter(y => typeof y === 'string').slice(0, 20) : [] }));
+  if (Array.isArray(p.history)) out.history = p.history.filter(isObj).slice(-200).map(x => ({ at: num(x.at, 0), seed: String(x.seed === undefined ? '' : x.seed).slice(0, 40), level: Math.min(5, Math.max(1, num(x.level, 1))), mode: typeof x.mode === 'string' ? x.mode.slice(0, 12) : 'free', id: typeof x.id === 'string' ? x.id.slice(0, 60) : '', try: Math.min(999, Math.max(0, Math.floor(num(x.try, 0)))), kind: typeof x.kind === 'string' ? x.kind.slice(0, 20) : '', total: n100(x.total), mttr: num(x.mttr, 0), stars: legacy ? 0 : Math.min(3, Math.max(0, num(x.stars, 0))), perfect: !legacy && x.perfect === true, skills: Array.isArray(x.skills) ? x.skills.filter(y => typeof y === 'string').slice(0, 20) : [] }));
   return out;
 };
 Game.profile = function () { const p = Game.cleanProfile(Game.store.get('profile')); return SIM.prog ? SIM.prog.migrate(p) : p; };
@@ -6907,7 +6913,8 @@ Game.record = function (m, profile) {
   const prev = { counts: {}, bests: {} }; m.parts.forEach(pt => { const d = p.done[pt.id]; prev.counts[pt.id] = d ? d.count : 0; prev.bests[pt.id] = d ? d.best : 0; });
   const lvBefore = P.levelOf(p.xp), stBefore = P.streakInfo(p);
   const pre = P.collectMission(p, m, r);          /* succès « de ticket » : évalués avant l'ajout à l'historique */
-  const entry = { at: Date.now(), seed: m.seed, level: m.lv.level, mode: m.mode.id, id: m.fault.id, kind: r.kind, total: r.total, mttr: r.mttrSec, stars: r.stars, perfect: !!r.perfect, skills: m.fault.skills };
+  const tries = 1 + p.history.filter(h => h.id === m.fault.id).length;   /* n° de l'essai sur cette panne (abandons et échecs compris) : sert à repérer les pannes qui bloquent */
+  const entry = { at: Date.now(), seed: m.seed, level: m.lv.level, mode: m.mode.id, id: m.fault.id, try: tries, kind: r.kind, total: r.total, mttr: r.mttrSec, stars: r.stars, perfect: !!r.perfect, skills: m.fault.skills };
   p.history.push(entry); if (p.history.length > 200) p.history.shift();
   m.parts.forEach(pt => { const d = p.done[pt.id] || { count: 0, best: 0 }; d.count++; d.best = Math.max(d.best, r.total); p.done[pt.id] = d; });
   (m.fault.skills || []).forEach(s => { const k = p.skills[s] || { ok: 0, ko: 0 }; if (r.passed && !m.hintLog.length && !m.dangers.length && !(r.report && !r.report.causeOk)) k.ok++; else k.ko++; p.skills[s] = k; });
@@ -7371,7 +7378,7 @@ C.seedInScope = function (def, seed, n) {
 };
 
 /* ------------------------------------------------------------------ état de la campagne (lu sur le profil) */
-C.blank = () => ({ ok: {}, exams: {}, seen: {}, review: [], n: 0, examTk: {}, examLast: {} });
+C.blank = () => ({ ok: {}, exams: {}, seen: {}, review: [], n: 0, examTk: {}, examLast: {}, ev: 2 });
 C.clean = function (c) {
   const out = C.blank(); if (!c || typeof c !== 'object' || Array.isArray(c)) return out;
   const okKey = k => k !== '__proto__' && k !== 'constructor' && k !== 'prototype';
@@ -7385,6 +7392,11 @@ C.clean = function (c) {
   /* tickets d'examen : meilleure note par chapitre et par ticket ; dernier ticket joué (pour « refaire le même ») */
   if (obj(c.examTk)) Object.keys(c.examTk).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10); if (!(i >= 1 && i <= 40) || !obj(c.examTk[k])) return; const row = {}; Object.keys(c.examTk[k]).slice(0, 12).forEach(j => { const t = parseInt(j, 10), v = note(c.examTk[k][j]); if (t >= 0 && t < 12 && v) row[t] = v; }); if (Object.keys(row).length) out.examTk[i] = row; });
   if (obj(c.examLast)) Object.keys(c.examLast).filter(okKey).slice(0, 40).forEach(k => { const i = parseInt(k, 10), t = c.examLast[k]; if (i >= 1 && i <= 40 && typeof t === 'number' && t >= 0 && t < 12) out.examLast[i] = Math.floor(t); });
+  /* profils d'avant le réordonnancement des séries (ev absent) : les numéros de ticket suivaient l'ordre « plus difficile d'abord » (= t.sk) */
+  if (c.ev !== 2) {
+    Object.keys(out.examTk).forEach(i => { const set = C.examSet(+i); const row = {}; Object.keys(out.examTk[i]).forEach(j => { const t = set.find(x => x.sk === +j); if (t) row[t.k] = out.examTk[i][j]; }); out.examTk[i] = row; });
+    Object.keys(out.examLast).forEach(i => { const t = C.examSet(+i).find(x => x.sk === out.examLast[i]); if (t) out.examLast[i] = t.k; else delete out.examLast[i]; });
+  }
   return out;
 };
 const campOf = p => (p.camp = p.camp || C.blank());
@@ -7423,7 +7435,8 @@ C.next = function (p, n, seed, opts) {
    chronométré, sans indice. Si le chapitre ne permet pas d'assembler deux pannes (chapitre 1 : pannes de niveau 1), une seule panne, la plus difficile. */
 /* ------------------------------------------------------------------ examens : une série fixe de tickets par chapitre
    Chaque chapitre a jusqu'à C.EXAM_TICKETS tickets d'examen, chacun ancré sur une panne DIFFÉRENTE du chapitre (les plus difficiles d'abord,
-   compétences variées). Un ticket d'examen est fixe : le rejouer redonne exactement le même incident. Réussir n'importe lequel ouvre le
+   compétences variées), puis présentée du plus simple au plus difficile : la panne la plus dure ferme la série au lieu de l'ouvrir
+   (chapitre 1 : le fichier hosts, qui demandait plusieurs essais, est le dernier ticket). Un ticket d'examen est fixe : le rejouer redonne exactement le même incident. Réussir n'importe lequel ouvre le
    chapitre suivant ; les réussir tous donne le badge du chapitre. Avant : un seul tirage « parmi les plus difficiles », qui retombait
    toujours sur la même panne quand le chapitre n'en avait qu'une au niveau le plus haut (chapitre 1 : toujours le fichier hosts). */
 C.EXAM_TICKETS = 5;
@@ -7431,13 +7444,19 @@ const examSetCache = {};
 C.examSet = function (n) {
   if (examSetCache[n]) return examSetCache[n];
   const unproven = (SIM.UNPROVEN_FAULTS || []).map(u => u.fault);
-  const pool = C.pool(n).filter(d => unproven.indexOf(d.id) < 0 && !(SIM.isRetiredFault && SIM.isRetiredFault(d.id)));
+  let pool = C.pool(n).filter(d => unproven.indexOf(d.id) < 0 && !(SIM.isRetiredFault && SIM.isRetiredFault(d.id)));
+  /* examen à plusieurs pannes : une panne d'ancrage trop simple pour être assemblée (niveau < F.COMBO_MIN_LEVEL) donnerait un examen
+     à une seule panne ; on la laisse de côté tant qu'il en reste d'autres (chapitre 9 : phys_eth_rv, ipv4_gw_rv) */
+  const ch = C.chapter(n); const combo = pool.filter(d => d.level >= F.COMBO_MIN_LEVEL);
+  if ((ch && ch.examParts || 2) >= 2 && combo.length) pool = combo;
   /* les plus difficiles d'abord ; à niveau égal, des compétences différentes */
   const sorted = pool.slice().sort((a, b) => (b.level - a.level) || (U.hash8(a.id) < U.hash8(b.id) ? -1 : 1));
   const pick = [], skills = [];
   sorted.forEach(d => { if (pick.length >= C.EXAM_TICKETS) return; const k = (d.skills || [])[0]; if (skills.indexOf(k) < 0) { pick.push(d); skills.push(k); } });
   sorted.forEach(d => { if (pick.length < C.EXAM_TICKETS && pick.indexOf(d) < 0) pick.push(d); });
-  return (examSetCache[n] = pick.map((d, k) => ({ k, anchor: d.id, level: d.level, title: d.title })));
+  /* sk : rang dans la sélection (« plus difficile d'abord ») ; il fixe la graine du ticket, qui reste donc le même incident qu'avant */
+  const order = pick.map((d, sk) => ({ d, sk })).sort((a, b) => (a.d.level - b.d.level) || (b.sk - a.sk));
+  return (examSetCache[n] = order.map((o, k) => ({ k, sk: o.sk, anchor: o.d.id, level: o.d.level, title: o.d.title })));
 };
 C.examProgress = function (p, n) { const set = C.examSet(n); const row = campOf(p).examTk[n] || {}; const passed = set.filter(t => (row[t.k] || 0) >= Game.PASS).length; return { total: set.length, passed, all: set.length > 0 && passed === set.length, notes: set.map(t => row[t.k] || 0), last: campOf(p).examLast[n] }; };
 /* le ticket proposé par défaut : le premier pas encore réussi ; tous réussis → un ticket au hasard */
@@ -7451,10 +7470,10 @@ C.exam = function (p, n, seed, opts) {
   const camp = { ch: n, exam: true, examK: k, examN: set.length };
   if (count >= 2) {
     /* assemblage figé pour ce ticket : la panne d'ancrage + des pannes déjà vues, validé par simulation (quelques graines dérivées) */
-    for (let j = 0; j < 6; j++) { const s = 'exam|' + n + '|t' + k + (j ? '~' + j : ''); try { const b = F.bundle(s, { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep' }); if (b.parts.some(x => x.id === tk.anchor)) return { level: 3, mode: 'timed', seed: s, parts: count, bundle: { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep', seed: s }, camp }; } catch (e) { /* graine suivante */ } }
+    for (let j = 0; j < 6; j++) { const s = 'exam|' + n + '|t' + tk.sk + (j ? '~' + j : ''); try { const b = F.bundle(s, { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep' }); if (b.parts.some(x => x.id === tk.anchor)) return { level: 3, mode: 'timed', seed: s, parts: count, bundle: { count, pool: known, anchor: [tk.anchor], exclude: unproven, mode: 'indep', seed: s }, camp }; } catch (e) { /* graine suivante */ } }
   }
   const def = SIM.faults.find(d => d.id === tk.anchor);
-  return { level: def.level, mode: 'timed', seed: C.seedInScope(def, 'exam|' + n + '|t' + k, n), parts: 1, faultId: def.id, camp };
+  return { level: def.level, mode: 'timed', seed: C.seedInScope(def, 'exam|' + n + '|t' + tk.sk, n), parts: 1, faultId: def.id, camp };
 };
 /* périmètre affiché pendant une mission de campagne : celui du chapitre, complété des équipements que la panne nomme */
 C.missionScope = function (m) {

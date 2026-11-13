@@ -17,7 +17,7 @@ const QUICK = process.argv.includes('--quick');
 const ONLY = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 /* --fast : palier rapide (quelques minutes) à lancer après chaque modification ; la batterie complète reste la référence avant livraison. */
 const FAST = process.argv.includes('--fast');
-const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|challenge|personas-text|desk-clicks|exams-ui|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
+const FASTSET = /^(assert-world|invariants|hints-commands|calendar|resume|events|events-ui|challenge|personas-text|desk-clicks|exams-ui|perfect-preview|dns-cache-ttl|hosts-edit|mmc-nav|verify-strict|bugreport|regress |game$|progress |campaign|report |rewards|lint-content|course-links|codes-audit|addressing|boot$|web$|ad$|ssh$|emu-|term$|ios-edge$|regress-ui|home-tour$|win1$|pfw1$|rig1$|infra )/;
 
 const BAD = /PAGEERR|TypeError|ReferenceError|SyntaxError|✗|ERREUR|Cannot read prop|is not a function|is not defined/;
 const T = [];
@@ -87,6 +87,7 @@ t('Interface', 'resume (ticket interrompu par un rechargement : reprise proposé
 t('Interface', 'events-ui (panneau Messages, téléphone et QCM, deuxième ticket, collègue, responsable)', ['tests/ui/events.js'], { expect: /tout passe/ });
 t('Interface', 'challenge (défi entre élèves : même code = même incident ; panne mystère : un essai par jour)', ['tests/ui/challenge.js'], { expect: /tout passe/ });
 t('Interface', 'desk-clicks (icônes du bureau cliquables, menus contextuels sous le pointeur, Ouvrir avec → Bloc-notes, redémarrage sans roue figée)', ['tests/ui/desk-clicks.js'], { expect: /tout passe/ });
+t('Interface', 'perfect-preview (aperçu de l’animation du 100 au-dessus de la fenêtre de choix du thème)', ['tests/ui/perfect-preview.js'], { expect: /tout passe/ });
 t('Interface', 'exams-ui (fenêtre d’examen : pastilles, Commencer, Refaire le même, Ticket suivant)', ['tests/ui/exams-ui.js'], { expect: /tout passe/ });
 t('Interface', 'ui-audit (audit graphique : éléments recouverts, menus du clic droit, fenêtres, écrans bloqués, débordements, sur tous les écrans et toutes les applications)', ['tests/ui/ui-audit.js'], { timeout: 900, expect: /tout passe/ });
 t('Interface', 'bugreport (bouton « Bug ? » : rapport copiable, cause non affichée, données décodables)', ['tests/ui/bugreport.js'], { expect: /tout passe/ });

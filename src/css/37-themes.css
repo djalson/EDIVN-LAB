@@ -2,7 +2,7 @@
    Animations « note parfaite » (100 / 100), une par thème. Superposition plein écran, fermée par clic, Échap ou après ~5 s.
    Tout est dessiné en CSS / canvas ; aucune image, police ni son tiers. Respecte prefers-reduced-motion (JS : carte fixe seule).
    ============================================================================ */
-.hperf { position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--bg) 82%, transparent); animation: pfin .25s ease-out; }
+.hperf { position: fixed; inset: 0; z-index: 200500; /* au-dessus des fenêtres modales (.overlay 200000) : l’aperçu se lance depuis le choix du thème */ display: grid; place-items: center; overflow: hidden; cursor: pointer; background: color-mix(in srgb, var(--bg) 82%, transparent); animation: pfin .25s ease-out; }
 .hperf.out { opacity: 0; transition: opacity .25s; }
 @keyframes pfin { from { opacity: 0; } }
 .pf-card { position: relative; z-index: 2; text-align: center; padding: 22px 34px; max-width: 90vw; }
