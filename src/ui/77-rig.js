@@ -196,7 +196,9 @@ function portMenu(run, d, port, e, hook) {
 function portLabel(p) { return p && p.desc ? ' · étiquette : « ' + p.desc + ' »' : ''; }
 function portTitle(W, d, port) {
   const cs = cableState(W, d, port); const p = N.portObj(d, port);
-  if (cs.k === 'none') return short(port) + ' — libre' + portLabel(p);
+  /* cordon de brassage resté dans le modèle mais la prise n'est plus brassée ici (W.walls) : le port est libre, comme l'affiche la case */
+  const stale = cs.to && cs.to.indexOf('patch:') === 0 && W.walls[cs.to.slice(6)] !== d.id + ':' + port;
+  if (cs.k === 'none' || stale) return short(port) + ' — libre' + portLabel(p);
   const st = p.errdisabled ? ' (port en erreur : err-disabled)' : p.adminDown ? ' (port désactivé par configuration)' : '';
   return short(port) + ' — câble vers ' + endText(W, cs.to) + (cs.k === 'out' ? ' (débranché)' : '') + st + portLabel(p);
 }
