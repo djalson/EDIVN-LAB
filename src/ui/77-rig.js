@@ -191,16 +191,13 @@ function portMenu(run, d, port, e, hook) {
   if (!items.length) items.push({ label: 'Port libre : aucun câble', disabled: true });
   UI.w.contextMenu(e.clientX, e.clientY, items);
 }
-/* étiquette collée sous le port dans la baie : reprend la description du port (« PC-01 (prise T-114) »), comme le repérage d'un vrai panneau.
-   Seulement le libellé : ni VLAN ni état de configuration, qui restent à vérifier en console (show interfaces status / show vlan brief). */
-function portLabel(p) { return p && p.desc ? ' · étiquette : « ' + p.desc + ' »' : ''; }
 function portTitle(W, d, port) {
   const cs = cableState(W, d, port); const p = N.portObj(d, port);
   /* cordon de brassage resté dans le modèle mais la prise n'est plus brassée ici (W.walls) : le port est libre, comme l'affiche la case */
   const stale = cs.to && cs.to.indexOf('patch:') === 0 && W.walls[cs.to.slice(6)] !== d.id + ':' + port;
-  if (cs.k === 'none' || stale) return short(port) + ' — libre' + portLabel(p);
+  if (cs.k === 'none' || stale) return short(port) + ' — libre';
   const st = p.errdisabled ? ' (port en erreur : err-disabled)' : p.adminDown ? ' (port désactivé par configuration)' : '';
-  return short(port) + ' — câble vers ' + endText(W, cs.to) + (cs.k === 'out' ? ' (débranché)' : '') + st + portLabel(p);
+  return short(port) + ' — câble vers ' + endText(W, cs.to) + (cs.k === 'out' ? ' (débranché)' : '') + st;
 }
 function portCell(run, d, port, hook) {
   const W = run.W; const p = N.portObj(d, port); const cs = cableState(W, d, port); const up = N.linkUp(W, d, port); const amber = (p.adminDown || p.errdisabled) && N.powered(d);

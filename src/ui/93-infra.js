@@ -1,5 +1,5 @@
 /* ============================================================================
-   Fiche de l'infra : identifiants (avec copie) et plan d'adressage attendu (IP, masque, passerelle, DNS, VLAN, mode),
+   Fiche de l'infra : identifiants (avec copie), plan d'adressage attendu (IP, masque, passerelle, DNS, VLAN, mode) et tableau de brassage attendu,
    comme un schéma réseau. Le plan est calculé depuis le monde SAIN (SIM.plan, src/engine/82-addressing.js), jamais écrit à la main.
    ============================================================================ */
 (function (g) {
@@ -38,8 +38,9 @@ INF.credsView = function (scope) {
 let cache = null;
 INF.plan = function (seed) {
   const key = String(seed || 1); if (cache && cache.key === key) return cache.plan;
-  const plan = SIM.plan(SIM.buildHealthyWorld({ seed: seed || 1 })); cache = { key, plan }; return plan;
+  const world = SIM.buildHealthyWorld({ seed: seed || 1 }); const plan = SIM.plan(world); cache = { key, plan, world }; return plan;
 };
+INF.world = function (seed) { INF.plan(seed); return cache.world; };
 INF.siteOf = dev => { const ids = Object.keys(UI.SITES); for (const sid of ids) { const n = UI.SITES[sid].nodes.find(x => x[0] === dev); if (n) return { sid, role: n[4] || '' }; } return { sid: '', role: '' }; };
 INF.planView = function (seed, scope) {
   const full = INF.plan(seed); const plan = scope ? { rows: full.rows.filter(r => scope.devs.indexOf(r.dev) >= 0), devices: full.devices.filter(d => scope.devs.indexOf(d) >= 0) } : full; const box = h('div'); const q = h('input.txt', { placeholder: 'Filtrer : machine, IP, VLAN…', 'aria-label': 'Filtrer le plan d’adressage', style: { width: '260px' } });
@@ -62,14 +63,48 @@ INF.planView = function (seed, scope) {
     h('div.row', { style: { margin: '6px 0' } }, q, h('span.muted', plan.rows.length + ' lignes, ' + plan.devices.length + ' équipements')), box);
 };
 
+/* ------------------------------------------------------------------ tableau de brassage
+   Comme le plan d'adressage : l'état ATTENDU, calculé depuis le monde sain (ports des commutateurs, prises murales), jamais écrit à la main.
+   Ce qu'on trouverait dans le dossier d'exploitation : port, ce qui y est relié, mode, VLAN, description. Rien sur la sécurité de port
+   (adresses MAC apprises), qui se vérifie en console. */
+const shortP = n => String(n).replace(/^FastEthernet/, 'Fa').replace(/^GigabitEthernet/, 'Gi').replace(/^TenGigabitEthernet/, 'Te').replace(/^Ethernet/, 'Eth');
+INF.patchRows = function (seed, scope) {
+  const W = INF.world(seed); const rows = [];
+  Object.keys(W.dev).sort().forEach(id => { const d = W.dev[id]; if (d.kind !== 'ios-sw' || (scope && scope.devs.indexOf(id) < 0)) return;
+    Object.keys(d.ports || {}).forEach(n => { const p = d.ports[n]; const to = p.cable && p.cable.to; if (!to && !p.desc) return; const logical = /^Port-channel/i.test(n) || p.virtual;
+      let link = logical ? 'interface logique (agrégat EtherChannel)' : '—'; if (to) { if (to.indexOf('patch:') === 0 || to.indexOf('wall:') === 0) link = 'prise murale ' + to.replace(/^\w+:/, ''); else { const i = to.indexOf(':'); link = to.slice(0, i) + ' ' + shortP(to.slice(i + 1)); } }
+      rows.push({ dev: id, port: shortP(n), link, mode: p.mode === 'trunk' ? 'trunk' : 'accès', vlan: p.mode === 'trunk' ? (p.allowed ? p.allowed.join(', ') : 'tous') + (p.native && p.native !== 1 ? ' (natif ' + p.native + ')' : '') : String(p.vlan || 1), desc: p.desc || '', free: !to && !logical, logical });
+    }); });
+  const walls = Object.keys(W.walls || {}).sort().map(id => { const t = W.walls[id]; if (!t) return { id, sw: '', port: '' }; const i = t.indexOf(':'); return { id, sw: t.slice(0, i), port: shortP(t.slice(i + 1)) }; })
+    .filter(w => !scope || !w.sw || scope.devs.indexOf(w.sw) >= 0);
+  return { rows, walls };
+};
+INF.patchView = function (seed, scope) {
+  const data = INF.patchRows(seed, scope); const box = h('div'); const q = h('input.txt', { placeholder: 'Filtrer : commutateur, port, prise, VLAN…', 'aria-label': 'Filtrer le tableau de brassage', style: { width: '260px' } });
+  const draw = () => {
+    UI.clear(box); const f = q.value.trim().toLowerCase(); const m = arr => !f || arr.join(' ').toLowerCase().indexOf(f) >= 0;
+    const walls = data.walls.filter(w => m(['prise', w.id, w.sw, w.port]));
+    if (walls.length) box.append(h('h3.infosite', 'Prises murales'), h('table.tbl.infotbl', h('thead', h('tr', ['Prise', 'Brassée sur'].map(x => h('th', x)))),
+      h('tbody', walls.map(w => h('tr', h('td', h('b', w.id)), h('td', w.sw ? w.sw + ' ' + w.port : h('span.muted', 'non brassée')))))));
+    let last = ''; const rows = data.rows.filter(r => m([r.dev, r.port, r.link, r.mode, 'vlan ' + r.vlan, r.desc]));
+    if (rows.length) box.append(h('h3.infosite', 'Ports des commutateurs'), h('table.tbl.infotbl', h('thead', h('tr', ['Commutateur', 'Port', 'Relié à', 'Mode', 'VLAN', 'Description'].map(x => h('th', x)))),
+      h('tbody', rows.map(r => { const first = r.dev !== last; last = r.dev;
+        return h('tr' + (first ? '.infofirst' : ''), h('td', first ? h('b', r.dev) : ''), h('td.mono', r.port), h('td', r.free ? h('span.muted', 'libre') : r.logical ? h('span.muted', r.link) : r.link), h('td', r.mode), h('td', r.vlan), h('td.muted', r.desc)); }))));
+    if (!walls.length && !rows.length) box.append(h('p.muted', 'Aucune ligne ne correspond.'));
+  };
+  q.addEventListener('input', draw); draw();
+  return h('div', h('p.muted', 'Brassage ATTENDU en fonctionnement normal, comme dans le dossier d’exploitation : quelle prise va sur quel port, et la configuration prévue de chaque port. Compare avec ce que tu observes (baie, show interfaces status, show vlan brief).'),
+    h('div.row', { style: { margin: '6px 0' } }, q, h('span.muted', data.walls.length + ' prises, ' + data.rows.length + ' ports')), box);
+};
+
 /* ------------------------------------------------------------------ fenêtre */
 INF.modal = function (app, tab) {
   const seed = app && app.run && app.run.m ? app.run.m.seed : 1; const scope = app && app.run && !app.run.ended && app.run.scope ? app.run.scope : (app && app.infraScope ? app.infraScope() : null); let cur = tab || 'creds'; const body = h('div.infoscroll'); const tabs = h('div.pgtabs', { style: { padding: '0 0 8px' } }); let mm = null;
   const draw = () => {
-    UI.clear(tabs); [['creds', 'Identifiants'], ['plan', 'Plan d’adressage']].forEach(t => tabs.append(h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
-    UI.clear(body); body.append(cur === 'creds' ? INF.credsView(scope) : INF.planView(seed, scope));
-    if (cur === 'plan' && app && app.run && app.run.m && app.run.m.aid) app.run.m.aid('plan');   /* D-94 : ouverture tracée, sans malus */
-    if (mm) { mm.el.style.maxWidth = cur === 'plan' ? 'min(1240px, 96vw)' : '860px'; mm.el.style.width = cur === 'plan' ? '96vw' : 'auto'; }
+    UI.clear(tabs); [['creds', 'Identifiants'], ['plan', 'Plan d’adressage'], ['patch', 'Brassage']].forEach(t => tabs.append(h('button.pgtab' + (cur === t[0] ? '.on' : ''), { on: { click: () => { cur = t[0]; draw(); } } }, t[1])));
+    UI.clear(body); body.append(cur === 'creds' ? INF.credsView(scope) : cur === 'patch' ? INF.patchView(seed, scope) : INF.planView(seed, scope));
+    if ((cur === 'plan' || cur === 'patch') && app && app.run && app.run.m && app.run.m.aid) app.run.m.aid('plan');   /* D-94 : ouverture tracée, sans malus */
+    if (mm) { mm.el.style.maxWidth = cur !== 'creds' ? 'min(1240px, 96vw)' : '860px'; mm.el.style.width = cur !== 'creds' ? '96vw' : 'auto'; }
   };
   mm = UI.modal('Fiche de l’infra', h('div', tabs, body), [{ label: 'Fermer', primary: true }]); draw();
   return mm;

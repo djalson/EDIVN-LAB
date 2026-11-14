@@ -34,7 +34,7 @@ add({ id: 'phys_wall', v1: 'phys_wall', level: 1, title: 'Prise murale non brass
   ticket: tk('Alice Martin (la comptabilité)', 'Prise du bureau T-114 morte', 'Bonjour, j’ai déplacé mon poste hier et la prise murale T-114 ne marche pas : mon ordinateur est bien branché mais rien ne se passe. Le voyant de la carte réseau est éteint.'),
   cause: 'Le cordon de brassage de la prise T-114 est débranché côté commutateur (panneau de brassage / SW-T2 Fa0/2).',
   solution: 'Rebrasser la prise T-114 sur le port Fa0/2 du commutateur SW-T2.',
-  hints: ['Le poste et son câble sont corrects : le problème se situe plus loin sur le chemin de la prise.', 'Une prise murale est reliée à un commutateur par un cordon de brassage : allez dans la baie.', 'Dans la baie, repérez la prise T-114 et rebranchez son cordon sur le port Fa0/2 de SW-T2.'],
+  hints: ['Le poste et son câble sont corrects : le problème se situe plus loin sur le chemin de la prise.', 'Une prise murale est reliée à un commutateur par un cordon de brassage : allez dans la baie. Le tableau de brassage (Fiche de l’infra → Brassage) dit sur quel port elle doit arriver.', 'Dans la baie, repérez la prise T-114 et rebranchez son cordon sur le port Fa0/2 de SW-T2.'],
   inject: [{ do: 'wall', wall: 'T-114', to: null }],
   probes: [{ t: 'link', dev: 'PC-01', port: 'Ethernet0' }, { t: 'ping', from: 'PC-01', to: '10.10.10.10' }],
   roots: ['walls/T-114'],
